@@ -1,0 +1,141 @@
+.page {
+  width: 100%;
+}
+
+.topControls {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  background: #f3eddd;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  padding: 12px 14px;
+  align-items: center;
+}
+
+.periodBlock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #000000;
+}
+
+.periodLabel {
+  font-size: 14px;
+  color: #000000;
+}
+
+.dateInput {
+  height: 34px;
+  border: 1px solid #9a9a9a;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #000000;
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.select {
+  min-width: 170px;
+  height: 34px;
+  border: 1px solid #9a9a9a;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #000000;
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 165px;
+  gap: 18px;
+  align-items: start;
+}
+
+.chartPanel {
+  background: #f3eddd;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.chartTitle {
+  color: #000000;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.chartArea {
+  width: 100%;
+  height: 360px;
+}
+
+.sidebarPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tabs {
+  background: #f3eddd;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tabButton {
+  height: 38px;
+  border: none;
+  background: transparent;
+  color: #000000;
+  text-align: left;
+  padding: 0 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tabButton:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.tabButtonActive {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.legendBox {
+  background: #f3eddd;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #000000;
+  font-size: 14px;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.green {
+  background: #7be08a;
+}
+
+.red {
+  background: #ff5b57;
+}

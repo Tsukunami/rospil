@@ -1,0 +1,42 @@
+{
+  "deliver": [
+    {
+      "id": 1,
+      "number": "12415125",
+      "suplier_id": 1,
+      "product_id": 1,
+      "create": "22.01.2026"
+    },
+    {
+      "id": 2,
+      "number": "12415125",
+      "suplier_id": 1,
+      "product_id": 1,
+      "create": "22.01.2026"
+    },    {
+      "id": 3,
+      "number": "12415125",
+      "suplier_id": 2,
+      "status": "В процессе",
+      "create": "22.01.2026"
+    },    {
+      "id": 4,
+      "number": "12415125",
+      "suplier_id": 1,
+      "status": "Готов",
+      "create": "22.01.2026"
+    },    {
+      "id": 5,
+      "number": "12415125",
+      "suplier_id": 12,
+      "status": "Готов",
+      "create": "22.01.2026"
+    },    {
+      "id": 6,
+      "number": "12415125",
+      "suplier_id": 2,
+      "status": "Готов",
+      "create": "22.01.2026"
+    }
+  ]
+}
