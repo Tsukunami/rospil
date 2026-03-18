@@ -18,10 +18,10 @@ type User = {
 
 type AuthContextType = {
   user: User | null;
-  login: (login: string, password: string) => Promise<{
-    success: boolean;
-    message?: string;
-  }>;
+  login: (
+    login: string,
+    password: string
+  ) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
 };
 

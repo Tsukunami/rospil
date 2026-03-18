@@ -33,6 +33,11 @@ const menuItems: MenuItem[] = [
     accessList: ["3", "4", "5"],
   },
   {
+    label: "Склад",
+    href: "/storage",
+    accessList: ["1", "2", "4", "5"],
+  },
+  {
     label: "Статистика",
     href: "/statistics",
     accessList: ["1", "3", "4", "5"],

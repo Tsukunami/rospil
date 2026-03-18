@@ -3,19 +3,28 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./Header.module.css";
 import LoginModal from "./LoginModal";
 import { useAuth } from "./AuthContext";
 
 function formatUserName(name: string) {
   const parts = name.trim().split(" ");
-  if (parts.length >= 2) return `${parts[1]} ${parts[0]}`;
+  if (parts.length >= 2) {
+    return `${parts[1]} ${parts[0]}`;
+  }
   return name;
 }
 
 export default function Header() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const { user, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   return (
     <>
@@ -58,7 +67,7 @@ export default function Header() {
               <button
                 type="button"
                 className={styles.logoutButton}
-                onClick={logout}
+                onClick={handleLogout}
               >
                 Выйти
               </button>

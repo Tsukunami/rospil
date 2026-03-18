@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import usersData from "@/data/users.json";
 
 const accessMap: Record<string, string> = {
+  "1": "Менеджер по закупкам",
+  "2": "Кладовщик",
+  "3": "Бухгалтер",
+  "4": "Директор",
   "5": "Администратор",
-  "4": "Менеджер",
-  "3": "Сотрудник",
-  "2": "Пользователь",
-  "1": "Гость",
 };
 
 export async function POST(request: Request) {

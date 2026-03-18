@@ -79,8 +79,10 @@ export default function DeliveryPage() {
 
     if (!normalizedSearch) return rows;
 
-    return rows.filter((row) =>
-      row.number.toLowerCase().includes(normalizedSearch)
+    return rows.filter(
+      (row) =>
+        row.number.toLowerCase().includes(normalizedSearch) ||
+        row.productName.toLowerCase().includes(normalizedSearch)
     );
   }, [search, rows]);
 
@@ -133,7 +135,7 @@ export default function DeliveryPage() {
         <div className={styles.searchBox}>
           <input
             type="text"
-            placeholder="Поиск документа"
+            placeholder="Поиск по номеру документа или древесине"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={styles.searchInput}
@@ -153,8 +155,8 @@ export default function DeliveryPage() {
             <Image
               src="/icons/create-document.svg"
               alt="Создать"
-              width={40}
-              height={40}
+              width={24}
+              height={24}
             />
           </button>
         </div>
@@ -199,8 +201,8 @@ export default function DeliveryPage() {
                   <Image
                     src="/icons/download-document.svg"
                     alt="Открыть"
-                    width={40}
-                    height={40}
+                    width={24}
+                    height={24}
                   />
                 </button>
 
@@ -213,8 +215,8 @@ export default function DeliveryPage() {
                   <Image
                     src="/icons/delete-document.svg"
                     alt="Удалить"
-                    width={40}
-                    height={40}
+                    width={24}
+                    height={24}
                   />
                 </button>
               </div>

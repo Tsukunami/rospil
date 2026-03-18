@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import styles from "./SuppliersPage.module.css";
 
 import suppliersData from "@/data/suplier.json";
@@ -46,7 +47,13 @@ function formatPrice(price: number) {
 }
 
 export default function SuppliersPage() {
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const searchFromQuery = searchParams.get("search") || "";
+    setSearch(searchFromQuery);
+  }, [searchParams]);
 
   const suppliers = suppliersData.suppliers as Supplier[];
   const products = productsData.products as Product[];
@@ -97,6 +104,7 @@ export default function SuppliersPage() {
             a.productName.localeCompare(b.productName, "ru")
           ),
         });
+
         return;
       }
 
