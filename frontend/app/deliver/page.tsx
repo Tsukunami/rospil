@@ -155,8 +155,8 @@ export default function DeliveryPage() {
             <Image
               src="/icons/create-document.svg"
               alt="Создать"
-              width={24}
-              height={24}
+              width={40}
+              height={40}
             />
           </button>
         </div>
@@ -201,8 +201,8 @@ export default function DeliveryPage() {
                   <Image
                     src="/icons/download-document.svg"
                     alt="Открыть"
-                    width={24}
-                    height={24}
+                    width={40}
+                    height={40}
                   />
                 </button>
 
@@ -215,8 +215,8 @@ export default function DeliveryPage() {
                   <Image
                     src="/icons/delete-document.svg"
                     alt="Удалить"
-                    width={24}
-                    height={24}
+                    width={40}
+                    height={40}
                   />
                 </button>
               </div>
