@@ -31,6 +31,12 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'statistics_company',
+    'settlements',
+    'acceptance_and_delivery',
+    'conclusion_contracts',
+    'selecting_supplier',
+    'main',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -77,9 +83,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'db_rospil',           # Название вашей базы данных
         'USER': 'postgres',          # Имя пользователя
-        'PASSWORD': 'passwd',  # Пароль
+        'PASSWORD': 'nutakoe2020',  # Пароль
         'HOST': 'localhost',        # Адрес сервера (или IP)
         'PORT': '5432',             # Порт PostgreSQL (по умолчанию 5432)
+        'OPTIONS': {
+            'client_encoding': 'UTF8',  # Явно указываем кодировку
+        },
     }
 }
 
