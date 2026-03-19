@@ -1,0 +1,42 @@
+{
+  "orders": [
+    { "date": "2025-08", "done": 0, "progress": 0 },
+    { "date": "2025-09", "done": 0, "progress": 0 },
+    { "date": "2025-10", "done": 211, "progress": 454 },
+    { "date": "2025-11", "done": 418, "progress": 454 },
+    { "date": "2025-12", "done": 861, "progress": 454 },
+    { "date": "2026-01", "done": 606, "progress": 454 }
+  ],
+  "documents": [
+    { "date": "2025-08", "done": 120, "progress": 30 },
+    { "date": "2025-09", "done": 180, "progress": 45 },
+    { "date": "2025-10", "done": 260, "progress": 60 },
+    { "date": "2025-11", "done": 340, "progress": 70 },
+    { "date": "2025-12", "done": 480, "progress": 85 },
+    { "date": "2026-01", "done": 530, "progress": 95 }
+  ],
+  "contracts": [
+    { "date": "2025-08", "done": 35, "progress": 5 },
+    { "date": "2025-09", "done": 42, "progress": 8 },
+    { "date": "2025-10", "done": 58, "progress": 12 },
+    { "date": "2025-11", "done": 74, "progress": 16 },
+    { "date": "2025-12", "done": 96, "progress": 18 },
+    { "date": "2026-01", "done": 110, "progress": 20 }
+  ],
+  "materials": [
+    { "date": "2025-08", "done": 420, "progress": 110 },
+    { "date": "2025-09", "done": 510, "progress": 120 },
+    { "date": "2025-10", "done": 640, "progress": 140 },
+    { "date": "2025-11", "done": 720, "progress": 155 },
+    { "date": "2025-12", "done": 890, "progress": 170 },
+    { "date": "2026-01", "done": 940, "progress": 185 }
+  ],
+  "income": [
+    { "date": "2025-08", "done": 1200000, "progress": 250000 },
+    { "date": "2025-09", "done": 1480000, "progress": 290000 },
+    { "date": "2025-10", "done": 1690000, "progress": 310000 },
+    { "date": "2025-11", "done": 1830000, "progress": 340000 },
+    { "date": "2025-12", "done": 2150000, "progress": 380000 },
+    { "date": "2026-01", "done": 2380000, "progress": 410000 }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "suppliers": [
+    {
+      "suplier_id": 1,
+      "supplier_name": "MilianWood",
+      "supplier_adress": "Россия, Санкт-Петербург",
+      "supplier_INN": "232526498813",
+      "supplier_phone": "+79530821889"
+    },
+    {
+      "suplier_id": 2,
+      "supplier_name": "Ока",
+      "supplier_adress": "Беларусь, Гомель",
+      "supplier_INN": "232526498813",
+      "supplier_phone": "+79530821889"
+    },
+    {
+      "suplier_id": 3,
+      "supplier_name": "ЛесТорг",
+      "supplier_adress": "Россия, Архангельск",
+      "supplier_INN": "2901014523",
+      "supplier_phone": "+78182845678"
+    },
+    {
+      "suplier_id": 4,
+      "supplier_name": "Древесина Сибири",
+      "supplier_adress": "Россия, Красноярск",
+      "supplier_INN": "2462056745",
+      "supplier_phone": "+73912567890"
+    },
+    {
+      "suplier_id": 5,
+      "supplier_name": "БелЛесПром",
+      "supplier_adress": "Беларусь, Минск",
+      "supplier_INN": "100456789",
+      "supplier_phone": "+375296547832"
+    },
+    {
+      "suplier_id": 6,
+      "supplier_name": "WoodMaster",
+      "supplier_adress": "Россия, Киров",
+      "supplier_INN": "4345678921",
+      "supplier_phone": "+78332659874"
+    },
+    {
+      "suplier_id": 7,
+      "supplier_name": "Северный Лес",
+      "supplier_adress": "Россия, Сыктывкар",
+      "supplier_INN": "1101485632",
+      "supplier_phone": "+78212234567"
+    },
+    {
+      "suplier_id": 8,
+      "supplier_name": "Евро-Древ",
+      "supplier_adress": "Беларусь, Витебск",
+      "supplier_INN": "200789123",
+      "supplier_phone": "+375332145698"
+    },
+    {
+      "suplier_id": 9,
+      "supplier_name": "УралЛес",
+      "supplier_adress": "Россия, Екатеринбург",
+      "supplier_INN": "6654321876",
+      "supplier_phone": "+73439876543"
+    },
+    {
+      "suplier_id": 10,
+      "supplier_name": "Балтийский Лес",
+      "supplier_adress": "Россия, Калининград",
+      "supplier_INN": "3901452678",
+      "supplier_phone": "+74012547896"
+    },
+    {
+      "suplier_id": 11,
+      "supplier_name": "ХольцГрупп",
+      "supplier_adress": "Беларусь, Брест",
+      "supplier_INN": "300456123",
+      "supplier_phone": "+375297896541"
+    },
+    {
+      "suplier_id": 12,
+      "supplier_name": "СибЛесЭкспорт",
+      "supplier_adress": "Россия, Иркутск",
+      "supplier_INN": "3801564892",
+      "supplier_phone": "+73952236547"
+    },
+    {
+      "suplier_id": 13,
+      "supplier_name": "Вологодский Лес",
+      "supplier_adress": "Россия, Вологда",
+      "supplier_INN": "3501652347",
+      "supplier_phone": "+78172547896"
+    },
+    {
+      "suplier_id": 14,
+      "supplier_name": "Пинскдрев",
+      "supplier_adress": "Беларусь, Пинск",
+      "supplier_INN": "400789456",
+      "supplier_phone": "+375165326547"
+    },
+    {
+      "suplier_id": 15,
+      "supplier_name": "ЛесКомплект",
+      "supplier_adress": "Россия, Нижний Новгород",
+      "supplier_INN": "5214563897",
+      "supplier_phone": "+78314569874"
+    },
+    {
+      "suplier_id": 16,
+      "supplier_name": "ДальЛесПром",
+      "supplier_adress": "Россия, Хабаровск",
+      "supplier_INN": "2701254789",
+      "supplier_phone": "+74212569874"
+    },
+    {
+      "suplier_id": 17,
+      "supplier_name": "БелЛесТрейд",
+      "supplier_adress": "Беларусь, Могилев",
+      "supplier_INN": "500123789",
+      "supplier_phone": "+375296321478"
+    },
+    {
+      "suplier_id": 18,
+      "supplier_name": "КарелияЛес",
+      "supplier_adress": "Россия, Петрозаводск",
+      "supplier_INN": "1001452369",
+      "supplier_phone": "+78142589632"
+    },
+    {
+      "suplier_id": 19,
+      "supplier_name": "БрянскЛес",
+      "supplier_adress": "Россия, Брянск",
+      "supplier_INN": "3201569874",
+      "supplier_phone": "+74832569874"
+    },
+    {
+      "suplier_id": 20,
+      "supplier_name": "ГомельЛес",
+      "supplier_adress": "Беларусь, Гомель",
+      "supplier_INN": "600258147",
+      "supplier_phone": "+375232654789"
+    },
+    {
+      "suplier_id": 21,
+      "supplier_name": "ЛенЛес",
+      "supplier_adress": "Россия, Ленинградская область",
+      "supplier_INN": "4701563298",
+      "supplier_phone": "+78123654789"
+    },
+    {
+      "suplier_id": 22,
+      "supplier_name": "МинскЛесПром",
+      "supplier_adress": "Беларусь, Минск",
+      "supplier_INN": "700369852",
+      "supplier_phone": "+375291478523"
+    }
+  ]
+}

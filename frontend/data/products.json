@@ -1,0 +1,92 @@
+{
+  "products": [
+    {
+      "wood_id": 1,
+      "swood_type": "Сосна"
+    },
+    {
+      "wood_id": 2,
+      "swood_type": "Ель"
+    },
+    {
+      "wood_id": 3,
+      "swood_type": "Лиственница"
+    },
+    {
+      "wood_id": 4,
+      "swood_type": "Кедр"
+    },
+    {
+      "wood_id": 5,
+      "swood_type": "Пихта"
+    },
+    {
+      "wood_id": 6,
+      "swood_type": "Дуб"
+    },
+    {
+      "wood_id": 7,
+      "swood_type": "Бук"
+    },
+    {
+      "wood_id": 8,
+      "swood_type": "Ясень"
+    },
+    {
+      "wood_id": 9,
+      "swood_type": "Клен"
+    },
+    {
+      "wood_id": 10,
+      "swood_type": "Береза"
+    },
+    {
+      "wood_id": 11,
+      "swood_type": "Осина"
+    },
+    {
+      "wood_id": 12,
+      "swood_type": "Ольха"
+    },
+    {
+      "wood_id": 13,
+      "swood_type": "Липа"
+    },
+    {
+      "wood_id": 14,
+      "swood_type": "Граб"
+    },
+    {
+      "wood_id": 15,
+      "swood_type": "Орех"
+    },
+    {
+      "wood_id": 16,
+      "swood_type": "Вишня"
+    },
+    {
+      "wood_id": 17,
+      "swood_type": "Груша"
+    },
+    {
+      "wood_id": 18,
+      "swood_type": "Яблоня"
+    },
+    {
+      "wood_id": 19,
+      "swood_type": "Тополь"
+    },
+    {
+      "wood_id": 20,
+      "swood_type": "Ива"
+    },
+    {
+      "wood_id": 21,
+      "swood_type": "Рябина"
+    },
+    {
+      "wood_id": 22,
+      "swood_type": "Красное дерево"
+    }
+  ]
+}
