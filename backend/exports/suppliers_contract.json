@@ -1,0 +1,182 @@
+[
+  {
+    "suppliers_contract_id": 1,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00001",
+    "suppliers_contract_status": "просрочено",
+    "suppliers_contract_cost": 1055135.8,
+    "suppliers_contract_scope": 37.61,
+    "suppliers_contract_date": "2026-03-11"
+  },
+  {
+    "suppliers_contract_id": 2,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00002",
+    "suppliers_contract_status": "оплачено",
+    "suppliers_contract_cost": 410226.03,
+    "suppliers_contract_scope": 79.54,
+    "suppliers_contract_date": "2025-05-30"
+  },
+  {
+    "suppliers_contract_id": 3,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00003",
+    "suppliers_contract_status": "оплачено",
+    "suppliers_contract_cost": 557876.66,
+    "suppliers_contract_scope": 76.83,
+    "suppliers_contract_date": "2025-12-04"
+  },
+  {
+    "suppliers_contract_id": 4,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00004",
+    "suppliers_contract_status": "оплачено",
+    "suppliers_contract_cost": 550888.18,
+    "suppliers_contract_scope": 84.08,
+    "suppliers_contract_date": "2025-04-06"
+  },
+  {
+    "suppliers_contract_id": 5,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00005",
+    "suppliers_contract_status": "срок оплаты не наступил",
+    "suppliers_contract_cost": 395392.64,
+    "suppliers_contract_scope": 184.0,
+    "suppliers_contract_date": "2025-04-26"
+  },
+  {
+    "suppliers_contract_id": 6,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00006",
+    "suppliers_contract_status": "просрочено",
+    "suppliers_contract_cost": 417184.85,
+    "suppliers_contract_scope": 194.94,
+    "suppliers_contract_date": "2025-11-08"
+  },
+  {
+    "suppliers_contract_id": 7,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00007",
+    "suppliers_contract_status": "просрочено",
+    "suppliers_contract_cost": 496248.05,
+    "suppliers_contract_scope": 205.92,
+    "suppliers_contract_date": "2025-08-17"
+  },
+  {
+    "suppliers_contract_id": 8,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00008",
+    "suppliers_contract_status": "срок оплаты не наступил",
+    "suppliers_contract_cost": 352102.37,
+    "suppliers_contract_scope": 154.35,
+    "suppliers_contract_date": "2025-04-13"
+  },
+  {
+    "suppliers_contract_id": 9,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00009",
+    "suppliers_contract_status": "просрочено",
+    "suppliers_contract_cost": 1002818.25,
+    "suppliers_contract_scope": 112.72,
+    "suppliers_contract_date": "2025-12-18"
+  },
+  {
+    "suppliers_contract_id": 10,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00010",
+    "suppliers_contract_status": "срок оплаты не наступил",
+    "suppliers_contract_cost": 742027.44,
+    "suppliers_contract_scope": 31.46,
+    "suppliers_contract_date": "2025-06-18"
+  },
+  {
+    "suppliers_contract_id": 11,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00011",
+    "suppliers_contract_status": "просрочено",
+    "suppliers_contract_cost": 915361.55,
+    "suppliers_contract_scope": 182.31,
+    "suppliers_contract_date": "2025-06-08"
+  },
+  {
+    "suppliers_contract_id": 12,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00012",
+    "suppliers_contract_status": "оплачено",
+    "suppliers_contract_cost": 965612.98,
+    "suppliers_contract_scope": 74.93,
+    "suppliers_contract_date": "2025-06-28"
+  },
+  {
+    "suppliers_contract_id": 13,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00013",
+    "suppliers_contract_status": "оплачено",
+    "suppliers_contract_cost": 842394.51,
+    "suppliers_contract_scope": 22.48,
+    "suppliers_contract_date": "2026-01-16"
+  },
+  {
+    "suppliers_contract_id": 14,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00014",
+    "suppliers_contract_status": "оплачено",
+    "suppliers_contract_cost": 863292.86,
+    "suppliers_contract_scope": 215.71,
+    "suppliers_contract_date": "2026-01-08"
+  },
+  {
+    "suppliers_contract_id": 15,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00015",
+    "suppliers_contract_status": "просрочено",
+    "suppliers_contract_cost": 633113.5,
+    "suppliers_contract_scope": 89.09,
+    "suppliers_contract_date": "2025-07-15"
+  },
+  {
+    "suppliers_contract_id": 16,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00016",
+    "suppliers_contract_status": "срок оплаты не наступил",
+    "suppliers_contract_cost": 810168.04,
+    "suppliers_contract_scope": 49.01,
+    "suppliers_contract_date": "2025-12-09"
+  },
+  {
+    "suppliers_contract_id": 17,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00017",
+    "suppliers_contract_status": "срок оплаты не наступил",
+    "suppliers_contract_cost": 833182.18,
+    "suppliers_contract_scope": 31.77,
+    "suppliers_contract_date": "2025-10-09"
+  },
+  {
+    "suppliers_contract_id": 18,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00018",
+    "suppliers_contract_status": "оплачено",
+    "suppliers_contract_cost": 125429.29,
+    "suppliers_contract_scope": 208.32,
+    "suppliers_contract_date": "2025-08-30"
+  },
+  {
+    "suppliers_contract_id": 19,
+    "supplier_id": 5,
+    "contract_number": "ДОГ-00019",
+    "suppliers_contract_status": "срок оплаты не наступил",
+    "suppliers_contract_cost": 828888.35,
+    "suppliers_contract_scope": 120.2,
+    "suppliers_contract_date": "2025-07-31"
+  },
+  {
+    "suppliers_contract_id": 20,
+    "supplier_id": 4,
+    "contract_number": "ДОГ-00020",
+    "suppliers_contract_status": "оплачено",
+    "suppliers_contract_cost": 646871.49,
+    "suppliers_contract_scope": 183.18,
+    "suppliers_contract_date": "2025-10-06"
+  }
+]

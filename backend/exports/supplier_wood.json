@@ -1,0 +1,252 @@
+[
+  {
+    "supplier_id": 6,
+    "wood_id": 1,
+    "available_quantity": 621.52
+  },
+  {
+    "supplier_id": 7,
+    "wood_id": 1,
+    "available_quantity": 438.73
+  },
+  {
+    "supplier_id": 1,
+    "wood_id": 2,
+    "available_quantity": 435.23
+  },
+  {
+    "supplier_id": 3,
+    "wood_id": 3,
+    "available_quantity": 696.55
+  },
+  {
+    "supplier_id": 1,
+    "wood_id": 4,
+    "available_quantity": 180.15
+  },
+  {
+    "supplier_id": 8,
+    "wood_id": 4,
+    "available_quantity": 966.96
+  },
+  {
+    "supplier_id": 2,
+    "wood_id": 6,
+    "available_quantity": 1055.23
+  },
+  {
+    "supplier_id": 7,
+    "wood_id": 6,
+    "available_quantity": 730.62
+  },
+  {
+    "supplier_id": 8,
+    "wood_id": 6,
+    "available_quantity": 821.3
+  },
+  {
+    "supplier_id": 3,
+    "wood_id": 8,
+    "available_quantity": 874.12
+  },
+  {
+    "supplier_id": 5,
+    "wood_id": 8,
+    "available_quantity": 1097.5
+  },
+  {
+    "supplier_id": 6,
+    "wood_id": 8,
+    "available_quantity": 575.19
+  },
+  {
+    "supplier_id": 8,
+    "wood_id": 9,
+    "available_quantity": 508.68
+  },
+  {
+    "supplier_id": 1,
+    "wood_id": 10,
+    "available_quantity": 495.17
+  },
+  {
+    "supplier_id": 5,
+    "wood_id": 10,
+    "available_quantity": 213.91
+  },
+  {
+    "supplier_id": 6,
+    "wood_id": 10,
+    "available_quantity": 575.4
+  },
+  {
+    "supplier_id": 7,
+    "wood_id": 10,
+    "available_quantity": 458.79
+  },
+  {
+    "supplier_id": 3,
+    "wood_id": 12,
+    "available_quantity": 457.65
+  },
+  {
+    "supplier_id": 8,
+    "wood_id": 12,
+    "available_quantity": 378.39
+  },
+  {
+    "supplier_id": 1,
+    "wood_id": 13,
+    "available_quantity": 239.05
+  },
+  {
+    "supplier_id": 4,
+    "wood_id": 13,
+    "available_quantity": 944.45
+  },
+  {
+    "supplier_id": 2,
+    "wood_id": 14,
+    "available_quantity": 1075.04
+  },
+  {
+    "supplier_id": 3,
+    "wood_id": 15,
+    "available_quantity": 399.19
+  },
+  {
+    "supplier_id": 5,
+    "wood_id": 17,
+    "available_quantity": 539.65
+  },
+  {
+    "supplier_id": 6,
+    "wood_id": 18,
+    "available_quantity": 456.1
+  },
+  {
+    "supplier_id": 7,
+    "wood_id": 18,
+    "available_quantity": 537.22
+  },
+  {
+    "supplier_id": 3,
+    "wood_id": 20,
+    "available_quantity": 202.92
+  },
+  {
+    "supplier_id": 7,
+    "wood_id": 22,
+    "available_quantity": 646.07
+  },
+  {
+    "supplier_id": 1,
+    "wood_id": 23,
+    "available_quantity": 324.05
+  },
+  {
+    "supplier_id": 2,
+    "wood_id": 23,
+    "available_quantity": 354.46
+  },
+  {
+    "supplier_id": 5,
+    "wood_id": 23,
+    "available_quantity": 435.84
+  },
+  {
+    "supplier_id": 1,
+    "wood_id": 24,
+    "available_quantity": 338.04
+  },
+  {
+    "supplier_id": 6,
+    "wood_id": 24,
+    "available_quantity": 805.8
+  },
+  {
+    "supplier_id": 4,
+    "wood_id": 26,
+    "available_quantity": 925.81
+  },
+  {
+    "supplier_id": 2,
+    "wood_id": 27,
+    "available_quantity": 243.31
+  },
+  {
+    "supplier_id": 8,
+    "wood_id": 28,
+    "available_quantity": 557.8
+  },
+  {
+    "supplier_id": 2,
+    "wood_id": 29,
+    "available_quantity": 703.78
+  },
+  {
+    "supplier_id": 3,
+    "wood_id": 29,
+    "available_quantity": 1036.36
+  },
+  {
+    "supplier_id": 4,
+    "wood_id": 29,
+    "available_quantity": 958.72
+  },
+  {
+    "supplier_id": 6,
+    "wood_id": 30,
+    "available_quantity": 242.49
+  },
+  {
+    "supplier_id": 1,
+    "wood_id": 31,
+    "available_quantity": 934.83
+  },
+  {
+    "supplier_id": 3,
+    "wood_id": 32,
+    "available_quantity": 390.6
+  },
+  {
+    "supplier_id": 4,
+    "wood_id": 32,
+    "available_quantity": 612.03
+  },
+  {
+    "supplier_id": 8,
+    "wood_id": 33,
+    "available_quantity": 911.55
+  },
+  {
+    "supplier_id": 8,
+    "wood_id": 34,
+    "available_quantity": 345.81
+  },
+  {
+    "supplier_id": 3,
+    "wood_id": 35,
+    "available_quantity": 731.17
+  },
+  {
+    "supplier_id": 1,
+    "wood_id": 36,
+    "available_quantity": 415.8
+  },
+  {
+    "supplier_id": 3,
+    "wood_id": 37,
+    "available_quantity": 802.77
+  },
+  {
+    "supplier_id": 5,
+    "wood_id": 37,
+    "available_quantity": 363.87
+  },
+  {
+    "supplier_id": 3,
+    "wood_id": 38,
+    "available_quantity": 740.02
+  }
+]

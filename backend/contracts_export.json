@@ -1,0 +1,71 @@
+{
+  "export_date": "2026-03-20T19:17:23.761507+00:00",
+  "database": "db_rospil",
+  "tables": {
+    "suppliers": {
+      "count": 8,
+      "data": [
+        {
+          "supplier_id": 1,
+          "supplier_name": "ООО \"ЛесТрейд\"",
+          "supplier_address": "г. Москва, ул. Лесная, д. 10, офис 5",
+          "supplier_phone": "+7 (495) 123-45-67",
+          "supplier_inn": "7701234567"
+        },
+        {
+          "supplier_id": 2,
+          "supplier_name": "ИП Петров И.И.",
+          "supplier_address": "г. Санкт-Петербург, пр. Лесной, д. 20, кв. 15",
+          "supplier_phone": "+7 (812) 234-56-78",
+          "supplier_inn": "780112345678"
+        },
+        {
+          "supplier_id": 3,
+          "supplier_name": "АО \"Древесина-Сервис\"",
+          "supplier_address": "г. Новосибирск, ул. Сибирская, д. 5",
+          "supplier_phone": "+7 (383) 345-67-89",
+          "supplier_inn": "5401234567"
+        },
+        {
+          "supplier_id": 4,
+          "supplier_name": "ООО \"ЛПК \"Северный лес\"\"",
+          "supplier_address": "г. Архангельск, ул. Поморская, д. 15",
+          "supplier_phone": "+7 (8182) 45-67-89",
+          "supplier_inn": "2901234567"
+        },
+        {
+          "supplier_id": 5,
+          "supplier_name": "ИП Сидоров А.А.",
+          "supplier_address": "г. Екатеринбург, ул. Трактовая, д. 30-12",
+          "supplier_phone": "+7 (343) 456-78-90",
+          "supplier_inn": "660112345678"
+        },
+        {
+          "supplier_id": 6,
+          "supplier_name": "ООО \"Зеленый бор\"",
+          "supplier_address": "г. Красноярск, ул. Таежная, д. 8",
+          "supplier_phone": "+7 (391) 567-89-01",
+          "supplier_inn": "2401234567"
+        },
+        {
+          "supplier_id": 7,
+          "supplier_name": "ООО \"Лесные ресурсы\"",
+          "supplier_address": "г. Иркутск, ул. Байкальская, д. 100",
+          "supplier_phone": "+7 (3952) 67-89-01",
+          "supplier_inn": "3801234567"
+        },
+        {
+          "supplier_id": 8,
+          "supplier_name": "ИП Иванова Е.В.",
+          "supplier_address": "г. Хабаровск, ул. Амурская, д. 45-67",
+          "supplier_phone": "+7 (4212) 78-90-12",
+          "supplier_inn": "270112345678"
+        }
+      ]
+    },
+    "suppliers_and_product": {
+      "count": 0,
+      "data": []
+    }
+  }
+}

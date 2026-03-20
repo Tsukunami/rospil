@@ -1,0 +1,58 @@
+[
+  {
+    "supplier_id": 1,
+    "supplier_name": "Поставщик B",
+    "supplier_address": "Адрес 1, ул. Лесная, д. 3",
+    "supplier_phone": "+7 (995) 883223",
+    "supplier_inn": "1111111111"
+  },
+  {
+    "supplier_id": 2,
+    "supplier_name": "Поставщик C",
+    "supplier_address": "Адрес 2, ул. Лесная, д. 43",
+    "supplier_phone": "+7 (968) 053645",
+    "supplier_inn": "1111111112"
+  },
+  {
+    "supplier_id": 3,
+    "supplier_name": "Поставщик D",
+    "supplier_address": "Адрес 3, ул. Лесная, д. 1",
+    "supplier_phone": "+7 (914) 164971",
+    "supplier_inn": "1111111113"
+  },
+  {
+    "supplier_id": 4,
+    "supplier_name": "Поставщик E",
+    "supplier_address": "Адрес 4, ул. Лесная, д. 45",
+    "supplier_phone": "+7 (969) 393730",
+    "supplier_inn": "1111111114"
+  },
+  {
+    "supplier_id": 5,
+    "supplier_name": "Поставщик F",
+    "supplier_address": "Адрес 5, ул. Лесная, д. 29",
+    "supplier_phone": "+7 (995) 238489",
+    "supplier_inn": "1111111115"
+  },
+  {
+    "supplier_id": 6,
+    "supplier_name": "Поставщик G",
+    "supplier_address": "Адрес 6, ул. Лесная, д. 2",
+    "supplier_phone": "+7 (96) 463119",
+    "supplier_inn": "1111111116"
+  },
+  {
+    "supplier_id": 7,
+    "supplier_name": "Поставщик H",
+    "supplier_address": "Адрес 7, ул. Лесная, д. 8",
+    "supplier_phone": "+7 (999) 220689",
+    "supplier_inn": "1111111117"
+  },
+  {
+    "supplier_id": 8,
+    "supplier_name": "Поставщик I",
+    "supplier_address": "Адрес 8, ул. Лесная, д. 39",
+    "supplier_phone": "+7 (936) 039654",
+    "supplier_inn": "1111111118"
+  }
+]

@@ -2,7 +2,7 @@
   "users": [
     {
       "id": 1,
-      "name": "Алексей Попов",
+      "name": "Олексей Попов",
       "login": "Alexey",
       "password": "123123",
       "access": "5"
@@ -17,7 +17,7 @@
         {
       "id": 1,
       "name": "Вильям Яцко",
-      "login": "Vilyam",
+      "login": "William",
       "password": "123123",
       "access": "2"
     }

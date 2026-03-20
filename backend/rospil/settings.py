@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'rospil.urls'
@@ -81,14 +83,15 @@ WSGI_APPLICATION = 'rospil.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'db_rospil',           # Название вашей базы данных
+        'NAME': 'rospil',           # Название вашей базы данных
         'USER': 'postgres',          # Имя пользователя
-        'PASSWORD': 'nutakoe2020',  # Пароль
+        'PASSWORD': '9352',  # Пароль
         'HOST': 'localhost',        # Адрес сервера (или IP)
-        'PORT': '5432',             # Порт PostgreSQL (по умолчанию 5432)
+        'PORT': '5432',
         'OPTIONS': {
-            'client_encoding': 'UTF8',  # Явно указываем кодировку
-        },
+            'client_encoding': 'UTF8',  
+        },             
+
     }
 }
 
@@ -111,6 +114,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",   # порт Next.js по умолчанию
+    "http://127.0.0.1:3000",
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

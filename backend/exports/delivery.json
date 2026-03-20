@@ -1,0 +1,162 @@
+[
+  {
+    "delivery_id": 1,
+    "suppliers_contract_id": 1,
+    "delivery_scope": 72.71,
+    "delivery_date": "2026-03-23",
+    "delivery_status": "доставлено",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 2,
+    "suppliers_contract_id": 2,
+    "delivery_scope": 20.29,
+    "delivery_date": "2025-06-02",
+    "delivery_status": "нарушение",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 3,
+    "suppliers_contract_id": 3,
+    "delivery_scope": 78.48,
+    "delivery_date": "2025-12-28",
+    "delivery_status": "ожидается",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 4,
+    "suppliers_contract_id": 4,
+    "delivery_scope": 97.61,
+    "delivery_date": "2025-04-23",
+    "delivery_status": "доставлено",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 5,
+    "suppliers_contract_id": 5,
+    "delivery_scope": 73.66,
+    "delivery_date": "2025-05-06",
+    "delivery_status": "нарушение",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 6,
+    "suppliers_contract_id": 6,
+    "delivery_scope": 78.14,
+    "delivery_date": "2025-11-18",
+    "delivery_status": "нарушение",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 7,
+    "suppliers_contract_id": 7,
+    "delivery_scope": 87.25,
+    "delivery_date": "2025-08-28",
+    "delivery_status": "ожидается",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 8,
+    "suppliers_contract_id": 8,
+    "delivery_scope": 55.72,
+    "delivery_date": "2025-04-16",
+    "delivery_status": "нарушение",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 9,
+    "suppliers_contract_id": 9,
+    "delivery_scope": 95.83,
+    "delivery_date": "2026-01-10",
+    "delivery_status": "доставлено",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 10,
+    "suppliers_contract_id": 10,
+    "delivery_scope": 82.07,
+    "delivery_date": "2025-07-11",
+    "delivery_status": "ожидается",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 11,
+    "suppliers_contract_id": 11,
+    "delivery_scope": 14.56,
+    "delivery_date": "2025-06-28",
+    "delivery_status": "ожидается",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 12,
+    "suppliers_contract_id": 12,
+    "delivery_scope": 64.21,
+    "delivery_date": "2025-07-01",
+    "delivery_status": "ожидается",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 13,
+    "suppliers_contract_id": 13,
+    "delivery_scope": 83.14,
+    "delivery_date": "2026-02-10",
+    "delivery_status": "нарушение",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 14,
+    "suppliers_contract_id": 14,
+    "delivery_scope": 78.21,
+    "delivery_date": "2026-02-03",
+    "delivery_status": "нарушение",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 15,
+    "suppliers_contract_id": 15,
+    "delivery_scope": 23.14,
+    "delivery_date": "2025-07-23",
+    "delivery_status": "нарушение",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 16,
+    "suppliers_contract_id": 16,
+    "delivery_scope": 70.9,
+    "delivery_date": "2025-12-27",
+    "delivery_status": "нарушение",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 17,
+    "suppliers_contract_id": 17,
+    "delivery_scope": 102.53,
+    "delivery_date": "2025-10-23",
+    "delivery_status": "доставлено",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 18,
+    "suppliers_contract_id": 18,
+    "delivery_scope": 102.01,
+    "delivery_date": "2025-09-17",
+    "delivery_status": "нарушение",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 19,
+    "suppliers_contract_id": 19,
+    "delivery_scope": 39.71,
+    "delivery_date": "2025-08-02",
+    "delivery_status": "ожидается",
+    "act_id": 13
+  },
+  {
+    "delivery_id": 20,
+    "suppliers_contract_id": 20,
+    "delivery_scope": 78.71,
+    "delivery_date": "2025-10-07",
+    "delivery_status": "доставлено",
+    "act_id": 13
+  }
+]

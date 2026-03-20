@@ -1,0 +1,302 @@
+[
+  {
+    "expenditure_id": 1,
+    "wood_id": 37,
+    "expenditure_scope_id": 1,
+    "expenditure_data": "2025-06-29"
+  },
+  {
+    "expenditure_id": 2,
+    "wood_id": 37,
+    "expenditure_scope_id": 4,
+    "expenditure_data": "2026-03-12"
+  },
+  {
+    "expenditure_id": 3,
+    "wood_id": 37,
+    "expenditure_scope_id": 1,
+    "expenditure_data": "2026-03-02"
+  },
+  {
+    "expenditure_id": 4,
+    "wood_id": 37,
+    "expenditure_scope_id": 2,
+    "expenditure_data": "2026-03-04"
+  },
+  {
+    "expenditure_id": 5,
+    "wood_id": 37,
+    "expenditure_scope_id": 5,
+    "expenditure_data": "2025-06-05"
+  },
+  {
+    "expenditure_id": 6,
+    "wood_id": 37,
+    "expenditure_scope_id": 6,
+    "expenditure_data": "2025-05-31"
+  },
+  {
+    "expenditure_id": 7,
+    "wood_id": 37,
+    "expenditure_scope_id": 8,
+    "expenditure_data": "2025-12-07"
+  },
+  {
+    "expenditure_id": 8,
+    "wood_id": 37,
+    "expenditure_scope_id": 1,
+    "expenditure_data": "2026-03-01"
+  },
+  {
+    "expenditure_id": 9,
+    "wood_id": 37,
+    "expenditure_scope_id": 4,
+    "expenditure_data": "2026-02-03"
+  },
+  {
+    "expenditure_id": 10,
+    "wood_id": 37,
+    "expenditure_scope_id": 9,
+    "expenditure_data": "2025-07-12"
+  },
+  {
+    "expenditure_id": 11,
+    "wood_id": 37,
+    "expenditure_scope_id": 7,
+    "expenditure_data": "2025-09-06"
+  },
+  {
+    "expenditure_id": 12,
+    "wood_id": 37,
+    "expenditure_scope_id": 3,
+    "expenditure_data": "2025-09-10"
+  },
+  {
+    "expenditure_id": 13,
+    "wood_id": 37,
+    "expenditure_scope_id": 1,
+    "expenditure_data": "2026-01-03"
+  },
+  {
+    "expenditure_id": 14,
+    "wood_id": 37,
+    "expenditure_scope_id": 6,
+    "expenditure_data": "2025-09-18"
+  },
+  {
+    "expenditure_id": 15,
+    "wood_id": 37,
+    "expenditure_scope_id": 9,
+    "expenditure_data": "2025-08-10"
+  },
+  {
+    "expenditure_id": 16,
+    "wood_id": 37,
+    "expenditure_scope_id": 8,
+    "expenditure_data": "2025-06-14"
+  },
+  {
+    "expenditure_id": 17,
+    "wood_id": 37,
+    "expenditure_scope_id": 1,
+    "expenditure_data": "2026-02-14"
+  },
+  {
+    "expenditure_id": 18,
+    "wood_id": 37,
+    "expenditure_scope_id": 8,
+    "expenditure_data": "2025-05-28"
+  },
+  {
+    "expenditure_id": 19,
+    "wood_id": 37,
+    "expenditure_scope_id": 3,
+    "expenditure_data": "2026-01-25"
+  },
+  {
+    "expenditure_id": 20,
+    "wood_id": 37,
+    "expenditure_scope_id": 2,
+    "expenditure_data": "2025-10-08"
+  },
+  {
+    "expenditure_id": 21,
+    "wood_id": 37,
+    "expenditure_scope_id": 4,
+    "expenditure_data": "2025-08-27"
+  },
+  {
+    "expenditure_id": 22,
+    "wood_id": 37,
+    "expenditure_scope_id": 3,
+    "expenditure_data": "2025-12-29"
+  },
+  {
+    "expenditure_id": 23,
+    "wood_id": 37,
+    "expenditure_scope_id": 9,
+    "expenditure_data": "2026-02-08"
+  },
+  {
+    "expenditure_id": 24,
+    "wood_id": 37,
+    "expenditure_scope_id": 8,
+    "expenditure_data": "2025-11-27"
+  },
+  {
+    "expenditure_id": 25,
+    "wood_id": 37,
+    "expenditure_scope_id": 10,
+    "expenditure_data": "2025-12-08"
+  },
+  {
+    "expenditure_id": 26,
+    "wood_id": 37,
+    "expenditure_scope_id": 2,
+    "expenditure_data": "2025-11-05"
+  },
+  {
+    "expenditure_id": 27,
+    "wood_id": 37,
+    "expenditure_scope_id": 2,
+    "expenditure_data": "2025-11-06"
+  },
+  {
+    "expenditure_id": 28,
+    "wood_id": 37,
+    "expenditure_scope_id": 4,
+    "expenditure_data": "2025-06-26"
+  },
+  {
+    "expenditure_id": 29,
+    "wood_id": 37,
+    "expenditure_scope_id": 6,
+    "expenditure_data": "2025-05-29"
+  },
+  {
+    "expenditure_id": 30,
+    "wood_id": 37,
+    "expenditure_scope_id": 3,
+    "expenditure_data": "2025-05-28"
+  },
+  {
+    "expenditure_id": 31,
+    "wood_id": 37,
+    "expenditure_scope_id": 7,
+    "expenditure_data": "2025-12-20"
+  },
+  {
+    "expenditure_id": 32,
+    "wood_id": 37,
+    "expenditure_scope_id": 1,
+    "expenditure_data": "2025-07-06"
+  },
+  {
+    "expenditure_id": 33,
+    "wood_id": 37,
+    "expenditure_scope_id": 1,
+    "expenditure_data": "2025-11-23"
+  },
+  {
+    "expenditure_id": 34,
+    "wood_id": 37,
+    "expenditure_scope_id": 7,
+    "expenditure_data": "2026-02-28"
+  },
+  {
+    "expenditure_id": 35,
+    "wood_id": 37,
+    "expenditure_scope_id": 10,
+    "expenditure_data": "2025-11-02"
+  },
+  {
+    "expenditure_id": 36,
+    "wood_id": 37,
+    "expenditure_scope_id": 1,
+    "expenditure_data": "2025-11-09"
+  },
+  {
+    "expenditure_id": 37,
+    "wood_id": 37,
+    "expenditure_scope_id": 3,
+    "expenditure_data": "2025-12-09"
+  },
+  {
+    "expenditure_id": 38,
+    "wood_id": 37,
+    "expenditure_scope_id": 3,
+    "expenditure_data": "2025-07-03"
+  },
+  {
+    "expenditure_id": 39,
+    "wood_id": 37,
+    "expenditure_scope_id": 4,
+    "expenditure_data": "2026-01-10"
+  },
+  {
+    "expenditure_id": 40,
+    "wood_id": 37,
+    "expenditure_scope_id": 4,
+    "expenditure_data": "2025-08-26"
+  },
+  {
+    "expenditure_id": 41,
+    "wood_id": 37,
+    "expenditure_scope_id": 9,
+    "expenditure_data": "2026-01-26"
+  },
+  {
+    "expenditure_id": 42,
+    "wood_id": 37,
+    "expenditure_scope_id": 6,
+    "expenditure_data": "2025-05-25"
+  },
+  {
+    "expenditure_id": 43,
+    "wood_id": 37,
+    "expenditure_scope_id": 6,
+    "expenditure_data": "2025-09-07"
+  },
+  {
+    "expenditure_id": 44,
+    "wood_id": 37,
+    "expenditure_scope_id": 5,
+    "expenditure_data": "2025-07-25"
+  },
+  {
+    "expenditure_id": 45,
+    "wood_id": 37,
+    "expenditure_scope_id": 8,
+    "expenditure_data": "2025-11-25"
+  },
+  {
+    "expenditure_id": 46,
+    "wood_id": 37,
+    "expenditure_scope_id": 1,
+    "expenditure_data": "2025-11-28"
+  },
+  {
+    "expenditure_id": 47,
+    "wood_id": 37,
+    "expenditure_scope_id": 3,
+    "expenditure_data": "2025-12-05"
+  },
+  {
+    "expenditure_id": 48,
+    "wood_id": 37,
+    "expenditure_scope_id": 2,
+    "expenditure_data": "2025-10-16"
+  },
+  {
+    "expenditure_id": 49,
+    "wood_id": 37,
+    "expenditure_scope_id": 1,
+    "expenditure_data": "2025-10-02"
+  },
+  {
+    "expenditure_id": 50,
+    "wood_id": 37,
+    "expenditure_scope_id": 6,
+    "expenditure_data": "2025-11-05"
+  }
+]

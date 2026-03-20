@@ -1,0 +1,202 @@
+[
+  {
+    "wood_id": 1,
+    "current_scope": 275.83,
+    "storage_cell": "Ячейка-B1"
+  },
+  {
+    "wood_id": 2,
+    "current_scope": 176.72,
+    "storage_cell": "Ячейка-C2"
+  },
+  {
+    "wood_id": 3,
+    "current_scope": 93.24,
+    "storage_cell": "Ячейка-D3"
+  },
+  {
+    "wood_id": 4,
+    "current_scope": 197.31,
+    "storage_cell": "Ячейка-E4"
+  },
+  {
+    "wood_id": 5,
+    "current_scope": 70.37,
+    "storage_cell": "Ячейка-F5"
+  },
+  {
+    "wood_id": 6,
+    "current_scope": 496.98,
+    "storage_cell": "Ячейка-G6"
+  },
+  {
+    "wood_id": 7,
+    "current_scope": 479.33,
+    "storage_cell": "Ячейка-H7"
+  },
+  {
+    "wood_id": 8,
+    "current_scope": 291.24,
+    "storage_cell": "Ячейка-I8"
+  },
+  {
+    "wood_id": 9,
+    "current_scope": 501.71,
+    "storage_cell": "Ячейка-J9"
+  },
+  {
+    "wood_id": 10,
+    "current_scope": 64.42,
+    "storage_cell": "Ячейка-K10"
+  },
+  {
+    "wood_id": 11,
+    "current_scope": 354.65,
+    "storage_cell": "Ячейка-L11"
+  },
+  {
+    "wood_id": 12,
+    "current_scope": 359.39,
+    "storage_cell": "Ячейка-M12"
+  },
+  {
+    "wood_id": 13,
+    "current_scope": 328.54,
+    "storage_cell": "Ячейка-N13"
+  },
+  {
+    "wood_id": 14,
+    "current_scope": 403.61,
+    "storage_cell": "Ячейка-O14"
+  },
+  {
+    "wood_id": 15,
+    "current_scope": 418.7,
+    "storage_cell": "Ячейка-P15"
+  },
+  {
+    "wood_id": 16,
+    "current_scope": 200.02,
+    "storage_cell": "Ячейка-Q16"
+  },
+  {
+    "wood_id": 17,
+    "current_scope": 386.88,
+    "storage_cell": "Ячейка-R17"
+  },
+  {
+    "wood_id": 18,
+    "current_scope": 129.97,
+    "storage_cell": "Ячейка-S18"
+  },
+  {
+    "wood_id": 19,
+    "current_scope": 447.78,
+    "storage_cell": "Ячейка-T19"
+  },
+  {
+    "wood_id": 20,
+    "current_scope": 315.37,
+    "storage_cell": "Ячейка-A20"
+  },
+  {
+    "wood_id": 21,
+    "current_scope": 427.87,
+    "storage_cell": "Ячейка-B21"
+  },
+  {
+    "wood_id": 22,
+    "current_scope": 244.71,
+    "storage_cell": "Ячейка-C22"
+  },
+  {
+    "wood_id": 23,
+    "current_scope": 220.21,
+    "storage_cell": "Ячейка-D23"
+  },
+  {
+    "wood_id": 24,
+    "current_scope": 181.9,
+    "storage_cell": "Ячейка-E24"
+  },
+  {
+    "wood_id": 25,
+    "current_scope": 330.68,
+    "storage_cell": "Ячейка-F25"
+  },
+  {
+    "wood_id": 26,
+    "current_scope": 264.76,
+    "storage_cell": "Ячейка-G26"
+  },
+  {
+    "wood_id": 27,
+    "current_scope": 98.81,
+    "storage_cell": "Ячейка-H27"
+  },
+  {
+    "wood_id": 28,
+    "current_scope": 540.83,
+    "storage_cell": "Ячейка-I28"
+  },
+  {
+    "wood_id": 29,
+    "current_scope": 427.58,
+    "storage_cell": "Ячейка-J29"
+  },
+  {
+    "wood_id": 30,
+    "current_scope": 543.13,
+    "storage_cell": "Ячейка-K30"
+  },
+  {
+    "wood_id": 31,
+    "current_scope": 271.45,
+    "storage_cell": "Ячейка-L31"
+  },
+  {
+    "wood_id": 32,
+    "current_scope": 392.62,
+    "storage_cell": "Ячейка-M32"
+  },
+  {
+    "wood_id": 33,
+    "current_scope": 333.06,
+    "storage_cell": "Ячейка-N33"
+  },
+  {
+    "wood_id": 34,
+    "current_scope": 263.69,
+    "storage_cell": "Ячейка-O34"
+  },
+  {
+    "wood_id": 35,
+    "current_scope": 241.52,
+    "storage_cell": "Ячейка-P35"
+  },
+  {
+    "wood_id": 36,
+    "current_scope": 157.65,
+    "storage_cell": "Ячейка-Q36"
+  },
+  {
+    "wood_id": 37,
+    "current_scope": 66.93,
+    "storage_cell": "Ячейка-R37"
+  },
+  {
+    "wood_id": 38,
+    "current_scope": 391.27,
+    "storage_cell": "Ячейка-S38"
+  },
+  {
+    "wood_id": 39,
+    "current_scope": 235.07,
+    "storage_cell": "Ячейка-T39"
+  },
+  {
+    "wood_id": 40,
+    "current_scope": 245.42,
+    "storage_cell": "Ячейка-A40"
+  }
+]

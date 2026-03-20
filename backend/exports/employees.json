@@ -1,0 +1,107 @@
+[
+  {
+    "employee_id": 1,
+    "employee_name": "Сотрудник 1",
+    "employee_pasport_number": "PA 000001",
+    "employee_phone": "+7 (919) 465726",
+    "employee_post": "Менеджер по закупкам"
+  },
+  {
+    "employee_id": 2,
+    "employee_name": "Сотрудник 2",
+    "employee_pasport_number": "PA 000002",
+    "employee_phone": "+7 (937) 367663",
+    "employee_post": "Администратор"
+  },
+  {
+    "employee_id": 3,
+    "employee_name": "Сотрудник 3",
+    "employee_pasport_number": "PA 000003",
+    "employee_phone": "+7 (959) 013352",
+    "employee_post": null
+  },
+  {
+    "employee_id": 4,
+    "employee_name": "Сотрудник 4",
+    "employee_pasport_number": "PA 000004",
+    "employee_phone": "+7 (923) 443665",
+    "employee_post": null
+  },
+  {
+    "employee_id": 5,
+    "employee_name": "Сотрудник 5",
+    "employee_pasport_number": "PA 000005",
+    "employee_phone": "+7 (99) 468943",
+    "employee_post": null
+  },
+  {
+    "employee_id": 6,
+    "employee_name": "Сотрудник 6",
+    "employee_pasport_number": "PA 000006",
+    "employee_phone": "+7 (933) 115214",
+    "employee_post": "Менеджер по закупкам"
+  },
+  {
+    "employee_id": 7,
+    "employee_name": "Сотрудник 7",
+    "employee_pasport_number": "PA 000007",
+    "employee_phone": "+7 (943) 691938",
+    "employee_post": "Администратор"
+  },
+  {
+    "employee_id": 8,
+    "employee_name": "Сотрудник 8",
+    "employee_pasport_number": "PA 000008",
+    "employee_phone": "+7 (959) 002488",
+    "employee_post": "Администратор"
+  },
+  {
+    "employee_id": 9,
+    "employee_name": "Сотрудник 9",
+    "employee_pasport_number": "PA 000009",
+    "employee_phone": "+7 (966) 598629",
+    "employee_post": null
+  },
+  {
+    "employee_id": 10,
+    "employee_name": "Сотрудник 10",
+    "employee_pasport_number": "PA 000010",
+    "employee_phone": "+7 (927) 427810",
+    "employee_post": "Менеджер по закупкам"
+  },
+  {
+    "employee_id": 11,
+    "employee_name": "Сотрудник 11",
+    "employee_pasport_number": "PA 000011",
+    "employee_phone": "+7 (947) 342172",
+    "employee_post": "Менеджер по закупкам"
+  },
+  {
+    "employee_id": 12,
+    "employee_name": "Сотрудник 12",
+    "employee_pasport_number": "PA 000012",
+    "employee_phone": "+7 (921) 415686",
+    "employee_post": "Кладовщик"
+  },
+  {
+    "employee_id": 13,
+    "employee_name": "Сотрудник 13",
+    "employee_pasport_number": "PA 000013",
+    "employee_phone": "+7 (993) 447965",
+    "employee_post": "Менеджер по закупкам"
+  },
+  {
+    "employee_id": 14,
+    "employee_name": "Сотрудник 14",
+    "employee_pasport_number": "PA 000014",
+    "employee_phone": "+7 (941) 545499",
+    "employee_post": "Менеджер по закупкам"
+  },
+  {
+    "employee_id": 15,
+    "employee_name": "Сотрудник 15",
+    "employee_pasport_number": "PA 000015",
+    "employee_phone": "+7 (914) 026543",
+    "employee_post": "Директор"
+  }
+]

@@ -1,0 +1,182 @@
+[
+  {
+    "act_id": 1,
+    "act_type": "акт приемки",
+    "act_date": "2025-12-20",
+    "employee_id": 4
+  },
+  {
+    "act_id": 2,
+    "act_type": "акт приемки",
+    "act_date": "2026-01-07",
+    "employee_id": 4
+  },
+  {
+    "act_id": 3,
+    "act_type": "акт о расхождении",
+    "act_date": "2026-02-05",
+    "employee_id": 4
+  },
+  {
+    "act_id": 4,
+    "act_type": "акт о расхождении",
+    "act_date": "2026-02-25",
+    "employee_id": 4
+  },
+  {
+    "act_id": 5,
+    "act_type": "акт о расхождении",
+    "act_date": "2025-08-21",
+    "employee_id": 4
+  },
+  {
+    "act_id": 6,
+    "act_type": "акт приемки",
+    "act_date": "2025-08-07",
+    "employee_id": 4
+  },
+  {
+    "act_id": 7,
+    "act_type": "акт приемки",
+    "act_date": "2025-09-17",
+    "employee_id": 4
+  },
+  {
+    "act_id": 8,
+    "act_type": "акт приемки",
+    "act_date": "2025-09-30",
+    "employee_id": 4
+  },
+  {
+    "act_id": 9,
+    "act_type": "акт о расхождении",
+    "act_date": "2025-12-24",
+    "employee_id": 4
+  },
+  {
+    "act_id": 10,
+    "act_type": "акт приемки",
+    "act_date": "2025-09-17",
+    "employee_id": 4
+  },
+  {
+    "act_id": 11,
+    "act_type": "акт приемки",
+    "act_date": "2025-11-11",
+    "employee_id": 4
+  },
+  {
+    "act_id": 12,
+    "act_type": "акт приемки",
+    "act_date": "2025-05-16",
+    "employee_id": 4
+  },
+  {
+    "act_id": 13,
+    "act_type": "акт о расхождении",
+    "act_date": "2025-07-09",
+    "employee_id": 4
+  },
+  {
+    "act_id": 14,
+    "act_type": "акт приемки",
+    "act_date": "2025-11-15",
+    "employee_id": 4
+  },
+  {
+    "act_id": 15,
+    "act_type": "акт о расхождении",
+    "act_date": "2025-08-11",
+    "employee_id": 4
+  },
+  {
+    "act_id": 16,
+    "act_type": "акт приемки",
+    "act_date": "2025-04-30",
+    "employee_id": 4
+  },
+  {
+    "act_id": 17,
+    "act_type": "акт о расхождении",
+    "act_date": "2025-11-23",
+    "employee_id": 4
+  },
+  {
+    "act_id": 18,
+    "act_type": "акт о расхождении",
+    "act_date": "2025-08-06",
+    "employee_id": 4
+  },
+  {
+    "act_id": 19,
+    "act_type": "акт о расхождении",
+    "act_date": "2025-07-30",
+    "employee_id": 4
+  },
+  {
+    "act_id": 20,
+    "act_type": "акт приемки",
+    "act_date": "2025-12-22",
+    "employee_id": 4
+  },
+  {
+    "act_id": 21,
+    "act_type": "акт приемки",
+    "act_date": "2025-05-15",
+    "employee_id": 4
+  },
+  {
+    "act_id": 22,
+    "act_type": "акт о расхождении",
+    "act_date": "2026-02-19",
+    "employee_id": 4
+  },
+  {
+    "act_id": 23,
+    "act_type": "акт приемки",
+    "act_date": "2025-06-03",
+    "employee_id": 4
+  },
+  {
+    "act_id": 24,
+    "act_type": "акт приемки",
+    "act_date": "2025-11-23",
+    "employee_id": 4
+  },
+  {
+    "act_id": 25,
+    "act_type": "акт о расхождении",
+    "act_date": "2025-07-18",
+    "employee_id": 4
+  },
+  {
+    "act_id": 26,
+    "act_type": "акт приемки",
+    "act_date": "2025-08-08",
+    "employee_id": 4
+  },
+  {
+    "act_id": 27,
+    "act_type": "акт о расхождении",
+    "act_date": "2026-02-01",
+    "employee_id": 4
+  },
+  {
+    "act_id": 28,
+    "act_type": "акт о расхождении",
+    "act_date": "2025-07-26",
+    "employee_id": 4
+  },
+  {
+    "act_id": 29,
+    "act_type": "акт о расхождении",
+    "act_date": "2026-02-04",
+    "employee_id": 4
+  },
+  {
+    "act_id": 30,
+    "act_type": "акт о расхождении",
+    "act_date": "2025-07-27",
+    "employee_id": 4
+  }
+]

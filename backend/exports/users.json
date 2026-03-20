@@ -1,0 +1,72 @@
+[
+  {
+    "user_id": 1,
+    "user_name": "Пользователь 1",
+    "user_login": "user1",
+    "user_password": "8f25595ce772646d85ab5d7284e6bdf6",
+    "user_phone": "+7 (994) 533123"
+  },
+  {
+    "user_id": 2,
+    "user_name": "Пользователь 2",
+    "user_login": "user2",
+    "user_password": "4e11a64957cc97432994cb35f79602e7",
+    "user_phone": "+7 (979) 395637"
+  },
+  {
+    "user_id": 3,
+    "user_name": "Пользователь 3",
+    "user_login": "user3",
+    "user_password": "1a135d2056bae4136abc677eaf37d55c",
+    "user_phone": "+7 (923) 217528"
+  },
+  {
+    "user_id": 4,
+    "user_name": "Пользователь 4",
+    "user_login": "user4",
+    "user_password": "1e3ec46405073f9bb176f0959dfaaceb",
+    "user_phone": "+7 (939) 652368"
+  },
+  {
+    "user_id": 5,
+    "user_name": "Пользователь 5",
+    "user_login": "user5",
+    "user_password": "c63ca0d756b916c4f782648b48a02167",
+    "user_phone": "+7 (96) 144609"
+  },
+  {
+    "user_id": 6,
+    "user_name": "Пользователь 6",
+    "user_login": "user6",
+    "user_password": "ca1b653adc4501bc670442b1edcde4e6",
+    "user_phone": "+7 (992) 411442"
+  },
+  {
+    "user_id": 7,
+    "user_name": "Пользователь 7",
+    "user_login": "user7",
+    "user_password": "435cd68b8a14e6ba2dc43bf7ab2d1db1",
+    "user_phone": "+7 (948) 319712"
+  },
+  {
+    "user_id": 8,
+    "user_name": "Пользователь 8",
+    "user_login": "user8",
+    "user_password": "3fdb508d25183f470c75f490fcc4a1c4",
+    "user_phone": "+7 (977) 310288"
+  },
+  {
+    "user_id": 9,
+    "user_name": "Пользователь 9",
+    "user_login": "user9",
+    "user_password": "22edecd69b069732a3f312b0ffe84c5e",
+    "user_phone": "+7 (918) 168747"
+  },
+  {
+    "user_id": 10,
+    "user_name": "Пользователь 10",
+    "user_login": "user10",
+    "user_password": "34c0469631ce8d3b6eb4f3e77e499dd7",
+    "user_phone": "+7 (926) 394368"
+  }
+]
