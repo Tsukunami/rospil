@@ -371,3 +371,33 @@ def update_supplier_wood(request):
     except Exception as e:
         return JsonResponse({'error': f'Error updating quantity: {str(e)}'}, status=500)
 
+# Добавьте эти функции в ваш views.py
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_supplier_wood(request):
+    """Удаление связи поставщик-материал"""
+    try:
+        supplier_id = request.GET.get('supplier_id')
+        wood_id = request.GET.get('wood_id')
+        
+        if not supplier_id or not wood_id:
+            return JsonResponse({'error': 'supplier_id and wood_id are required'}, status=400)
+        
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                DELETE FROM supplier_wood 
+                WHERE supplier_id = %s AND wood_id = %s
+                RETURNING supplier_id
+            """, [supplier_id, wood_id])
+            
+            if cursor.rowcount == 0:
+                return JsonResponse({'error': 'Record not found'}, status=404)
+            
+        return JsonResponse({
+            'success': True,
+            'message': 'Supplier wood relation deleted successfully'
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': f'Error deleting relation: {str(e)}'}, status=500)

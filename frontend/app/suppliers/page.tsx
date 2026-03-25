@@ -43,12 +43,21 @@ export default function SuppliersPage() {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [expandedSuppliers, setExpandedSuppliers] = useState<Set<number>>(new Set());
   
   const [formData, setFormData] = useState({
     name: "",
     address: "",
     phone: "",
     inn: "",
+  });
+
+  const [productFormData, setProductFormData] = useState({
+    wood_id: "",
+    available_quantity: "",
   });
 
   useEffect(() => {
@@ -134,8 +143,20 @@ export default function SuppliersPage() {
     );
   }, [search, enrichedSuppliers]);
 
+  const toggleExpand = (supplierId: number) => {
+    setExpandedSuppliers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(supplierId)) {
+        newSet.delete(supplierId);
+      } else {
+        newSet.add(supplierId);
+      }
+      return newSet;
+    });
+  };
+
   const handleDelete = async (id: number) => {
-    if (!confirm('Вы уверены, что хотите удалить этого поставщика? Все связанные контракты также будут удалены.')) return;
+    if (!confirm('Вы уверены, что хотите удалить этого поставщика? Все связанные контракты и материалы также будут удалены.')) return;
     
     try {
       const response = await fetch(`http://localhost:8000/api/table/suppliers_info/?id=${id}`, {
@@ -153,6 +174,27 @@ export default function SuppliersPage() {
     } catch (err) {
       console.error('Ошибка удаления:', err);
       alert('Ошибка удаления поставщика');
+    }
+  };
+
+  const handleDeleteProduct = async (supplierId: number, woodId: number) => {
+    if (!confirm('Вы уверены, что хотите удалить этот материал у поставщика?')) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8000/api/table/supplier_wood/?supplier_id=${supplierId}&wood_id=${woodId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Ошибка удаления материала');
+      }
+      
+      alert('Материал удален');
+      await fetchAllData();
+      
+    } catch (err) {
+      console.error('Ошибка удаления материала:', err);
+      alert('Ошибка удаления материала');
     }
   };
 
@@ -218,6 +260,71 @@ export default function SuppliersPage() {
     }
   };
 
+  const handleAddProduct = async () => {
+    if (!selectedSupplier) return;
+    
+    if (!productFormData.wood_id) {
+      alert("Выберите материал");
+      return;
+    }
+    
+    if (!productFormData.available_quantity || parseFloat(productFormData.available_quantity) <= 0) {
+      alert("Введите корректное количество");
+      return;
+    }
+    
+    setIsAddingProduct(true);
+    
+    try {
+      const productData = {
+        supplier_id: selectedSupplier.supplier_id,
+        wood_id: parseInt(productFormData.wood_id),
+        available_quantity: parseFloat(productFormData.available_quantity)
+      };
+      
+      const response = await fetch('http://localhost:8000/api/table/supplier_wood/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Ошибка добавления материала');
+      }
+      
+      alert('Материал успешно добавлен');
+      
+      // Обновляем данные
+      await fetchAllData();
+      
+      // Закрываем модальное окно и сбрасываем форму
+      setIsProductModalOpen(false);
+      setSelectedSupplier(null);
+      setProductFormData({
+        wood_id: "",
+        available_quantity: "",
+      });
+      
+    } catch (err) {
+      console.error('Ошибка:', err);
+      alert('Ошибка добавления материала: ' + (err instanceof Error ? err.message : 'Неизвестная ошибка'));
+    } finally {
+      setIsAddingProduct(false);
+    }
+  };
+
+  const openProductModal = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setProductFormData({
+      wood_id: "",
+      available_quantity: "",
+    });
+    setIsProductModalOpen(true);
+  };
+
   const formatPhone = (phone: string) => {
     if (!phone) return '—';
     return phone;
@@ -226,6 +333,16 @@ export default function SuppliersPage() {
   const formatAddress = (address: string) => {
     if (!address) return '—';
     return address;
+  };
+
+  // Получаем список доступных материалов (которых еще нет у поставщика)
+  const getAvailableProducts = () => {
+    if (!selectedSupplier) return [];
+    
+    const currentSupplier = enrichedSuppliers.find(s => s.supplier_id === selectedSupplier.supplier_id);
+    const currentProductIds = currentSupplier?.products.map(p => p.wood_id) || [];
+    
+    return products.filter(product => !currentProductIds.includes(product.wood_id));
   };
 
   if (loading) {
@@ -265,70 +382,124 @@ export default function SuppliersPage() {
       </div>
 
       <div className={styles.list}>
-        {filteredSuppliers.map((supplier) => (
-          <div key={supplier.supplier_id} className={styles.card}>
-            <div className={styles.cardTitle}>
-              {supplier.supplier_name}
-            </div>
-            
-            <div className={styles.cardBody}>
-              <div className={styles.infoLine}>
-                <span className={styles.label}>ИНН:</span>
-                <span className={styles.value}>{supplier.supplier_inn || '—'}</span>
+        {filteredSuppliers.map((supplier) => {
+          const isExpanded = expandedSuppliers.has(supplier.supplier_id);
+          const hasProducts = supplier.products.length > 0;
+          
+          return (
+            <div key={supplier.supplier_id} className={styles.card}>
+              <div className={styles.cardTitle}>
+                {supplier.supplier_name}
               </div>
               
-              <div className={styles.infoLine}>
-                <span className={styles.label}>Телефон:</span>
-                <span className={styles.value}>{formatPhone(supplier.supplier_phone)}</span>
-              </div>
-              
-              <div className={styles.infoLine}>
-                <span className={styles.label}>Адрес:</span>
-                <span className={styles.value}>{formatAddress(supplier.supplier_address)}</span>
-              </div>
-              
-              {supplier.products.length > 0 && (
-                <div className={styles.productsBlock}>
-                  <div className={styles.productsTitle}>Поставляемые материалы:</div>
-                  {supplier.products.map((product) => (
-                    <div key={product.wood_id} className={styles.productLine}>
-                      <div className={styles.productNameBlock}>
-                        <span className={styles.productIcon}>📦</span>
-                        <span>
-                          {product.wood_type} {product.wood_grade && `(${product.wood_grade})`}
-                        </span>
-                      </div>
-                      <div className={styles.priceBlock}>
-                        <span>Доступно:</span>
-                        <strong>{product.available_quantity.toLocaleString("ru-RU", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        })} м³</strong>
-                      </div>
-                    </div>
-                  ))}
+              <div className={styles.cardBody}>
+                <div className={styles.infoLine}>
+                  <span className={styles.label}>ИНН:</span>
+                  <span className={styles.value}>{supplier.supplier_inn || '—'}</span>
                 </div>
-              )}
-              
-              <div className={styles.cardActions}>
-                <button
-                  type="button"
-                  className={styles.deleteButton}
-                  onClick={() => handleDelete(supplier.supplier_id)}
-                  title="Удалить поставщика"
-                >
-                  <Image
-                    src="/icons/delete-document.svg"
-                    alt="Удалить"
-                    width={20}
-                    height={20}
-                  />
-                  Удалить
-                </button>
+                
+                <div className={styles.infoLine}>
+                  <span className={styles.label}>Телефон:</span>
+                  <span className={styles.value}>{formatPhone(supplier.supplier_phone)}</span>
+                </div>
+                
+                <div className={styles.infoLine}>
+                  <span className={styles.label}>Адрес:</span>
+                  <span className={styles.value}>{formatAddress(supplier.supplier_address)}</span>
+                </div>
+                
+                {/* Кнопка "Показать подробнее" */}
+                <div className={styles.expandSection}>
+                  <button
+                    type="button"
+                    className={styles.expandButton}
+                    onClick={() => toggleExpand(supplier.supplier_id)}
+                  >
+                    <span className={styles.expandIcon}>
+                      {isExpanded ? '▼' : '▶'}
+                    </span>
+                    {isExpanded ? 'Скрыть материалы' : 'Показать материалы'}
+                    {!isExpanded && hasProducts && (
+                      <span className={styles.productCount}>
+                        ({supplier.products.length})
+                      </span>
+                    )}
+                  </button>
+                </div>
+                
+                {/* Скрытый блок с материалами */}
+                {isExpanded && (
+                  <>
+                    <div className={styles.productsHeader}>
+                      <div className={styles.productsTitle}>Поставляемые материалы:</div>
+                      <button
+                        type="button"
+                        className={styles.addProductButton}
+                        onClick={() => openProductModal(supplier)}
+                        title="Добавить материал"
+                      >
+                        + Добавить материал
+                      </button>
+                    </div>
+                    
+                    {hasProducts ? (
+                      <div className={styles.productsBlock}>
+                        {supplier.products.map((product) => (
+                          <div key={product.wood_id} className={styles.productLine}>
+                            <div className={styles.productNameBlock}>
+                              <span className={styles.productIcon}>📦</span>
+                              <span>
+                                {product.wood_type} {product.wood_grade && `(${product.wood_grade})`}
+                              </span>
+                            </div>
+                            <div className={styles.productActions}>
+                              <div className={styles.priceBlock}>
+                                <span>Доступно:</span>
+                                <strong>{product.available_quantity.toLocaleString("ru-RU", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2
+                                })} м³</strong>
+                              </div>
+                              <button
+                                type="button"
+                                className={styles.deleteProductButton}
+                                onClick={() => handleDeleteProduct(supplier.supplier_id, product.wood_id)}
+                                title="Удалить материал"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className={styles.noProducts}>
+                        Нет поставляемых материалов
+                      </div>
+                    )}
+                  </>
+                )}
+                
+                <div className={styles.cardActions}>
+                  <button
+                    type="button"
+                    className={styles.deleteButton}
+                    onClick={() => handleDelete(supplier.supplier_id)}
+                    title="Удалить поставщика"
+                  >
+                    <Image
+                      src="/icons/delete-document.svg"
+                      alt="Удалить"
+                      width={20}
+                      height={20}
+                    />
+                    Удалить поставщика
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {filteredSuppliers.length === 0 && (
           <div className={styles.empty}>
@@ -337,6 +508,7 @@ export default function SuppliersPage() {
         )}
       </div>
 
+      {/* Модальное окно для добавления поставщика */}
       {isModalOpen && (
         <div className={styles.overlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -405,6 +577,68 @@ export default function SuppliersPage() {
                   disabled={isCreating}
                 >
                   {isCreating ? 'Создание...' : 'Создать'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно для добавления материала */}
+      {isProductModalOpen && selectedSupplier && (
+        <div className={styles.overlay} onClick={() => setIsProductModalOpen(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalTitle}>
+              Добавление материала для {selectedSupplier.supplier_name}
+            </div>
+
+            <div className={styles.form}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Материал *</label>
+                <select
+                  value={productFormData.wood_id}
+                  onChange={(e) => setProductFormData({...productFormData, wood_id: e.target.value})}
+                  className={styles.select}
+                  required
+                >
+                  <option value="">Выберите материал</option>
+                  {getAvailableProducts().map((product) => (
+                    <option key={product.wood_id} value={product.wood_id}>
+                      {product.wood_type} {product.wood_grade && `(${product.wood_grade})`} - {product.wood_length}мм, {product.wood_cross_section}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Доступное количество (м³) *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={productFormData.available_quantity}
+                  onChange={(e) => setProductFormData({...productFormData, available_quantity: e.target.value})}
+                  className={styles.input}
+                  required
+                />
+              </div>
+
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => setIsProductModalOpen(false)}
+                  disabled={isAddingProduct}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="button"
+                  className={styles.submitButton}
+                  onClick={handleAddProduct}
+                  disabled={isAddingProduct}
+                >
+                  {isAddingProduct ? 'Добавление...' : 'Добавить'}
                 </button>
               </div>
             </div>
