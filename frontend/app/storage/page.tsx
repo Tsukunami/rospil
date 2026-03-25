@@ -1,11 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./StoragePage.module.css";
-
-import storageData from "@/data/storage.json";
-import productsData from "@/data/products.json";
 
 type StorageItem = {
   wood_id: number;
@@ -15,43 +12,88 @@ type StorageItem = {
 
 type Product = {
   wood_id: number;
-  swood_type: string;
+  wood_type: string;
+  wood_grade: string;
+  wood_length: number;
+  wood_diameter: number;
+  wood_graduation: string;
+  wood_cross_section: string;
 };
 
 type StorageRow = {
   woodId: number;
   woodName: string;
+  woodGrade: string;
+  woodLength: number;
+  woodCrossSection: string;
   currentScope: number;
-  storageCell: string | null;
+  storageCell: string;
 };
 
 type SortField = "woodName" | "currentScope" | "storageCell";
 type SortDirection = "asc" | "desc";
 
 export default function StoragePage() {
+  const [storageItems, setStorageItems] = useState<StorageItem[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showAllWoodTypes, setShowAllWoodTypes] = useState(false);
   const [sortField, setSortField] = useState<SortField>("woodName");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
-  const storageItems = storageData.storage as StorageItem[];
-  const products = productsData.products as Product[];
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      // Загружаем данные склада и продукты
+      const [storageRes, productsRes] = await Promise.all([
+        fetch('http://localhost:8000/api/table/storage/'),
+        fetch('http://localhost:8000/api/table/product/')
+      ]);
+      
+      if (!storageRes.ok) throw new Error('Ошибка загрузки склада');
+      if (!productsRes.ok) throw new Error('Ошибка загрузки продуктов');
+      
+      const storageData = await storageRes.json();
+      const productsData = await productsRes.json();
+      
+      setStorageItems(storageData);
+      setProducts(productsData);
+      
+    } catch (err) {
+      console.error('Ошибка загрузки:', err);
+      alert('Ошибка загрузки данных');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const rows = useMemo<StorageRow[]>(() => {
-    return products
-      .map((product) => {
-        const storageEntry = storageItems.find(
-          (item) => item.wood_id === product.wood_id
-        );
-
-        return {
-          woodId: product.wood_id,
-          woodName: product.swood_type,
-          currentScope: storageEntry ? Number(storageEntry.current_scope) : 0,
-          storageCell: storageEntry ? storageEntry.storage_cell : null,
-        };
-      })
-      .sort((a, b) => a.woodId - b.woodId);
+    // Создаем карту остатков на складе
+    const storageMap = new Map<number, StorageItem>();
+    storageItems.forEach(item => {
+      storageMap.set(item.wood_id, item);
+    });
+    
+    // Формируем строки для всех продуктов
+    return products.map((product) => {
+      const storage = storageMap.get(product.wood_id);
+      
+      return {
+        woodId: product.wood_id,
+        woodName: product.wood_type,
+        woodGrade: product.wood_grade,
+        woodLength: product.wood_length,
+        woodCrossSection: product.wood_cross_section,
+        currentScope: storage ? Number(storage.current_scope) : 0,
+        storageCell: storage ? storage.storage_cell : '—',
+      };
+    }).sort((a, b) => a.woodId - b.woodId);
   }, [products, storageItems]);
 
   const sortedAndFilteredRows = useMemo(() => {
@@ -79,9 +121,7 @@ export default function StoragePage() {
       }
 
       if (sortField === "storageCell") {
-        const cellA = a.storageCell ? Number(a.storageCell) : -1;
-        const cellB = b.storageCell ? Number(b.storageCell) : -1;
-        compareValue = cellA - cellB;
+        compareValue = a.storageCell.localeCompare(b.storageCell);
       }
 
       return sortDirection === "asc" ? compareValue : -compareValue;
@@ -95,7 +135,6 @@ export default function StoragePage() {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
       return;
     }
-
     setSortField(field);
     setSortDirection("asc");
   };
@@ -104,6 +143,18 @@ export default function StoragePage() {
     if (sortField !== field) return "";
     return sortDirection === "asc" ? " ↑" : " ↓";
   };
+
+  const formatWoodInfo = (row: StorageRow) => {
+    const parts = [row.woodName];
+    if (row.woodGrade) parts.push(`${row.woodGrade}`);
+    if (row.woodLength) parts.push(`длина: ${row.woodLength}м`);
+    if (row.woodCrossSection) parts.push(`сечение: ${row.woodCrossSection}`);
+    return parts.join(' | ');
+  };
+
+  if (loading) {
+    return <div className={styles.page}>Загрузка данных склада...</div>;
+  }
 
   return (
     <div className={styles.page}>
@@ -148,7 +199,7 @@ export default function StoragePage() {
               className={styles.headerButton}
               onClick={() => handleSort("currentScope")}
             >
-              Количество на складе{getSortMarker("currentScope")}
+              Количество на складе (м³){getSortMarker("currentScope")}
             </button>
 
             <button
@@ -166,17 +217,30 @@ export default function StoragePage() {
                 <Link
                   href={`/suppliers?search=${encodeURIComponent(row.woodName)}`}
                   className={styles.woodLink}
+                  title={formatWoodInfo(row)}
                 >
                   {row.woodName}
+                  {row.woodGrade && (
+                    <span className={styles.woodGrade}> ({row.woodGrade})</span>
+                  )}
                 </Link>
               </div>
 
-              <div className={styles.colAmount}>
-                {row.currentScope.toLocaleString("ru-RU")}
+              <div className={`${styles.colAmount} ${row.currentScope === 0 ? styles.zeroAmount : ''}`}>
+                {row.currentScope.toLocaleString("ru-RU", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}
+                {row.currentScope === 0 && (
+                  <span className={styles.outOfStock}> (нет в наличии)</span>
+                )}
               </div>
 
               <div className={styles.colCell}>
-                {row.storageCell ? `Ячейка №${row.storageCell}` : "—"}
+                {row.storageCell}
+                {row.storageCell === '—' && (
+                  <span className={styles.noCell}> - ячейка не назначена</span>
+                )}
               </div>
             </div>
           ))}
@@ -184,6 +248,25 @@ export default function StoragePage() {
           {sortedAndFilteredRows.length === 0 && (
             <div className={styles.empty}>Данные по складу не найдены</div>
           )}
+        </div>
+      </div>
+
+      {/* Статистика склада */}
+      <div className={styles.statsBar}>
+        <div className={styles.statItem}>
+          <span className={styles.statLabel}>Всего на складе:</span>
+          <span className={styles.statValue}>
+            {rows.reduce((sum, row) => sum + row.currentScope, 0).toLocaleString("ru-RU", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })} м³
+          </span>
+        </div>
+        <div className={styles.statItem}>
+          <span className={styles.statLabel}>Видов древесины:</span>
+          <span className={styles.statValue}>
+            {rows.filter(row => row.currentScope > 0).length} / {rows.length}
+          </span>
         </div>
       </div>
     </div>

@@ -118,3 +118,333 @@
   font-size: 16px;
   color: #555;
 }
+.page {
+  width: 100%;
+  padding: 20px;
+}
+
+.searchRow {
+  margin-bottom: 20px;
+}
+
+.searchBox {
+  width: 320px;
+  height: 40px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0 42px 0 14px;
+  font-size: 14px;
+  color: #333;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.searchIcon {
+  position: absolute;
+  right: 13px;
+  color: #999;
+  font-size: 18px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.tableActions {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.createButton:hover {
+  background: #40a9ff;
+  transform: translateY(-1px);
+}
+
+.createButton:active {
+  transform: translateY(0);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cardTitle {
+  padding: 16px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f1f1f;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cardBody {
+  padding: 20px;
+}
+
+.infoLine {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.label {
+  min-width: 70px;
+  font-weight: 500;
+  color: #8c8c8c;
+}
+
+.value {
+  color: #262626;
+  word-break: break-word;
+  flex: 1;
+}
+
+.productsBlock {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.productsTitle {
+  font-weight: 500;
+  color: #595959;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.productLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.productLine:last-child {
+  border-bottom: none;
+}
+
+.productNameBlock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #262626;
+}
+
+.productIcon {
+  font-size: 16px;
+}
+
+.priceBlock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #8c8c8c;
+}
+
+.priceBlock strong {
+  color: #52c41a;
+  font-size: 14px;
+}
+
+.cardActions {
+  margin-top: 16px;
+  padding-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #f0f0f0;
+}
+
+.deleteButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: #fff1f0;
+  color: #ff4d4f;
+  border: 1px solid #ffccc7;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.deleteButton:hover {
+  background: #ff4d4f;
+  color: white;
+  border-color: #ff4d4f;
+}
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 16px;
+  color: #8c8c8c;
+  background: #fafafa;
+  border-radius: 12px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.modalTitle {
+  padding: 20px 24px;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 1px solid #f0f0f0;
+  color: #262626;
+}
+
+.form {
+  padding: 24px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup .label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #595959;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.cancelButton,
+.submitButton {
+  padding: 8px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelButton {
+  background: white;
+  border: 1px solid #d9d9d9;
+  color: #595959;
+}
+
+.cancelButton:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.submitButton {
+  background: #1890ff;
+  border: none;
+  color: white;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: #40a9ff;
+}
+
+.submitButton:disabled,
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

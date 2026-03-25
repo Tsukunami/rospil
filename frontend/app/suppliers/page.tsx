@@ -1,129 +1,236 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import styles from "./SuppliersPage.module.css";
 
-import suppliersData from "@/data/suplier.json";
-import productsData from "@/data/products.json";
-import relationsData from "@/data/Suppliers_And_Product.json";
-
 type Supplier = {
-  suplier_id: number;
+  supplier_id: number;
   supplier_name: string;
-  supplier_adress: string;
-  supplier_INN: string;
+  supplier_address: string;
   supplier_phone: string;
+  supplier_inn: string;
+};
+
+type SupplierWood = {
+  supplier_id: number;
+  wood_id: number;
+  available_quantity: number;
 };
 
 type Product = {
   wood_id: number;
-  swood_type: string;
+  wood_type: string;
+  wood_grade: string;
+  wood_length: number;
+  wood_cross_section: string;
 };
 
-type SupplierProductRelation = {
-  product_id: number;
-  supplier_id: number;
-  product_cost: number;
+type SupplierWithProducts = Supplier & {
+  products: {
+    wood_id: number;
+    wood_type: string;
+    wood_grade: string;
+    available_quantity: number;
+  }[];
 };
-
-type SupplierItem = {
-  productName: string;
-  cost: number;
-};
-
-type SupplierCard = {
-  id: number;
-  name: string;
-  adress: string;
-  inn: string;
-  phone: string;
-  items: SupplierItem[];
-};
-
-function formatPrice(price: number) {
-  return `${price.toLocaleString("ru-RU")} руб`;
-}
 
 export default function SuppliersPage() {
-  const searchParams = useSearchParams();
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [supplierWood, setSupplierWood] = useState<SupplierWood[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    address: "",
+    phone: "",
+    inn: "",
+  });
 
   useEffect(() => {
-    const searchFromQuery = searchParams.get("search") || "";
-    setSearch(searchFromQuery);
-  }, [searchParams]);
+    fetchAllData();
+  }, []);
 
-  const suppliers = suppliersData.suppliers as Supplier[];
-  const products = productsData.products as Product[];
-  const relations = relationsData.suppliers as SupplierProductRelation[];
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      console.log("Загрузка данных поставщиков...");
+      
+      const [suppliersRes, supplierWoodRes, productsRes] = await Promise.all([
+        fetch('http://localhost:8000/api/table/suppliers_info/'),
+        fetch('http://localhost:8000/api/table/supplier_wood/'),
+        fetch('http://localhost:8000/api/table/product/')
+      ]);
+      
+      if (!suppliersRes.ok) throw new Error('Ошибка загрузки поставщиков');
+      
+      const suppliersData = await suppliersRes.json();
+      const supplierWoodData = supplierWoodRes.ok ? await supplierWoodRes.json() : [];
+      const productsData = productsRes.ok ? await productsRes.json() : [];
+      
+      console.log("Загружено поставщиков:", suppliersData.length);
+      console.log("Загружено связей поставщик-материал:", supplierWoodData.length);
+      
+      setSuppliers(suppliersData);
+      setSupplierWood(supplierWoodData);
+      setProducts(productsData);
+      
+    } catch (err) {
+      console.error('Ошибка загрузки:', err);
+      alert('Ошибка загрузки данных');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Обогащаем поставщиков информацией о продуктах
+  const enrichedSuppliers = useMemo(() => {
+    const suppliersMap = new Map<number, SupplierWithProducts>();
+    
+    // Инициализируем поставщиков
+    suppliers.forEach(supplier => {
+      suppliersMap.set(supplier.supplier_id, {
+        ...supplier,
+        products: []
+      });
+    });
+    
+    // Добавляем продукты к поставщикам
+    supplierWood.forEach(sw => {
+      const supplier = suppliersMap.get(sw.supplier_id);
+      if (supplier) {
+        const product = products.find(p => p.wood_id === sw.wood_id);
+        if (product) {
+          supplier.products.push({
+            wood_id: sw.wood_id,
+            wood_type: product.wood_type,
+            wood_grade: product.wood_grade,
+            available_quantity: sw.available_quantity
+          });
+        }
+      }
+    });
+    
+    // Сортируем продукты
+    suppliersMap.forEach(supplier => {
+      supplier.products.sort((a, b) => a.wood_type.localeCompare(b.wood_type));
+    });
+    
+    return Array.from(suppliersMap.values());
+  }, [suppliers, supplierWood, products]);
 
   const filteredSuppliers = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
+    if (!normalizedSearch) return enrichedSuppliers;
+    
+    return enrichedSuppliers.filter(supplier =>
+      supplier.supplier_name.toLowerCase().includes(normalizedSearch) ||
+      supplier.supplier_inn?.toLowerCase().includes(normalizedSearch) ||
+      supplier.supplier_phone?.toLowerCase().includes(normalizedSearch)
+    );
+  }, [search, enrichedSuppliers]);
 
-    if (!normalizedSearch) {
-      return [];
+  const handleDelete = async (id: number) => {
+    if (!confirm('Вы уверены, что хотите удалить этого поставщика? Все связанные контракты также будут удалены.')) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8000/api/table/suppliers_info/?id=${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Ошибка удаления');
+      }
+      
+      alert('Поставщик удален');
+      await fetchAllData();
+      
+    } catch (err) {
+      console.error('Ошибка удаления:', err);
+      alert('Ошибка удаления поставщика');
     }
+  };
 
-    const result: SupplierCard[] = [];
-
-    suppliers.forEach((supplier) => {
-      const supplierRelations = relations.filter(
-        (relation) => relation.supplier_id === supplier.suplier_id
-      );
-
-      const allSupplierItems: SupplierItem[] = supplierRelations
-        .map((relation) => {
-          const product = products.find((p) => p.wood_id === relation.product_id);
-          if (!product) return null;
-
-          return {
-            productName: product.swood_type,
-            cost: relation.product_cost,
-          };
-        })
-        .filter(Boolean) as SupplierItem[];
-
-      const companyMatches = supplier.supplier_name
-        .toLowerCase()
-        .includes(normalizedSearch);
-
-      const matchedItems = allSupplierItems.filter((item) =>
-        item.productName.toLowerCase().includes(normalizedSearch)
-      );
-
-      if (companyMatches) {
-        result.push({
-          id: supplier.suplier_id,
-          name: supplier.supplier_name,
-          adress: supplier.supplier_adress,
-          inn: supplier.supplier_INN?.trim() || "Не указан",
-          phone: supplier.supplier_phone,
-          items: allSupplierItems.sort((a, b) =>
-            a.productName.localeCompare(b.productName, "ru")
-          ),
-        });
-
-        return;
+  const handleCreate = async () => {
+    // Валидация
+    if (!formData.name.trim()) {
+      alert("Введите название поставщика");
+      return;
+    }
+    
+    if (!formData.inn.trim()) {
+      alert("Введите ИНН поставщика");
+      return;
+    }
+    
+    setIsCreating(true);
+    
+    try {
+      const supplierData = {
+        supplier_name: formData.name.trim(),
+        supplier_address: formData.address.trim() || null,
+        supplier_phone: formData.phone.trim() || null,
+        supplier_inn: formData.inn.trim()
+      };
+      
+      console.log("Создаем поставщика:", supplierData);
+      
+      const response = await fetch('http://localhost:8000/api/table/suppliers_info/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(supplierData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Ошибка создания поставщика');
       }
+      
+      const result = await response.json();
+      console.log("Поставщик создан, ID:", result.id);
+      
+      alert('Поставщик успешно создан');
+      
+      // Обновляем список
+      await fetchAllData();
+      
+      // Закрываем модальное окно и сбрасываем форму
+      setFormData({
+        name: "",
+        address: "",
+        phone: "",
+        inn: "",
+      });
+      setIsModalOpen(false);
+      
+    } catch (err) {
+      console.error('Ошибка:', err);
+      alert('Ошибка создания поставщика: ' + (err instanceof Error ? err.message : 'Неизвестная ошибка'));
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
-      if (matchedItems.length > 0) {
-        result.push({
-          id: supplier.suplier_id,
-          name: supplier.supplier_name,
-          adress: supplier.supplier_adress,
-          inn: supplier.supplier_INN?.trim() || "Не указан",
-          phone: supplier.supplier_phone,
-          items: matchedItems.sort((a, b) =>
-            a.productName.localeCompare(b.productName, "ru")
-          ),
-        });
-      }
-    });
+  const formatPhone = (phone: string) => {
+    if (!phone) return '—';
+    return phone;
+  };
 
-    return result.sort((a, b) => a.id - b.id);
-  }, [search, suppliers, products, relations]);
+  const formatAddress = (address: string) => {
+    if (!address) return '—';
+    return address;
+  };
+
+  if (loading) {
+    return <div className={styles.page}>Загрузка данных...</div>;
+  }
 
   return (
     <div className={styles.page}>
@@ -131,7 +238,7 @@ export default function SuppliersPage() {
         <div className={styles.searchBox}>
           <input
             type="text"
-            placeholder="Введите тип древесины или компанию"
+            placeholder="Поиск по названию, ИНН или телефону"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={styles.searchInput}
@@ -140,83 +247,170 @@ export default function SuppliersPage() {
         </div>
       </div>
 
+      <div className={styles.tableActions}>
+        <button
+          type="button"
+          className={styles.createButton}
+          onClick={() => setIsModalOpen(true)}
+          title="Добавить поставщика"
+        >
+          <Image
+            src="/icons/create-document.svg"
+            alt="Добавить"
+            width={40}
+            height={40}
+          />
+          <span>Добавить поставщика</span>
+        </button>
+      </div>
+
       <div className={styles.list}>
-        {search.trim() !== "" && filteredSuppliers.length === 0 && (
-          <div className={styles.empty}>Поставщики не найдены</div>
-        )}
-
         {filteredSuppliers.map((supplier) => (
-          <div key={supplier.id} className={styles.card}>
-            <div className={styles.cardTitle}>{supplier.name}</div>
-
+          <div key={supplier.supplier_id} className={styles.card}>
+            <div className={styles.cardTitle}>
+              {supplier.supplier_name}
+            </div>
+            
             <div className={styles.cardBody}>
               <div className={styles.infoLine}>
-                <Image
-                  src="/icons/location.svg"
-                  alt="Адрес"
-                  width={16}
-                  height={16}
-                  className={styles.lineIcon}
-                />
-                <span>{supplier.adress}</span>
+                <span className={styles.label}>ИНН:</span>
+                <span className={styles.value}>{supplier.supplier_inn || '—'}</span>
               </div>
-
+              
               <div className={styles.infoLine}>
-                <Image
-                  src="/icons/inn.svg"
-                  alt="ИНН"
-                  width={16}
-                  height={16}
-                  className={styles.lineIcon}
-                />
-                <span>ИНН: {supplier.inn}</span>
+                <span className={styles.label}>Телефон:</span>
+                <span className={styles.value}>{formatPhone(supplier.supplier_phone)}</span>
               </div>
-
+              
               <div className={styles.infoLine}>
-                <Image
-                  src="/icons/phone.svg"
-                  alt="Телефон"
-                  width={16}
-                  height={16}
-                  className={styles.lineIcon}
-                />
-                <span>Телефон: {supplier.phone}</span>
+                <span className={styles.label}>Адрес:</span>
+                <span className={styles.value}>{formatAddress(supplier.supplier_address)}</span>
               </div>
-
-              <div className={styles.productsBlock}>
-                {supplier.items.map((item, index) => (
-                  <div
-                    key={`${supplier.id}-${item.productName}-${index}`}
-                    className={styles.productLine}
-                  >
-                    <div className={styles.productNameBlock}>
-                      <Image
-                        src="/icons/wood.svg"
-                        alt="Материал"
-                        width={16}
-                        height={16}
-                        className={styles.lineIcon}
-                      />
-                      <span>{item.productName}</span>
+              
+              {supplier.products.length > 0 && (
+                <div className={styles.productsBlock}>
+                  <div className={styles.productsTitle}>Поставляемые материалы:</div>
+                  {supplier.products.map((product) => (
+                    <div key={product.wood_id} className={styles.productLine}>
+                      <div className={styles.productNameBlock}>
+                        <span className={styles.productIcon}>📦</span>
+                        <span>
+                          {product.wood_type} {product.wood_grade && `(${product.wood_grade})`}
+                        </span>
+                      </div>
+                      <div className={styles.priceBlock}>
+                        <span>Доступно:</span>
+                        <strong>{product.available_quantity.toLocaleString("ru-RU", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2
+                        })} м³</strong>
+                      </div>
                     </div>
-
-                    <div className={styles.priceBlock}>
-                      <Image
-                        src="/icons/price.svg"
-                        alt="Цена"
-                        width={16}
-                        height={16}
-                        className={styles.lineIcon}
-                      />
-                      <span>{formatPrice(item.cost)}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
+              
+              <div className={styles.cardActions}>
+                <button
+                  type="button"
+                  className={styles.deleteButton}
+                  onClick={() => handleDelete(supplier.supplier_id)}
+                  title="Удалить поставщика"
+                >
+                  <Image
+                    src="/icons/delete-document.svg"
+                    alt="Удалить"
+                    width={20}
+                    height={20}
+                  />
+                  Удалить
+                </button>
               </div>
             </div>
           </div>
         ))}
+
+        {filteredSuppliers.length === 0 && (
+          <div className={styles.empty}>
+            {search ? "Поставщики не найдены" : "Нет добавленных поставщиков"}
+          </div>
+        )}
       </div>
+
+      {isModalOpen && (
+        <div className={styles.overlay} onClick={() => setIsModalOpen(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalTitle}>Добавление поставщика</div>
+
+            <div className={styles.form}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Название поставщика *</label>
+                <input
+                  type="text"
+                  placeholder="ООО ЛесПром"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className={styles.input}
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>ИНН *</label>
+                <input
+                  type="text"
+                  placeholder="1234567890"
+                  value={formData.inn}
+                  onChange={(e) => setFormData({...formData, inn: e.target.value})}
+                  className={styles.input}
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Телефон</label>
+                <input
+                  type="text"
+                  placeholder="+7 (XXX) XXX-XX-XX"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Адрес</label>
+                <textarea
+                  placeholder="г. Москва, ул. Лесная, д. 1"
+                  value={formData.address}
+                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  className={styles.textarea}
+                  rows={3}
+                />
+              </div>
+
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => setIsModalOpen(false)}
+                  disabled={isCreating}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="button"
+                  className={styles.submitButton}
+                  onClick={handleCreate}
+                  disabled={isCreating}
+                >
+                  {isCreating ? 'Создание...' : 'Создать'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
