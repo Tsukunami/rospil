@@ -253,7 +253,7 @@ export default function ContractsPage() {
 
           {filteredDocuments.map((doc) => (
             <div key={doc.id} className={styles.row}>
-              <div className={styles.colNumber}>№{doc.number}</div>
+              <div className={styles.colNumber}>ДОГ-№{doc.number}</div>
               <div className={styles.colSupplier}>{doc.supplierName}</div>
               <div
                 className={`${styles.colStatus} ${
@@ -337,19 +337,7 @@ export default function ContractsPage() {
                 ))}
               </select>
               
-              <input
-                type="text"
-                placeholder="Или введите нового поставщика *"
-                value={formData.supplierName}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData, 
-                    supplierName: e.target.value,
-                    supplierId: ""
-                  });
-                }}
-                className={styles.input}
-              />
+            
               
               <input
                 type="date"
