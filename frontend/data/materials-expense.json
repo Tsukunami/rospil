@@ -1,0 +1,28 @@
+{
+  "expenses": [
+    {
+      "id": 1,
+      "wood_id": 1,
+      "expense_scope": 120.5,
+      "expense_date": "22.01.2026"
+    },
+    {
+      "id": 2,
+      "wood_id": 2,
+      "expense_scope": 85,
+      "expense_date": "23.01.2026"
+    },
+    {
+      "id": 3,
+      "wood_id": 5,
+      "expense_scope": 42.75,
+      "expense_date": "24.01.2026"
+    },
+    {
+      "id": 4,
+      "wood_id": 7,
+      "expense_scope": 210,
+      "expense_date": "25.01.2026"
+    }
+  ]
+}

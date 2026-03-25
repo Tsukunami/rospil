@@ -49,51 +49,56 @@ export default function StoragePage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
-      // Загружаем данные склада и продукты
+
       const [storageRes, productsRes] = await Promise.all([
-        fetch('http://localhost:8000/api/table/storage/'),
-        fetch('http://localhost:8000/api/table/product/')
+        fetch("http://localhost:8000/api/table/storage/"),
+        fetch("http://localhost:8000/api/table/product/"),
       ]);
-      
-      if (!storageRes.ok) throw new Error('Ошибка загрузки склада');
-      if (!productsRes.ok) throw new Error('Ошибка загрузки продуктов');
-      
+
+      if (!storageRes.ok) throw new Error("Ошибка загрузки склада");
+      if (!productsRes.ok) throw new Error("Ошибка загрузки продуктов");
+
       const storageData = await storageRes.json();
       const productsData = await productsRes.json();
-      
+
       setStorageItems(storageData);
       setProducts(productsData);
-      
     } catch (err) {
-      console.error('Ошибка загрузки:', err);
-      alert('Ошибка загрузки данных');
+      console.error("Ошибка загрузки:", err);
+      alert("Ошибка загрузки данных");
     } finally {
       setLoading(false);
     }
   };
 
+  const replaceCellWithBlock = (value: string) => {
+    if (!value) return "—";
+    return value.replace(/ячейка/gi, "Блок");
+  };
+
   const rows = useMemo<StorageRow[]>(() => {
-    // Создаем карту остатков на складе
     const storageMap = new Map<number, StorageItem>();
-    storageItems.forEach(item => {
+    storageItems.forEach((item) => {
       storageMap.set(item.wood_id, item);
     });
-    
-    // Формируем строки для всех продуктов
-    return products.map((product) => {
-      const storage = storageMap.get(product.wood_id);
-      
-      return {
-        woodId: product.wood_id,
-        woodName: product.wood_type,
-        woodGrade: product.wood_grade,
-        woodLength: product.wood_length,
-        woodCrossSection: product.wood_cross_section,
-        currentScope: storage ? Number(storage.current_scope) : 0,
-        storageCell: storage ? storage.storage_cell : '—',
-      };
-    }).sort((a, b) => a.woodId - b.woodId);
+
+    return products
+      .map((product) => {
+        const storage = storageMap.get(product.wood_id);
+
+        return {
+          woodId: product.wood_id,
+          woodName: product.wood_type,
+          woodGrade: product.wood_grade,
+          woodLength: product.wood_length,
+          woodCrossSection: product.wood_cross_section,
+          currentScope: storage ? Number(storage.current_scope) : 0,
+          storageCell: storage
+            ? replaceCellWithBlock(storage.storage_cell)
+            : "—",
+        };
+      })
+      .sort((a, b) => a.woodId - b.woodId);
   }, [products, storageItems]);
 
   const sortedAndFilteredRows = useMemo(() => {
@@ -121,7 +126,7 @@ export default function StoragePage() {
       }
 
       if (sortField === "storageCell") {
-        compareValue = a.storageCell.localeCompare(b.storageCell);
+        compareValue = a.storageCell.localeCompare(b.storageCell, "ru");
       }
 
       return sortDirection === "asc" ? compareValue : -compareValue;
@@ -135,6 +140,7 @@ export default function StoragePage() {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
       return;
     }
+
     setSortField(field);
     setSortDirection("asc");
   };
@@ -149,7 +155,7 @@ export default function StoragePage() {
     if (row.woodGrade) parts.push(`${row.woodGrade}`);
     if (row.woodLength) parts.push(`длина: ${row.woodLength}м`);
     if (row.woodCrossSection) parts.push(`сечение: ${row.woodCrossSection}`);
-    return parts.join(' | ');
+    return parts.join(" | ");
   };
 
   if (loading) {
@@ -207,7 +213,7 @@ export default function StoragePage() {
               className={styles.headerButton}
               onClick={() => handleSort("storageCell")}
             >
-              Ячейка хранения{getSortMarker("storageCell")}
+              Блок хранения{getSortMarker("storageCell")}
             </button>
           </div>
 
@@ -226,10 +232,14 @@ export default function StoragePage() {
                 </Link>
               </div>
 
-              <div className={`${styles.colAmount} ${row.currentScope === 0 ? styles.zeroAmount : ''}`}>
+              <div
+                className={`${styles.colAmount} ${
+                  row.currentScope === 0 ? styles.zeroAmount : ""
+                }`}
+              >
                 {row.currentScope.toLocaleString("ru-RU", {
                   minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
+                  maximumFractionDigits: 2,
                 })}
                 {row.currentScope === 0 && (
                   <span className={styles.outOfStock}> (нет в наличии)</span>
@@ -238,8 +248,8 @@ export default function StoragePage() {
 
               <div className={styles.colCell}>
                 {row.storageCell}
-                {row.storageCell === '—' && (
-                  <span className={styles.noCell}> - ячейка не назначена</span>
+                {row.storageCell === "—" && (
+                  <span className={styles.noCell}> - блок не назначен</span>
                 )}
               </div>
             </div>
@@ -251,21 +261,24 @@ export default function StoragePage() {
         </div>
       </div>
 
-      {/* Статистика склада */}
       <div className={styles.statsBar}>
         <div className={styles.statItem}>
           <span className={styles.statLabel}>Всего на складе:</span>
           <span className={styles.statValue}>
-            {rows.reduce((sum, row) => sum + row.currentScope, 0).toLocaleString("ru-RU", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            })} м³
+            {rows
+              .reduce((sum, row) => sum + row.currentScope, 0)
+              .toLocaleString("ru-RU", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+            м³
           </span>
         </div>
+
         <div className={styles.statItem}>
           <span className={styles.statLabel}>Видов древесины:</span>
           <span className={styles.statValue}>
-            {rows.filter(row => row.currentScope > 0).length} / {rows.length}
+            {rows.filter((row) => row.currentScope > 0).length} / {rows.length}
           </span>
         </div>
       </div>

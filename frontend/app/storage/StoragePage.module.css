@@ -11,8 +11,8 @@
 }
 
 .searchBox {
-  width: 280px;
-  height: 38px;
+  width: 320px;
+  height: 40px;
   position: relative;
 }
 
@@ -22,9 +22,10 @@
   border: 1px solid #bdbdbd;
   border-radius: 10px;
   background: #f5f5f5;
-  padding: 0 38px 0 14px;
+  padding: 0 40px 0 14px;
   font-size: 14px;
   box-sizing: border-box;
+  color: #1f1f1f;
 }
 
 .searchInput:focus {
@@ -34,11 +35,11 @@
 
 .searchIcon {
   position: absolute;
-  right: 12px;
+  right: 13px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 18px;
-  color: #666;
+  color: #666666;
   pointer-events: none;
 }
 
@@ -48,7 +49,7 @@
 }
 
 .dropdownButton {
-  height: 38px;
+  min-height: 40px;
   padding: 0 14px;
   border: 1px solid #8f8f8f;
   border-radius: 10px;
@@ -56,6 +57,7 @@
   color: #1f1f1f;
   cursor: pointer;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .dropdownButton:hover {
@@ -64,7 +66,7 @@
 
 .tableWrapper {
   width: 100%;
-  max-width: 920px;
+  max-width: 1100px;
   background: #f3eedf;
   border: 1px solid #8d8d8d;
   border-radius: 10px;
@@ -77,13 +79,13 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1.8fr 1.2fr 1.2fr;
+  grid-template-columns: 2fr 1.2fr 1.4fr;
   align-items: center;
-  min-height: 46px;
+  min-height: 54px;
   padding: 0 14px;
   border-top: 1px solid #b5b5b5;
   box-sizing: border-box;
-  gap: 8px;
+  gap: 12px;
 }
 
 .headerRow {
@@ -99,6 +101,7 @@
   text-align: left;
   font-size: 13px;
   color: #202020;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -123,98 +126,57 @@
   opacity: 0.7;
 }
 
-.empty {
-  padding: 20px 14px;
-  font-size: 14px;
-  color: #666;
-}
 .woodGrade {
-  font-size: 12px;
-  color: #666;
-  margin-left: 4px;
+  color: #5f5f5f;
 }
 
 .zeroAmount {
-  color: #f44336;
+  color: #9a3e3e;
 }
 
 .outOfStock {
-  font-size: 12px;
-  color: #999;
-  margin-left: 8px;
+  color: #9a3e3e;
+  font-size: 13px;
 }
 
 .noCell {
-  font-size: 12px;
-  color: #999;
-  margin-left: 8px;
+  color: #666666;
+  font-size: 13px;
+}
+
+.empty {
+  padding: 20px 14px;
+  font-size: 14px;
+  color: #666666;
 }
 
 .statsBar {
+  width: 100%;
+  max-width: 1100px;
+  margin-top: 16px;
   display: flex;
-  gap: 24px;
-  padding: 16px 24px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  margin-top: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .statItem {
+  background: #f3eedf;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  padding: 12px 14px;
+  min-width: 260px;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
 }
 
 .statLabel {
   font-size: 14px;
-  color: #666;
+  color: #444444;
 }
 
 .statValue {
-  font-size: 18px;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.colAmount {
-  flex: 1;
-  text-align: right;
-  font-weight: 500;
-}
-
-.woodLink {
-  text-decoration: none;
-  color: #2c3e50;
-  transition: color 0.2s;
-}
-
-.woodLink:hover {
-  color: #3498db;
-  text-decoration: underline;
-}
-
-.headerButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
   font-size: 14px;
-  color: #2c3e50;
-  padding: 12px 8px;
-  text-align: left;
-  transition: color 0.2s;
-}
-
-.headerButton:hover {
-  color: #3498db;
-}
-
-.colName {
-  flex: 2;
-  padding: 0 8px;
-}
-
-.colCell {
-  flex: 1;
-  padding: 0 8px;
+  color: #1f1f1f;
+  font-weight: 600;
 }

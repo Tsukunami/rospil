@@ -279,8 +279,8 @@ export default function PaymentsPage() {
             <Image
               src="/icons/create-document.svg"
               alt="Обновить статус"
-              width={40}
-              height={40}
+              width={50}
+              height={50}
             />
           </button>
         </div>
@@ -316,8 +316,8 @@ export default function PaymentsPage() {
                   <Image
                     src="/icons/download-document.svg"
                     alt="Открыть"
-                    width={40}
-                    height={40}
+                    width={50}
+                    height={50}
                   />
                 </button>
                 <button
@@ -329,8 +329,8 @@ export default function PaymentsPage() {
                   <Image
                     src="/icons/delete-document.svg"
                     alt="Удалить"
-                    width={40}
-                    height={40}
+                    width={50}
+                    height={50}
                   />
                 </button>
               </div>

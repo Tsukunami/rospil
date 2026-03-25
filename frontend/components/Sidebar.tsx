@@ -28,6 +28,11 @@ const menuItems: MenuItem[] = [
     accessList: ["2", "4", "5"],
   },
   {
+    label: "Расход материалов",
+    href: "/materials-expense",
+    accessList: ["2", "4", "5"],
+  },
+  {
     label: "Расчеты с поставщиками",
     href: "/payments",
     accessList: ["3", "4", "5"],

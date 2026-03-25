@@ -47,7 +47,7 @@ export default function SuppliersPage() {
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [expandedSuppliers, setExpandedSuppliers] = useState<Set<number>>(new Set());
-  
+
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -68,83 +68,87 @@ export default function SuppliersPage() {
     try {
       setLoading(true);
       console.log("Загрузка данных поставщиков...");
-      
+
       const [suppliersRes, supplierWoodRes, productsRes] = await Promise.all([
-        fetch('http://localhost:8000/api/table/suppliers_info/'),
-        fetch('http://localhost:8000/api/table/supplier_wood/'),
-        fetch('http://localhost:8000/api/table/product/')
+        fetch("http://localhost:8000/api/table/suppliers_info/"),
+        fetch("http://localhost:8000/api/table/supplier_wood/"),
+        fetch("http://localhost:8000/api/table/product/"),
       ]);
-      
-      if (!suppliersRes.ok) throw new Error('Ошибка загрузки поставщиков');
-      
+
+      if (!suppliersRes.ok) throw new Error("Ошибка загрузки поставщиков");
+
       const suppliersData = await suppliersRes.json();
       const supplierWoodData = supplierWoodRes.ok ? await supplierWoodRes.json() : [];
       const productsData = productsRes.ok ? await productsRes.json() : [];
-      
+
       console.log("Загружено поставщиков:", suppliersData.length);
       console.log("Загружено связей поставщик-материал:", supplierWoodData.length);
-      
+
       setSuppliers(suppliersData);
       setSupplierWood(supplierWoodData);
       setProducts(productsData);
-      
     } catch (err) {
-      console.error('Ошибка загрузки:', err);
-      alert('Ошибка загрузки данных');
+      console.error("Ошибка загрузки:", err);
+      alert("Ошибка загрузки данных");
     } finally {
       setLoading(false);
     }
   };
 
-  // Обогащаем поставщиков информацией о продуктах
   const enrichedSuppliers = useMemo(() => {
     const suppliersMap = new Map<number, SupplierWithProducts>();
-    
-    // Инициализируем поставщиков
-    suppliers.forEach(supplier => {
+
+    suppliers.forEach((supplier) => {
       suppliersMap.set(supplier.supplier_id, {
         ...supplier,
-        products: []
+        products: [],
       });
     });
-    
-    // Добавляем продукты к поставщикам
-    supplierWood.forEach(sw => {
+
+    supplierWood.forEach((sw) => {
       const supplier = suppliersMap.get(sw.supplier_id);
       if (supplier) {
-        const product = products.find(p => p.wood_id === sw.wood_id);
+        const product = products.find((p) => p.wood_id === sw.wood_id);
         if (product) {
           supplier.products.push({
             wood_id: sw.wood_id,
             wood_type: product.wood_type,
             wood_grade: product.wood_grade,
-            available_quantity: sw.available_quantity
+            available_quantity: sw.available_quantity,
           });
         }
       }
     });
-    
-    // Сортируем продукты
-    suppliersMap.forEach(supplier => {
-      supplier.products.sort((a, b) => a.wood_type.localeCompare(b.wood_type));
+
+    suppliersMap.forEach((supplier) => {
+      supplier.products.sort((a, b) => a.wood_type.localeCompare(b.wood_type, "ru"));
     });
-    
+
     return Array.from(suppliersMap.values());
   }, [suppliers, supplierWood, products]);
 
   const filteredSuppliers = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
     if (!normalizedSearch) return enrichedSuppliers;
-    
-    return enrichedSuppliers.filter(supplier =>
-      supplier.supplier_name.toLowerCase().includes(normalizedSearch) ||
-      supplier.supplier_inn?.toLowerCase().includes(normalizedSearch) ||
-      supplier.supplier_phone?.toLowerCase().includes(normalizedSearch)
-    );
+
+    return enrichedSuppliers.filter((supplier) => {
+      const matchesSupplier =
+        supplier.supplier_name.toLowerCase().includes(normalizedSearch) ||
+        supplier.supplier_inn?.toLowerCase().includes(normalizedSearch) ||
+        supplier.supplier_phone?.toLowerCase().includes(normalizedSearch);
+
+      const matchesWood = supplier.products.some(
+        (product) =>
+          product.wood_type.toLowerCase().includes(normalizedSearch) ||
+          product.wood_grade?.toLowerCase().includes(normalizedSearch)
+      );
+
+      return matchesSupplier || matchesWood;
+    });
   }, [search, enrichedSuppliers]);
 
   const toggleExpand = (supplierId: number) => {
-    setExpandedSuppliers(prev => {
+    setExpandedSuppliers((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(supplierId)) {
         newSet.delete(supplierId);
@@ -156,94 +160,100 @@ export default function SuppliersPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Вы уверены, что хотите удалить этого поставщика? Все связанные контракты и материалы также будут удалены.')) return;
-    
+    if (
+      !confirm(
+        "Вы уверены, что хотите удалить этого поставщика? Все связанные контракты и материалы также будут удалены."
+      )
+    )
+      return;
+
     try {
-      const response = await fetch(`http://localhost:8000/api/table/suppliers_info/?id=${id}`, {
-        method: 'DELETE',
-      });
-      
+      const response = await fetch(
+        `http://localhost:8000/api/table/suppliers_info/?id=${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Ошибка удаления');
+        throw new Error(error.error || "Ошибка удаления");
       }
-      
-      alert('Поставщик удален');
+
+      alert("Поставщик удален");
       await fetchAllData();
-      
     } catch (err) {
-      console.error('Ошибка удаления:', err);
-      alert('Ошибка удаления поставщика');
+      console.error("Ошибка удаления:", err);
+      alert("Ошибка удаления поставщика");
     }
   };
 
   const handleDeleteProduct = async (supplierId: number, woodId: number) => {
-    if (!confirm('Вы уверены, что хотите удалить этот материал у поставщика?')) return;
-    
+    if (!confirm("Вы уверены, что хотите удалить этот материал у поставщика?")) return;
+
     try {
-      const response = await fetch(`http://localhost:8000/api/table/supplier_wood/?supplier_id=${supplierId}&wood_id=${woodId}`, {
-        method: 'DELETE',
-      });
-      
+      const response = await fetch(
+        `http://localhost:8000/api/table/supplier_wood/?supplier_id=${supplierId}&wood_id=${woodId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
       if (!response.ok) {
-        throw new Error('Ошибка удаления материала');
+        throw new Error("Ошибка удаления материала");
       }
-      
-      alert('Материал удален');
+
+      alert("Материал удален");
       await fetchAllData();
-      
     } catch (err) {
-      console.error('Ошибка удаления материала:', err);
-      alert('Ошибка удаления материала');
+      console.error("Ошибка удаления материала:", err);
+      alert("Ошибка удаления материала");
     }
   };
 
   const handleCreate = async () => {
-    // Валидация
     if (!formData.name.trim()) {
       alert("Введите название поставщика");
       return;
     }
-    
+
     if (!formData.inn.trim()) {
       alert("Введите ИНН поставщика");
       return;
     }
-    
+
     setIsCreating(true);
-    
+
     try {
       const supplierData = {
         supplier_name: formData.name.trim(),
         supplier_address: formData.address.trim() || null,
         supplier_phone: formData.phone.trim() || null,
-        supplier_inn: formData.inn.trim()
+        supplier_inn: formData.inn.trim(),
       };
-      
+
       console.log("Создаем поставщика:", supplierData);
-      
-      const response = await fetch('http://localhost:8000/api/table/suppliers_info/', {
-        method: 'POST',
+
+      const response = await fetch("http://localhost:8000/api/table/suppliers_info/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(supplierData),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Ошибка создания поставщика');
+        throw new Error(error.error || "Ошибка создания поставщика");
       }
-      
+
       const result = await response.json();
       console.log("Поставщик создан, ID:", result.id);
-      
-      alert('Поставщик успешно создан');
-      
-      // Обновляем список
+
+      alert("Поставщик успешно создан");
+
       await fetchAllData();
-      
-      // Закрываем модальное окно и сбрасываем форму
+
       setFormData({
         name: "",
         address: "",
@@ -251,10 +261,12 @@ export default function SuppliersPage() {
         inn: "",
       });
       setIsModalOpen(false);
-      
     } catch (err) {
-      console.error('Ошибка:', err);
-      alert('Ошибка создания поставщика: ' + (err instanceof Error ? err.message : 'Неизвестная ошибка'));
+      console.error("Ошибка:", err);
+      alert(
+        "Ошибка создания поставщика: " +
+          (err instanceof Error ? err.message : "Неизвестная ошибка")
+      );
     } finally {
       setIsCreating(false);
     }
@@ -262,55 +274,58 @@ export default function SuppliersPage() {
 
   const handleAddProduct = async () => {
     if (!selectedSupplier) return;
-    
+
     if (!productFormData.wood_id) {
       alert("Выберите материал");
       return;
     }
-    
-    if (!productFormData.available_quantity || parseFloat(productFormData.available_quantity) <= 0) {
+
+    if (
+      !productFormData.available_quantity ||
+      parseFloat(productFormData.available_quantity) <= 0
+    ) {
       alert("Введите корректное количество");
       return;
     }
-    
+
     setIsAddingProduct(true);
-    
+
     try {
       const productData = {
         supplier_id: selectedSupplier.supplier_id,
         wood_id: parseInt(productFormData.wood_id),
-        available_quantity: parseFloat(productFormData.available_quantity)
+        available_quantity: parseFloat(productFormData.available_quantity),
       };
-      
-      const response = await fetch('http://localhost:8000/api/table/supplier_wood/', {
-        method: 'POST',
+
+      const response = await fetch("http://localhost:8000/api/table/supplier_wood/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(productData),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Ошибка добавления материала');
+        throw new Error(error.error || "Ошибка добавления материала");
       }
-      
-      alert('Материал успешно добавлен');
-      
-      // Обновляем данные
+
+      alert("Материал успешно добавлен");
+
       await fetchAllData();
-      
-      // Закрываем модальное окно и сбрасываем форму
+
       setIsProductModalOpen(false);
       setSelectedSupplier(null);
       setProductFormData({
         wood_id: "",
         available_quantity: "",
       });
-      
     } catch (err) {
-      console.error('Ошибка:', err);
-      alert('Ошибка добавления материала: ' + (err instanceof Error ? err.message : 'Неизвестная ошибка'));
+      console.error("Ошибка:", err);
+      alert(
+        "Ошибка добавления материала: " +
+          (err instanceof Error ? err.message : "Неизвестная ошибка")
+      );
     } finally {
       setIsAddingProduct(false);
     }
@@ -326,23 +341,24 @@ export default function SuppliersPage() {
   };
 
   const formatPhone = (phone: string) => {
-    if (!phone) return '—';
+    if (!phone) return "—";
     return phone;
   };
 
   const formatAddress = (address: string) => {
-    if (!address) return '—';
+    if (!address) return "—";
     return address;
   };
 
-  // Получаем список доступных материалов (которых еще нет у поставщика)
   const getAvailableProducts = () => {
     if (!selectedSupplier) return [];
-    
-    const currentSupplier = enrichedSuppliers.find(s => s.supplier_id === selectedSupplier.supplier_id);
-    const currentProductIds = currentSupplier?.products.map(p => p.wood_id) || [];
-    
-    return products.filter(product => !currentProductIds.includes(product.wood_id));
+
+    const currentSupplier = enrichedSuppliers.find(
+      (s) => s.supplier_id === selectedSupplier.supplier_id
+    );
+    const currentProductIds = currentSupplier?.products.map((p) => p.wood_id) || [];
+
+    return products.filter((product) => !currentProductIds.includes(product.wood_id));
   };
 
   if (loading) {
@@ -355,16 +371,14 @@ export default function SuppliersPage() {
         <div className={styles.searchBox}>
           <input
             type="text"
-            placeholder="Поиск по названию, ИНН или телефону"
+            placeholder="Поиск по поставщику, ИНН, телефону или древесине"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={styles.searchInput}
           />
           <span className={styles.searchIcon}>⌕</span>
         </div>
-      </div>
 
-      <div className={styles.tableActions}>
         <button
           type="button"
           className={styles.createButton}
@@ -374,8 +388,8 @@ export default function SuppliersPage() {
           <Image
             src="/icons/create-document.svg"
             alt="Добавить"
-            width={40}
-            height={40}
+            width={32}
+            height={32}
           />
           <span>Добавить поставщика</span>
         </button>
@@ -385,40 +399,39 @@ export default function SuppliersPage() {
         {filteredSuppliers.map((supplier) => {
           const isExpanded = expandedSuppliers.has(supplier.supplier_id);
           const hasProducts = supplier.products.length > 0;
-          
+
           return (
             <div key={supplier.supplier_id} className={styles.card}>
-              <div className={styles.cardTitle}>
-                {supplier.supplier_name}
-              </div>
-              
+              <div className={styles.cardTitle}>{supplier.supplier_name}</div>
+
               <div className={styles.cardBody}>
                 <div className={styles.infoLine}>
                   <span className={styles.label}>ИНН:</span>
-                  <span className={styles.value}>{supplier.supplier_inn || '—'}</span>
+                  <span className={styles.value}>{supplier.supplier_inn || "—"}</span>
                 </div>
-                
+
                 <div className={styles.infoLine}>
                   <span className={styles.label}>Телефон:</span>
-                  <span className={styles.value}>{formatPhone(supplier.supplier_phone)}</span>
+                  <span className={styles.value}>
+                    {formatPhone(supplier.supplier_phone)}
+                  </span>
                 </div>
-                
+
                 <div className={styles.infoLine}>
                   <span className={styles.label}>Адрес:</span>
-                  <span className={styles.value}>{formatAddress(supplier.supplier_address)}</span>
+                  <span className={styles.value}>
+                    {formatAddress(supplier.supplier_address)}
+                  </span>
                 </div>
-                
-                {/* Кнопка "Показать подробнее" */}
+
                 <div className={styles.expandSection}>
                   <button
                     type="button"
                     className={styles.expandButton}
                     onClick={() => toggleExpand(supplier.supplier_id)}
                   >
-                    <span className={styles.expandIcon}>
-                      {isExpanded ? '▼' : '▶'}
-                    </span>
-                    {isExpanded ? 'Скрыть материалы' : 'Показать материалы'}
+                    <span className={styles.expandIcon}>{isExpanded ? "▼" : "▶"}</span>
+                    {isExpanded ? "Скрыть материалы" : "Показать материалы"}
                     {!isExpanded && hasProducts && (
                       <span className={styles.productCount}>
                         ({supplier.products.length})
@@ -426,8 +439,7 @@ export default function SuppliersPage() {
                     )}
                   </button>
                 </div>
-                
-                {/* Скрытый блок с материалами */}
+
                 {isExpanded && (
                   <>
                     <div className={styles.productsHeader}>
@@ -441,7 +453,7 @@ export default function SuppliersPage() {
                         + Добавить материал
                       </button>
                     </div>
-                    
+
                     {hasProducts ? (
                       <div className={styles.productsBlock}>
                         {supplier.products.map((product) => (
@@ -449,21 +461,30 @@ export default function SuppliersPage() {
                             <div className={styles.productNameBlock}>
                               <span className={styles.productIcon}>📦</span>
                               <span>
-                                {product.wood_type} {product.wood_grade && `(${product.wood_grade})`}
+                                {product.wood_type}{" "}
+                                {product.wood_grade && `(${product.wood_grade})`}
                               </span>
                             </div>
                             <div className={styles.productActions}>
                               <div className={styles.priceBlock}>
                                 <span>Доступно:</span>
-                                <strong>{product.available_quantity.toLocaleString("ru-RU", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2
-                                })} м³</strong>
+                                <strong>
+                                  {product.available_quantity.toLocaleString("ru-RU", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}{" "}
+                                  м³
+                                </strong>
                               </div>
                               <button
                                 type="button"
                                 className={styles.deleteProductButton}
-                                onClick={() => handleDeleteProduct(supplier.supplier_id, product.wood_id)}
+                                onClick={() =>
+                                  handleDeleteProduct(
+                                    supplier.supplier_id,
+                                    product.wood_id
+                                  )
+                                }
                                 title="Удалить материал"
                               >
                                 🗑️
@@ -479,7 +500,7 @@ export default function SuppliersPage() {
                     )}
                   </>
                 )}
-                
+
                 <div className={styles.cardActions}>
                   <button
                     type="button"
@@ -508,7 +529,6 @@ export default function SuppliersPage() {
         )}
       </div>
 
-      {/* Модальное окно для добавления поставщика */}
       {isModalOpen && (
         <div className={styles.overlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -521,7 +541,9 @@ export default function SuppliersPage() {
                   type="text"
                   placeholder="ООО ЛесПром"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className={styles.input}
                   required
                 />
@@ -533,7 +555,9 @@ export default function SuppliersPage() {
                   type="text"
                   placeholder="1234567890"
                   value={formData.inn}
-                  onChange={(e) => setFormData({...formData, inn: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, inn: e.target.value })
+                  }
                   className={styles.input}
                   required
                 />
@@ -545,7 +569,9 @@ export default function SuppliersPage() {
                   type="text"
                   placeholder="+7 (XXX) XXX-XX-XX"
                   value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   className={styles.input}
                 />
               </div>
@@ -555,7 +581,9 @@ export default function SuppliersPage() {
                 <textarea
                   placeholder="г. Москва, ул. Лесная, д. 1"
                   value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
                   className={styles.textarea}
                   rows={3}
                 />
@@ -576,7 +604,7 @@ export default function SuppliersPage() {
                   onClick={handleCreate}
                   disabled={isCreating}
                 >
-                  {isCreating ? 'Создание...' : 'Создать'}
+                  {isCreating ? "Создание..." : "Создать"}
                 </button>
               </div>
             </div>
@@ -584,7 +612,6 @@ export default function SuppliersPage() {
         </div>
       )}
 
-      {/* Модальное окно для добавления материала */}
       {isProductModalOpen && selectedSupplier && (
         <div className={styles.overlay} onClick={() => setIsProductModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -597,27 +624,41 @@ export default function SuppliersPage() {
                 <label className={styles.label}>Материал *</label>
                 <select
                   value={productFormData.wood_id}
-                  onChange={(e) => setProductFormData({...productFormData, wood_id: e.target.value})}
+                  onChange={(e) =>
+                    setProductFormData({
+                      ...productFormData,
+                      wood_id: e.target.value,
+                    })
+                  }
                   className={styles.select}
                   required
                 >
                   <option value="">Выберите материал</option>
                   {getAvailableProducts().map((product) => (
                     <option key={product.wood_id} value={product.wood_id}>
-                      {product.wood_type} {product.wood_grade && `(${product.wood_grade})`} - {product.wood_length}мм, {product.wood_cross_section}
+                      {product.wood_type}{" "}
+                      {product.wood_grade && `(${product.wood_grade})`} -{" "}
+                      {product.wood_length}мм, {product.wood_cross_section}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>Доступное количество (м³) *</label>
+                <label className={styles.label}>
+                  Доступное количество (м³) *
+                </label>
                 <input
                   type="number"
                   step="0.01"
                   placeholder="0.00"
                   value={productFormData.available_quantity}
-                  onChange={(e) => setProductFormData({...productFormData, available_quantity: e.target.value})}
+                  onChange={(e) =>
+                    setProductFormData({
+                      ...productFormData,
+                      available_quantity: e.target.value,
+                    })
+                  }
                   className={styles.input}
                   required
                 />
@@ -638,7 +679,7 @@ export default function SuppliersPage() {
                   onClick={handleAddProduct}
                   disabled={isAddingProduct}
                 >
-                  {isAddingProduct ? 'Добавление...' : 'Добавить'}
+                  {isAddingProduct ? "Добавление..." : "Добавить"}
                 </button>
               </div>
             </div>
