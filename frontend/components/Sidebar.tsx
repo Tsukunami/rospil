@@ -13,7 +13,7 @@ type MenuItem = {
 
 const menuItems: MenuItem[] = [
   {
-    label: "Выбор поставщиков",
+    label: "Поставщики",
     href: "/suppliers",
     accessList: ["1", "4", "5"],
   },
@@ -25,6 +25,11 @@ const menuItems: MenuItem[] = [
   {
     label: "Поставка и приемка сырья",
     href: "/deliver",
+    accessList: ["2", "4", "5"],
+  },
+  {
+    label: "Акты",
+    href: "/acts",
     accessList: ["2", "4", "5"],
   },
   {

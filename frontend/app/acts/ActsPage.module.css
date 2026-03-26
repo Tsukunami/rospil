@@ -1,4 +1,4 @@
-/* app/suppliers/SuppliersPage.module.css */
+/* ActsPage.module.css */
 .page {
   width: 100%;
 }
@@ -44,9 +44,9 @@
   pointer-events: none;
 }
 
-.createButton {
+.filterButton {
   height: 40px;
-  padding: 0 16px;
+  padding: 0 14px;
   border: 1px solid #8d8d8d;
   border-radius: 10px;
   background: #f3eedf;
@@ -56,19 +56,96 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: background 0.2s;
+  position: relative;
 }
 
-.createButton:hover {
+.filterButton:hover {
   background: #eee6d3;
+}
+
+.filterIcon {
+  font-size: 14px;
+}
+
+.filterBadge {
+  color: #b73b3b;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.filterPanel {
+  margin-bottom: 16px;
+  background: #f3eedf;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.filterRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.filterGroup label {
+  font-size: 13px;
+  color: #444444;
+}
+
+.filterSelect,
+.filterInput {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #9a9a9a;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #1f1f1f;
+  box-sizing: border-box;
+}
+
+.filterSelect:focus,
+.filterInput:focus {
+  outline: none;
+  border-color: #1f1f1f;
+}
+
+.clearFiltersButton {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #8f8f8f;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clearFiltersButton:hover {
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .tableWrapper {
   width: 100%;
+  max-width: 1100px;
   background: #f3eedf;
   border: 1px solid #8d8d8d;
   border-radius: 10px;
   overflow: hidden;
+}
+
+.tableActions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 12px 0;
 }
 
 .table {
@@ -78,7 +155,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: 2fr 1.2fr 1.2fr 2fr 1fr 0.8fr;
+  grid-template-columns: 1.2fr 1.5fr 2fr 1.2fr 0.9fr;
   align-items: center;
   min-height: 58px;
   padding: 0 12px;
@@ -92,28 +169,23 @@
   min-height: 48px;
 }
 
-.headerRow .colName,
-.headerRow .colInn,
-.headerRow .colPhone,
-.headerRow .colAddress,
-.headerRow .colMaterials,
+.headerRow .colNumber,
+.headerRow .colType,
+.headerRow .colEmployee,
+.headerRow .colDate,
 .headerRow .colActions {
   font-size: 13px;
   color: #202020;
   font-weight: 500;
 }
 
-.colName,
-.colInn,
-.colPhone,
-.colAddress,
-.colMaterials,
+.colNumber,
+.colType,
+.colEmployee,
+.colDate,
 .colActions {
   font-size: 14px;
   color: #1f1f1f;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .sortable {
@@ -125,36 +197,43 @@
   opacity: 0.7;
 }
 
-.materialsButton {
-  background: #ffffff;
-  border: 1px solid #9a9a9a;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 13px;
+.clickableNumber {
   cursor: pointer;
-  display: inline-flex;
+  text-decoration: underline;
+}
+
+.clickableNumber:hover {
+  opacity: 0.7;
+}
+
+.colEmployee {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.colActions {
+  display: flex;
+  justify-content: flex-end;
   align-items: center;
-  gap: 6px;
-  transition: background 0.2s;
+  gap: 8px;
 }
 
-.materialsButton:hover {
-  background: #f0f0f0;
-}
-
-.deleteButton {
-  background: transparent;
+.iconButton {
+  width: 54px;
+  height: 54px;
   border: none;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 8px;
+  background: transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 10px;
+  flex-shrink: 0;
 }
 
-.deleteButton:hover {
+.iconButton:hover {
   background: rgba(0, 0, 0, 0.05);
 }
 
@@ -162,7 +241,6 @@
   padding: 20px 12px;
   font-size: 14px;
   color: #666666;
-  text-align: center;
 }
 
 .overlay {
@@ -183,24 +261,17 @@
   padding: 22px;
   box-sizing: border-box;
   position: relative;
-  max-height: 90vh;
-  overflow-y: auto;
 }
 
 .deliveriesModal {
-  width: 900px;
+  width: 760px;
   max-width: calc(100vw - 40px);
-}
-
-.productModal {
-  width: 480px;
 }
 
 .modalTitle {
   font-size: 22px;
   margin-bottom: 16px;
   color: #1f1f1f;
-  padding-right: 30px;
 }
 
 .closeButton {
@@ -224,23 +295,10 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.label {
-  font-size: 13px;
-  color: #444444;
-}
-
-.input,
-.select,
-.textarea {
+.input {
   width: 100%;
   min-height: 42px;
   padding: 10px 12px;
@@ -252,16 +310,9 @@
   color: #1f1f1f;
 }
 
-.input:focus,
-.select:focus,
-.textarea:focus {
+.input:focus {
   outline: none;
   border-color: #1f1f1f;
-}
-
-.textarea {
-  resize: vertical;
-  font-family: inherit;
 }
 
 .modalActions {
@@ -303,8 +354,7 @@
   opacity: 0.92;
 }
 
-/* Стили для модального окна материалов (аналогично поставкам) */
-.contractInfo {
+.actInfo {
   background: #faf6ec;
   border: 1px solid #c8c1b3;
   border-radius: 8px;
@@ -312,7 +362,7 @@
   margin-bottom: 16px;
 }
 
-.contractInfoRow {
+.actInfoRow {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -320,11 +370,11 @@
   font-size: 14px;
 }
 
-.contractInfoLabel {
+.actInfoLabel {
   color: #555555;
 }
 
-.contractInfoValue {
+.actInfoValue {
   color: #1f1f1f;
   font-weight: 500;
   text-align: right;
@@ -334,10 +384,23 @@
   margin-top: 12px;
 }
 
+.deliveriesTitle {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: #1f1f1f;
+}
+
+.deliveriesList {
+  border: 1px solid #c8c1b3;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #faf6ec;
+}
+
 .deliveriesHeader,
 .deliveryRow {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 0.8fr;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr;
   gap: 10px;
   align-items: center;
   padding: 12px;
@@ -363,56 +426,31 @@
 
 .deliveryColMaterial,
 .deliveryColScope,
-.deliveryColPrice,
-.deliveryColTotal,
-.deliveryColActions {
+.deliveryColDate,
+.deliveryColStatus {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.clickableProduct {
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.clickableProduct:hover {
-  opacity: 0.7;
-}
-
-.deleteProductButton {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 4px;
+.deliveryStatusBadge {
+  display: inline-block;
+  padding: 4px 8px;
   border-radius: 6px;
-}
-
-.deleteProductButton:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.addProductSection {
-  margin-top: 16px;
-  text-align: right;
-}
-
-.addProductButton {
   background: #ffffff;
-  border: 1px solid #9a9a9a;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: background 0.2s;
+  font-size: 13px;
 }
 
-.addProductButton:hover {
-  background: #f0f0f0;
+.deliveryStatusReady {
+  color: #1f1f1f;
+}
+
+.deliveryStatusDoing {
+  color: #a27a1d;
+}
+
+.deliveryStatusProgress {
+  color: #d94a4a;
 }
 
 .noDeliveries {
@@ -422,37 +460,13 @@
   background: #faf6ec;
   border: 1px dashed #c8c1b3;
   border-radius: 8px;
-  text-align: center;
 }
 
-/* Стили для карточки товара */
-.productContent {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.productChar {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #ddd4c2;
-}
-
-.charLabel {
-  font-weight: 500;
-  color: #555555;
-}
-
-.charValue {
-  color: #1f1f1f;
-  text-align: right;
-}
-
-.productId {
-  margin-top: 12px;
-  font-size: 12px;
-  color: #777;
-  text-align: center;
+.cancelButton:disabled,
+.submitButton:disabled,
+.closeModalButton:disabled,
+.iconButton:disabled,
+.statusSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
