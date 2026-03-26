@@ -38,6 +38,8 @@ type Product = {
   wood_grade: string;
   wood_length: number;
   wood_diameter: number;
+  wood_the_upper_end_diameter?: number;
+  wood_lower_end_diameter?: number;
   wood_graduation: string;
   wood_cross_section: string;
 };
@@ -54,16 +56,52 @@ type StorageItem = {
   storage_cell: string;
 };
 
+type Act = {
+  act_id: number;
+  act_type: string;
+  act_date: string;
+  employee_id: number;
+  employee_name?: string;
+};
+
+type Employee = {
+  employee_id: number;
+  employee_name: string;
+  employee_pasport_number: string;
+  employee_phone: string;
+  employee_post: string;
+};
+
 type DeliveryRow = {
   id: number;
   number: string;
   supplierName: string;
+  supplierId: number;
   productName: string;
+  productId?: number;
   status: string;
   create: string;
+  createRaw: string;
   scope: number;
   actId: number;
   woodId?: number;
+  contractId: number;
+};
+
+type Filters = {
+  supplier: string;
+  product: string;
+  status: string;
+  contract: string;
+  dateFrom: string;
+  dateTo: string;
+  minScope: string;
+  maxScope: string;
+};
+
+type SortConfig = {
+  key: 'number' | 'supplierName' | 'productName' | 'status' | 'create' | 'scope';
+  direction: 'asc' | 'desc';
 };
 
 function formatDate(dateStr: string) {
@@ -76,6 +114,15 @@ function formatDate(dateStr: string) {
   }
 }
 
+function formatDateForAPI(dateStr: string) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('.');
+  if (parts.length === 3) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
+  return dateStr;
+}
+
 export default function DeliveryPage() {
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -83,10 +130,40 @@ export default function DeliveryPage() {
   const [contracts, setContracts] = useState<SupplierContract[]>([]);
   const [supplierWood, setSupplierWood] = useState<SupplierWood[]>([]);
   const [storage, setStorage] = useState<StorageItem[]>([]);
+  const [acts, setActs] = useState<Act[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isActModalOpen, setIsActModalOpen] = useState(false);
+  const [selectedDelivery, setSelectedDelivery] = useState<DeliveryRow | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
+  const [filters, setFilters] = useState<Filters>({
+    supplier: "",
+    product: "",
+    status: "",
+    contract: "",
+    dateFrom: "",
+    dateTo: "",
+    minScope: "",
+    maxScope: ""
+  });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({
+    key: 'create',
+    direction: 'desc'
+  });
+  
+  // Состояние для карточки товара
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  
+  // Состояние для формы акта
+  const [actFormData, setActFormData] = useState({
+    act_type: "акт приемки",
+    employee_id: "",
+  });
   
   const [formData, setFormData] = useState({
     contractId: "",
@@ -106,14 +183,15 @@ export default function DeliveryPage() {
       setLoading(true);
       console.log("Начинаем загрузку данных...");
       
-      // Загружаем все данные через универсальный API
-      const [deliveriesRes, suppliersRes, productsRes, contractsRes, supplierWoodRes, storageRes] = await Promise.all([
+      const [deliveriesRes, suppliersRes, productsRes, contractsRes, supplierWoodRes, storageRes, actsRes, employeesRes] = await Promise.all([
         fetch('http://localhost:8000/api/table/delivery/'),
         fetch('http://localhost:8000/api/table/suppliers_info/'),
         fetch('http://localhost:8000/api/table/product/'),
         fetch('http://localhost:8000/api/table/suppliers_contract/'),
         fetch('http://localhost:8000/api/table/supplier_wood/'),
-        fetch('http://localhost:8000/api/table/storage/')
+        fetch('http://localhost:8000/api/table/storage/'),
+        fetch('http://localhost:8000/api/table/act/'),
+        fetch('http://localhost:8000/api/table/employees/')
       ]);
       
       if (!deliveriesRes.ok) throw new Error('Ошибка загрузки поставок');
@@ -127,9 +205,12 @@ export default function DeliveryPage() {
       const contractsData = await contractsRes.json();
       const supplierWoodData = supplierWoodRes.ok ? await supplierWoodRes.json() : [];
       const storageData = storageRes.ok ? await storageRes.json() : [];
+      const actsData = actsRes.ok ? await actsRes.json() : [];
+      const employeesData = employeesRes.ok ? await employeesRes.json() : [];
       
       console.log("Загружено поставок:", deliveriesData.length);
-      console.log("Загружено склада:", storageData.length);
+      console.log("Загружено актов:", actsData.length);
+      console.log("Загружено сотрудников:", employeesData.length);
       
       setDeliveries(deliveriesData);
       setSuppliers(suppliersData);
@@ -137,6 +218,8 @@ export default function DeliveryPage() {
       setContracts(contractsData);
       setSupplierWood(supplierWoodData);
       setStorage(storageData);
+      setActs(actsData);
+      setEmployees(employeesData);
       
     } catch (err) {
       console.error('Ошибка загрузки:', err);
@@ -146,7 +229,250 @@ export default function DeliveryPage() {
     }
   };
 
-  // Получаем доступные материалы для выбранного контракта
+  // Функция для открытия модального окна акта
+  const handleOpenActModal = (delivery: DeliveryRow) => {
+    setSelectedDelivery(delivery);
+    // Если у поставки уже есть акт, заполняем форму
+    if (delivery.actId) {
+      const existingAct = acts.find(a => a.act_id === delivery.actId);
+      if (existingAct) {
+        setActFormData({
+          act_type: existingAct.act_type,
+          employee_id: existingAct.employee_id.toString(),
+        });
+      } else {
+        setActFormData({
+          act_type: "акт приемки",
+          employee_id: "",
+        });
+      }
+    } else {
+      setActFormData({
+        act_type: "акт приемки",
+        employee_id: "",
+      });
+    }
+    setIsActModalOpen(true);
+  };
+
+  // Фильтруем сотрудников только с должностью "кладовщик"
+  const storekeepers = useMemo(() => {
+    return employees.filter(emp => emp.employee_post === "Кладовщик");
+  }, [employees]);
+
+  // Функция для сохранения/обновления акта
+  const handleSaveAct = async () => {
+    if (!selectedDelivery) return;
+    
+    if (!actFormData.employee_id) {
+      alert("Выберите сотрудника");
+      return;
+    }
+    
+    setIsCreating(true);
+    
+    try {
+      const today = new Date();
+      const formattedDate = today.toISOString().split('T')[0];
+      
+      const actData = {
+        act_type: actFormData.act_type,
+        act_date: formattedDate,
+        employee_id: parseInt(actFormData.employee_id),
+      };
+      
+      let actId: number;
+      
+      if (selectedDelivery.actId) {
+        // Обновляем существующий акт
+        const updateResponse = await fetch(`http://localhost:8000/api/table/act/`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            act_id: selectedDelivery.actId,
+            ...actData
+          }),
+        });
+        
+        if (!updateResponse.ok) {
+          throw new Error('Ошибка обновления акта');
+        }
+        
+        actId = selectedDelivery.actId;
+      } else {
+        // Создаем новый акт
+        const createResponse = await fetch('http://localhost:8000/api/table/act/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(actData),
+        });
+        
+        if (!createResponse.ok) {
+          throw new Error('Ошибка создания акта');
+        }
+        
+        const result = await createResponse.json();
+        actId = result.id;
+        
+        // Обновляем поставку, добавляя act_id
+        const updateDeliveryResponse = await fetch(`http://localhost:8000/api/table/delivery/`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            delivery_id: selectedDelivery.id,
+            act_id: actId
+          }),
+        });
+        
+        if (!updateDeliveryResponse.ok) {
+          throw new Error('Ошибка обновления поставки');
+        }
+      }
+      
+      alert('Акт успешно сохранен');
+      await fetchAllData();
+      setIsActModalOpen(false);
+      setSelectedDelivery(null);
+      
+    } catch (err) {
+      console.error('Ошибка:', err);
+      alert('Ошибка сохранения акта: ' + (err instanceof Error ? err.message : 'Неизвестная ошибка'));
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  // Функция для получения wood_id для поставки
+  const getWoodIdForDelivery = (delivery: DeliveryItem): number | undefined => {
+    if (delivery.wood_id) {
+      return delivery.wood_id;
+    }
+    
+    const contract = contracts.find(c => c.suppliers_contract_id === delivery.suppliers_contract_id);
+    if (!contract) return undefined;
+    
+    const supplierWoodItem = supplierWood.find(sw => sw.supplier_id === contract.supplier_id);
+    return supplierWoodItem?.wood_id;
+  };
+
+  // Функция для открытия карточки товара
+  const handleProductClick = (woodId?: number) => {
+    if (!woodId) {
+      alert("Информация о материале недоступна (ID не найден)");
+      return;
+    }
+    
+    const product = products.find(p => p.wood_id === woodId);
+    
+    if (product) {
+      setSelectedProduct(product);
+      setIsProductModalOpen(true);
+    } else {
+      alert(`Информация о материале не найдена (ID: ${woodId})`);
+    }
+  };
+
+  const handleSort = (key: SortConfig['key']) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const handleStatusChange = async (deliveryId: number, newStatus: string, woodId?: number, scope?: number, supplierId?: number) => {
+    setUpdatingStatus(deliveryId);
+    
+    try {
+      const currentDelivery = deliveries.find(d => d.delivery_id === deliveryId);
+      if (!currentDelivery) {
+        throw new Error('Поставка не найдена');
+      }
+      
+      if (newStatus === 'доставлено' && currentDelivery.delivery_status !== 'доставлено') {
+        if (woodId && scope) {
+          await updateStorage(woodId, scope, true);
+        }
+      }
+      
+      if (currentDelivery.delivery_status === 'доставлено' && newStatus !== 'доставлено') {
+        if (woodId && scope) {
+          await updateStorage(woodId, scope, false);
+        }
+      }
+      
+      const response = await fetch(`http://localhost:8000/api/table/delivery/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          delivery_id: deliveryId,
+          delivery_status: newStatus
+        }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Ошибка обновления статуса');
+      }
+      
+      setDeliveries(prev => prev.map(delivery => 
+        delivery.delivery_id === deliveryId 
+          ? { ...delivery, delivery_status: newStatus }
+          : delivery
+      ));
+      
+    } catch (err) {
+      console.error('Ошибка обновления статуса:', err);
+      alert('Ошибка обновления статуса поставки');
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  const updateStorage = async (woodId: number, scope: number, isAdd: boolean) => {
+    const storageRes = await fetch('http://localhost:8000/api/table/storage/');
+    const currentStorage = await storageRes.json();
+    const storageItem = currentStorage.find((s: StorageItem) => s.wood_id === woodId);
+    
+    if (storageItem) {
+      const currentScope = parseFloat(storageItem.current_scope);
+      const newScope = isAdd ? currentScope + scope : currentScope - scope;
+      
+      await fetch('http://localhost:8000/api/table/storage/', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wood_id: woodId,
+          current_scope: newScope.toString(),
+          storage_cell: storageItem.storage_cell
+        }),
+      });
+    } else {
+      const newStorageItem = {
+        wood_id: woodId,
+        current_scope: scope.toString(),
+        storage_cell: `Ячейка-${String.fromCharCode(65 + Math.floor((woodId - 1) / 10))}${((woodId - 1) % 10) + 1}`
+      };
+      
+      await fetch('http://localhost:8000/api/table/storage/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newStorageItem),
+      });
+    }
+  };
+
   const availableProducts = useMemo(() => {
     if (!formData.contractId) return [];
     
@@ -173,7 +499,6 @@ export default function DeliveryPage() {
     return availableProductsList;
   }, [formData.contractId, contracts, supplierWood, products]);
 
-  // Получаем контракты с информацией о поставщиках
   const enrichedContracts = useMemo(() => {
     return contracts.map(contract => {
       const supplier = suppliers.find(s => s.supplier_id === contract.supplier_id);
@@ -185,7 +510,6 @@ export default function DeliveryPage() {
     });
   }, [contracts, suppliers]);
 
-  // Получаем информацию о продукте для поставки
   const getProductForDelivery = (delivery: DeliveryItem) => {
     if (delivery.wood_id) {
       const product = products.find(p => p.wood_id === delivery.wood_id);
@@ -206,38 +530,132 @@ export default function DeliveryPage() {
     return deliveries.map((item) => {
       const contract = contracts.find(c => c.suppliers_contract_id === item.suppliers_contract_id);
       const supplier = suppliers.find(s => s.supplier_id === contract?.supplier_id);
+      const woodId = getWoodIdForDelivery(item);
       
       return {
         id: item.delivery_id,
         number: contract?.contract_number || `ДОГ-${item.suppliers_contract_id}`,
         supplierName: supplier?.supplier_name || "Неизвестный поставщик",
+        supplierId: contract?.supplier_id || 0,
         productName: getProductForDelivery(item),
+        productId: item.wood_id,
         status: item.delivery_status,
         create: formatDate(item.delivery_date),
+        createRaw: item.delivery_date,
         scope: item.delivery_scope,
         actId: item.act_id,
-        woodId: item.wood_id
+        woodId: woodId,
+        contractId: item.suppliers_contract_id,
       };
     });
   }, [deliveries, contracts, suppliers, supplierWood, products]);
 
-  const filteredRows = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-    if (!normalizedSearch) return rows;
+  const uniqueSuppliers = useMemo(() => {
+    const suppliersList = rows.map(row => row.supplierName);
+    return [...new Set(suppliersList)].sort();
+  }, [rows]);
+
+  const uniqueProducts = useMemo(() => {
+    const productsList = rows.map(row => row.productName);
+    return [...new Set(productsList)].sort();
+  }, [rows]);
+
+  const uniqueStatuses = useMemo(() => {
+    const statusesList = rows.map(row => row.status);
+    return [...new Set(statusesList)];
+  }, [rows]);
+
+  const uniqueContracts = useMemo(() => {
+    const contractsList = rows.map(row => row.number);
+    return [...new Set(contractsList)].sort();
+  }, [rows]);
+
+  const filteredAndSortedRows = useMemo(() => {
+    let filtered = rows;
     
-    return rows.filter(
-      (row) =>
-        row.number.toLowerCase().includes(normalizedSearch) ||
-        row.productName.toLowerCase().includes(normalizedSearch) ||
-        row.supplierName.toLowerCase().includes(normalizedSearch)
-    );
-  }, [search, rows]);
+    const normalizedSearch = search.trim().toLowerCase();
+    if (normalizedSearch) {
+      filtered = filtered.filter(
+        (row) =>
+          row.number.toLowerCase().includes(normalizedSearch) ||
+          row.productName.toLowerCase().includes(normalizedSearch) ||
+          row.supplierName.toLowerCase().includes(normalizedSearch)
+      );
+    }
+    
+    if (filters.contract) {
+      filtered = filtered.filter(row => row.number === filters.contract);
+    }
+    
+    if (filters.supplier) {
+      filtered = filtered.filter(row => row.supplierName === filters.supplier);
+    }
+    
+    if (filters.product) {
+      filtered = filtered.filter(row => row.productName === filters.product);
+    }
+    
+    if (filters.status) {
+      filtered = filtered.filter(row => row.status === filters.status);
+    }
+    
+    if (filters.dateFrom) {
+      filtered = filtered.filter(row => row.createRaw >= filters.dateFrom);
+    }
+    
+    if (filters.dateTo) {
+      filtered = filtered.filter(row => row.createRaw <= filters.dateTo);
+    }
+    
+    if (filters.minScope) {
+      const minScope = Number(filters.minScope);
+      filtered = filtered.filter(row => row.scope >= minScope);
+    }
+    
+    if (filters.maxScope) {
+      const maxScope = Number(filters.maxScope);
+      filtered = filtered.filter(row => row.scope <= maxScope);
+    }
+    
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortConfig.key) {
+        case 'number':
+          comparison = a.number.localeCompare(b.number);
+          break;
+        case 'supplierName':
+          comparison = a.supplierName.localeCompare(b.supplierName, 'ru');
+          break;
+        case 'productName':
+          comparison = a.productName.localeCompare(b.productName, 'ru');
+          break;
+        case 'status':
+          comparison = a.status.localeCompare(b.status, 'ru');
+          break;
+        case 'create':
+          comparison = a.createRaw.localeCompare(b.createRaw);
+          break;
+        case 'scope':
+          comparison = a.scope - b.scope;
+          break;
+      }
+      
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    });
+    
+    return filtered;
+  }, [search, filters, rows, sortConfig]);
 
   const handleDelete = async (id: number) => {
     if (!confirm('Вы уверены, что хотите удалить эту поставку?')) return;
     
     try {
       const deliveryToDelete = deliveries.find(d => d.delivery_id === id);
+      
+      if (deliveryToDelete?.delivery_status === 'доставлено' && deliveryToDelete.wood_id) {
+        await updateStorage(deliveryToDelete.wood_id, deliveryToDelete.delivery_scope, false);
+      }
       
       const response = await fetch(`http://localhost:8000/api/table/delivery/?id=${id}`, {
         method: 'DELETE',
@@ -249,8 +667,6 @@ export default function DeliveryPage() {
       }
       
       alert('Поставка удалена');
-      
-      // Полностью обновляем все данные
       await fetchAllData();
       
     } catch (err) {
@@ -259,77 +675,9 @@ export default function DeliveryPage() {
     }
   };
 
-  const handleOpenPdf = (number: string) => {
-    window.open(`/docs/${number}.pdf`, "_blank");
-  };
-
-  // Функция для обновления склада - возвращает обновленные данные
-  const updateStorage = async (woodId: number, scope: number, isAdd: boolean) => {
-    console.log(`Обновление склада: wood_id=${woodId}, scope=${scope}, isAdd=${isAdd}`);
-    
-    // Сначала получаем актуальные данные склада
-    const storageRes = await fetch('http://localhost:8000/api/table/storage/');
-    const currentStorage = await storageRes.json();
-    const storageItem = currentStorage.find((s: StorageItem) => s.wood_id === woodId);
-    
-    if (storageItem) {
-      // Обновляем существующую запись
-      const currentScope = parseFloat(storageItem.current_scope);
-      const newScope = isAdd ? currentScope + scope : currentScope - scope;
-      
-      console.log(`Текущий остаток: ${currentScope}, новый: ${newScope}`);
-      
-      const updateRes = await fetch('http://localhost:8000/api/table/storage/', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          wood_id: woodId,
-          current_scope: newScope.toString(),
-          storage_cell: storageItem.storage_cell
-        }),
-      });
-      
-      if (!updateRes.ok) {
-        const error = await updateRes.text();
-        console.error("Ошибка обновления склада:", error);
-        throw new Error('Ошибка обновления склада');
-      }
-      
-      console.log("Склад успешно обновлен");
-    } else {
-      // Создаем новую запись на складе
-      const newStorageItem = {
-        wood_id: woodId,
-        current_scope: scope.toString(),
-        storage_cell: `Ячейка-${String.fromCharCode(65 + Math.floor((woodId - 1) / 10))}${((woodId - 1) % 10) + 1}`
-      };
-      
-      console.log("Создаем новую запись на складе:", newStorageItem);
-      
-      const createRes = await fetch('http://localhost:8000/api/table/storage/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newStorageItem),
-      });
-      
-      if (!createRes.ok) {
-        const error = await createRes.text();
-        console.error("Ошибка создания записи на складе:", error);
-        throw new Error('Ошибка создания записи на складе');
-      }
-      
-      console.log("Новая запись на складе создана");
-    }
-  };
-
   const handleCreate = async () => {
     console.log("Начинаем создание поставки с данными:", formData);
     
-    // Валидация
     if (!formData.contractId) {
       alert("Выберите контракт");
       return;
@@ -353,7 +701,6 @@ export default function DeliveryPage() {
     setIsCreating(true);
     
     try {
-      // Проверяем, доступен ли выбранный материал для этого поставщика
       const selectedContract = contracts.find(c => c.suppliers_contract_id === parseInt(formData.contractId));
       if (!selectedContract) {
         throw new Error("Контракт не найден");
@@ -370,7 +717,6 @@ export default function DeliveryPage() {
       
       const deliveryScopeNum = parseFloat(formData.deliveryScope);
       
-      // Создаем акт приемки
       let actId = formData.actId;
       
       if (!actId) {
@@ -396,7 +742,6 @@ export default function DeliveryPage() {
         actId = actResult.id;
       }
       
-      // Создаем поставку с wood_id
       const deliveryData = {
         suppliers_contract_id: parseInt(formData.contractId),
         delivery_scope: deliveryScopeNum,
@@ -422,13 +767,10 @@ export default function DeliveryPage() {
       const result = await response.json();
       console.log("Поставка создана, ID:", result.id);
       
-      // ЕСЛИ ПОСТАВКА ДОСТАВЛЕНА - ОБНОВЛЯЕМ СКЛАД
       if (formData.deliveryStatus === 'доставлено') {
-        console.log("Поставка доставлена, обновляем склад...");
         await updateStorage(parseInt(formData.woodId), deliveryScopeNum, true);
       }
       
-      // Обновляем количество доступного материала у поставщика
       await fetch('http://localhost:8000/api/supplier_wood/update/', {
         method: 'PUT',
         headers: {
@@ -442,11 +784,8 @@ export default function DeliveryPage() {
       });
       
       alert('Поставка успешно создана');
-      
-      // ПРИНУДИТЕЛЬНО ОБНОВЛЯЕМ ВСЕ ДАННЫЕ
       await fetchAllData();
       
-      // Закрываем модальное окно и сбрасываем форму
       setFormData({
         contractId: "",
         woodId: "",
@@ -463,6 +802,19 @@ export default function DeliveryPage() {
     } finally {
       setIsCreating(false);
     }
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      supplier: "",
+      product: "",
+      status: "",
+      contract: "",
+      dateFrom: "",
+      dateTo: "",
+      minScope: "",
+      maxScope: ""
+    });
   };
 
   const getStatusClass = (status: string) => {
@@ -490,6 +842,26 @@ export default function DeliveryPage() {
     }
   };
 
+  const getSortIcon = (key: SortConfig['key']) => {
+    if (sortConfig.key !== key) return '↕️';
+    return sortConfig.direction === 'asc' ? '↑' : '↓';
+  };
+
+  const formatProductCharacteristics = (product: Product) => {
+    const characteristics = [];
+    
+    if (product.wood_type) characteristics.push({ label: 'Порода', value: product.wood_type });
+    if (product.wood_grade) characteristics.push({ label: 'Сорт', value: product.wood_grade });
+    if (product.wood_length) characteristics.push({ label: 'Длина', value: `${product.wood_length} м` });
+    if (product.wood_diameter) characteristics.push({ label: 'Диаметр', value: `${product.wood_diameter} мм` });
+    if (product.wood_the_upper_end_diameter) characteristics.push({ label: 'Верхний диаметр', value: `${product.wood_the_upper_end_diameter} мм` });
+    if (product.wood_lower_end_diameter) characteristics.push({ label: 'Нижний диаметр', value: `${product.wood_lower_end_diameter} мм` });
+    if (product.wood_graduation) characteristics.push({ label: 'Градация', value: product.wood_graduation });
+    if (product.wood_cross_section) characteristics.push({ label: 'Сечение', value: product.wood_cross_section });
+    
+    return characteristics;
+  };
+
   if (loading) {
     return <div className={styles.page}>Загрузка данных...</div>;
   }
@@ -507,7 +879,136 @@ export default function DeliveryPage() {
           />
           <span className={styles.searchIcon}>⌕</span>
         </div>
+        
+        <button
+          type="button"
+          className={styles.filterButton}
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+        >
+          <span className={styles.filterIcon}>🔍</span>
+          Фильтры
+          {(filters.supplier || filters.product || filters.status || filters.contract || 
+            filters.dateFrom || filters.dateTo || filters.minScope || filters.maxScope) && (
+            <span className={styles.filterBadge}>●</span>
+          )}
+        </button>
       </div>
+
+      {isFilterOpen && (
+        <div className={styles.filterPanel}>
+          <div className={styles.filterRow}>
+            <div className={styles.filterGroup}>
+              <label>Контракт</label>
+              <select
+                value={filters.contract}
+                onChange={(e) => setFilters({...filters, contract: e.target.value})}
+                className={styles.filterSelect}
+              >
+                <option value="">Все контракты</option>
+                {uniqueContracts.map(contract => (
+                  <option key={contract} value={contract}>{contract}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Поставщик</label>
+              <select
+                value={filters.supplier}
+                onChange={(e) => setFilters({...filters, supplier: e.target.value})}
+                className={styles.filterSelect}
+              >
+                <option value="">Все поставщики</option>
+                {uniqueSuppliers.map(supplier => (
+                  <option key={supplier} value={supplier}>{supplier}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Материал</label>
+              <select
+                value={filters.product}
+                onChange={(e) => setFilters({...filters, product: e.target.value})}
+                className={styles.filterSelect}
+              >
+                <option value="">Все материалы</option>
+                {uniqueProducts.map(product => (
+                  <option key={product} value={product}>{product}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Статус</label>
+              <select
+                value={filters.status}
+                onChange={(e) => setFilters({...filters, status: e.target.value})}
+                className={styles.filterSelect}
+              >
+                <option value="">Все статусы</option>
+                {uniqueStatuses.map(status => (
+                  <option key={status} value={status}>
+                    {getStatusText(status)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Дата от</label>
+              <input
+                type="date"
+                value={filters.dateFrom}
+                onChange={(e) => setFilters({...filters, dateFrom: e.target.value})}
+                className={styles.filterInput}
+              />
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Дата до</label>
+              <input
+                type="date"
+                value={filters.dateTo}
+                onChange={(e) => setFilters({...filters, dateTo: e.target.value})}
+                className={styles.filterInput}
+              />
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Объем от (м³)</label>
+              <input
+                type="number"
+                step="0.01"
+                placeholder="0"
+                value={filters.minScope}
+                onChange={(e) => setFilters({...filters, minScope: e.target.value})}
+                className={styles.filterInput}
+              />
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Объем до (м³)</label>
+              <input
+                type="number"
+                step="0.01"
+                placeholder="9999"
+                value={filters.maxScope}
+                onChange={(e) => setFilters({...filters, maxScope: e.target.value})}
+                className={styles.filterInput}
+              />
+            </div>
+            
+            <button
+              type="button"
+              className={styles.clearFiltersButton}
+              onClick={clearFilters}
+            >
+              Сбросить
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className={styles.tableWrapper}>
         <div className={styles.tableActions}>
@@ -528,66 +1029,133 @@ export default function DeliveryPage() {
 
         <div className={styles.table}>
           <div className={`${styles.row} ${styles.headerRow}`}>
-            <div className={styles.colNumber}>Номер контракта</div>
-            <div className={styles.colSupplier}>Поставщик</div>
-            <div className={styles.colProduct}>Материал</div>
-            <div className={styles.colStatus}>Статус</div>
-            <div className={styles.colDate}>Дата поставки</div>
-            <div className={styles.colScope}>Объем</div>
+            <div 
+              className={`${styles.colNumber} ${styles.sortable}`}
+              onClick={() => handleSort('number')}
+            >
+              Номер контракта {getSortIcon('number')}
+            </div>
+            <div 
+              className={`${styles.colSupplier} ${styles.sortable}`}
+              onClick={() => handleSort('supplierName')}
+            >
+              Поставщик {getSortIcon('supplierName')}
+            </div>
+            <div 
+              className={`${styles.colProduct} ${styles.sortable}`}
+              onClick={() => handleSort('productName')}
+            >
+              Материал {getSortIcon('productName')}
+            </div>
+            <div 
+              className={`${styles.colStatus} ${styles.sortable}`}
+              onClick={() => handleSort('status')}
+            >
+              Статус {getSortIcon('status')}
+            </div>
+            <div 
+              className={`${styles.colDate} ${styles.sortable}`}
+              onClick={() => handleSort('create')}
+            >
+              Дата поставки {getSortIcon('create')}
+            </div>
+            <div 
+              className={`${styles.colScope} ${styles.sortable}`}
+              onClick={() => handleSort('scope')}
+            >
+              Объем {getSortIcon('scope')}
+            </div>
             <div className={styles.colActions}>Действия</div>
+            <div className={styles.colAct}>Акт</div>
           </div>
 
-          {filteredRows.map((row) => (
-            <div key={row.id} className={styles.row}>
-              <div className={styles.colNumber}>№{row.number}</div>
-              <div className={styles.colSupplier}>{row.supplierName}</div>
-              <div className={styles.colProduct}>{row.productName}</div>
-              <div className={`${styles.colStatus} ${getStatusClass(row.status)}`}>
-                {getStatusText(row.status)}
-              </div>
-              <div className={styles.colDate}>{row.create}</div>
-              <div className={styles.colScope}>{row.scope} м³</div>
-              <div className={styles.colActions}>
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  onClick={() => handleOpenPdf(row.number)}
-                  title="Открыть PDF"
+          {filteredAndSortedRows.map((row) => {
+            return (
+              <div key={row.id} className={styles.row}>
+                <div className={styles.colNumber}>{row.number}</div>
+                <div className={styles.colSupplier}>{row.supplierName}</div>
+                <div 
+                  className={`${styles.colProduct} ${styles.clickableProduct}`}
+                  onClick={() => handleProductClick(row.woodId)}
+                  title="Нажмите для просмотра характеристик"
                 >
-                  <Image
-                    src="/icons/download-document.svg"
-                    alt="Открыть"
-                    width={50}
-                    height={50}
-                  />
-                </button>
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  onClick={() => handleDelete(row.id)}
-                  title="Удалить"
-                >
-                  <Image
-                    src="/icons/delete-document.svg"
-                    alt="Удалить"
-                    width={50}
-                    height={50}
-                  />
-                </button>
+                  {row.productName}
+                </div>
+                <div className={styles.colStatus}>
+                  <select
+                    value={row.status}
+                    onChange={(e) => handleStatusChange(row.id, e.target.value, row.woodId, row.scope, row.supplierId)}
+                    className={`${styles.statusSelect} ${getStatusClass(row.status)}`}
+                    disabled={updatingStatus === row.id}
+                  >
+                    <option value="ожидается">Ожидается</option>
+                    <option value="доставлено">Доставлено</option>
+                    <option value="нарушение">Нарушение</option>
+                  </select>
+                  {updatingStatus === row.id && (
+                    <span className={styles.statusUpdating}>⏳</span>
+                  )}
+                </div>
+                <div className={styles.colDate}>{row.create}</div>
+                <div className={styles.colScope}>{row.scope} м³</div>
+                <div className={styles.colActions}>
+                  <button
+                    type="button"
+                    className={styles.iconButton}
+                    onClick={() => handleDelete(row.id)}
+                    title="Удалить"
+                  >
+                    <Image
+                      src="/icons/delete-document.svg"
+                      alt="Удалить"
+                      width={50}
+                      height={50}
+                    />
+                  </button>
+                </div>
+                <div className={styles.colAct}>
+                  <button
+                    type="button"
+                    className={styles.actButton}
+                    onClick={() => handleOpenActModal(row)}
+                    title={row.actId ? "Редактировать акт" : "Создать акт"}
+                  >
+                    {row.actId ? (
+                      <>
+                        <span className={styles.actIcon}>📄</span>
+                        Акт №{row.actId}
+                      </>
+                    ) : (
+                      <>
+                        <span className={styles.actIcon}>➕</span>
+                        Создать акт
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
-          {filteredRows.length === 0 && (
+          {filteredAndSortedRows.length === 0 && (
             <div className={styles.empty}>Поставки не найдены</div>
           )}
         </div>
       </div>
 
+      {/* Модальное окно создания поставки */}
       {isModalOpen && (
         <div className={styles.overlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalTitle}>Создание поставки</div>
+            <div className={styles.modalTitle}>
+              Создание поставки
+              <button
+                className={styles.closeButton}
+                onClick={() => setIsModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
 
             <div className={styles.form}>
               <select
@@ -663,17 +1231,6 @@ export default function DeliveryPage() {
                 <option value="нарушение">Нарушение</option>
               </select>
 
-              <input
-                type="number"
-                placeholder="ID акта (необязательно)"
-                value={formData.actId}
-                onChange={(e) => setFormData({...formData, actId: e.target.value})}
-                className={styles.input}
-              />
-              <small className={styles.hint}>
-                Если акт не указан, он будет создан автоматически
-              </small>
-
               <div className={styles.modalActions}>
                 <button
                   type="button"
@@ -692,6 +1249,149 @@ export default function DeliveryPage() {
                   {isCreating ? 'Создание...' : 'Создать'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно для работы с актом */}
+      {isActModalOpen && selectedDelivery && (
+        <div className={styles.overlay} onClick={() => setIsActModalOpen(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalTitle}>
+              {selectedDelivery.actId ? "Редактирование акта" : "Создание акта"}
+              <button
+                className={styles.closeButton}
+                onClick={() => setIsActModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className={styles.actInfo}>
+              <div className={styles.actInfoRow}>
+                <span className={styles.actInfoLabel}>Поставка №:</span>
+                <span className={styles.actInfoValue}>{selectedDelivery.id}</span>
+              </div>
+              <div className={styles.actInfoRow}>
+                <span className={styles.actInfoLabel}>Контракт:</span>
+                <span className={styles.actInfoValue}>{selectedDelivery.number}</span>
+              </div>
+              <div className={styles.actInfoRow}>
+                <span className={styles.actInfoLabel}>Поставщик:</span>
+                <span className={styles.actInfoValue}>{selectedDelivery.supplierName}</span>
+              </div>
+              <div className={styles.actInfoRow}>
+                <span className={styles.actInfoLabel}>Материал:</span>
+                <span className={styles.actInfoValue}>{selectedDelivery.productName}</span>
+              </div>
+              <div className={styles.actInfoRow}>
+                <span className={styles.actInfoLabel}>Объем:</span>
+                <span className={styles.actInfoValue}>{selectedDelivery.scope} м³</span>
+              </div>
+            </div>
+            
+            <div className={styles.form}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Тип акта *</label>
+                <select
+                  value={actFormData.act_type}
+                  onChange={(e) => setActFormData({...actFormData, act_type: e.target.value})}
+                  className={styles.input}
+                  required
+                >
+                  <option value="акт приемки">Акт приемки</option>
+                  <option value="акт о расхождении">Акт о расхождении</option>
+                </select>
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Кладовщик *</label>
+                <select
+                  value={actFormData.employee_id}
+                  onChange={(e) => setActFormData({...actFormData, employee_id: e.target.value})}
+                  className={styles.input}
+                  required
+                >
+                  <option value="">Выберите кладовщика</option>
+                  {storekeepers.map((employee) => (
+                    <option key={employee.employee_id} value={employee.employee_id}>
+                      {employee.employee_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Дата акта</label>
+                <div className={styles.readonlyDate}>
+                  {new Date().toLocaleDateString('ru-RU')}
+                </div>
+                <small className={styles.hint}>Дата устанавливается автоматически</small>
+              </div>
+              
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => setIsActModalOpen(false)}
+                  disabled={isCreating}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="button"
+                  className={styles.submitButton}
+                  onClick={handleSaveAct}
+                  disabled={isCreating}
+                >
+                  {isCreating ? 'Сохранение...' : (selectedDelivery.actId ? 'Обновить' : 'Создать')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно карточки товара */}
+      {isProductModalOpen && selectedProduct && (
+        <div className={styles.overlay} onClick={() => setIsProductModalOpen(false)}>
+          <div className={`${styles.modal} ${styles.productModal}`} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalTitle}>
+              Характеристики материала
+              <button
+                className={styles.closeButton}
+                onClick={() => setIsProductModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className={styles.productContent}>
+              <div className={styles.productInfo}>
+                {formatProductCharacteristics(selectedProduct).map((char, index) => (
+                  <div key={index} className={styles.productChar}>
+                    <span className={styles.charLabel}>{char.label}:</span>
+                    <span className={styles.charValue}>{char.value}</span>
+                  </div>
+                ))}
+              </div>
+              
+              {selectedProduct.wood_id && (
+                <div className={styles.productId}>
+                  ID материала: {selectedProduct.wood_id}
+                </div>
+              )}
+            </div>
+            
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={styles.closeModalButton}
+                onClick={() => setIsProductModalOpen(false)}
+              >
+                Закрыть
+              </button>
             </div>
           </div>
         </div>

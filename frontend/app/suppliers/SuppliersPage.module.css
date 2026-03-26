@@ -404,3 +404,207 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* SuppliersPage.module.css - добавьте в конец файла */
+
+.clickableProduct {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #0066cc;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.clickableProduct:hover {
+  color: #0052a3;
+  text-decoration: underline;
+  text-decoration-style: solid;
+  background-color: rgba(0, 102, 204, 0.05);
+}
+
+.productModal {
+  max-width: 500px;
+  width: 90%;
+}
+
+.productContent {
+  padding: 20px 0;
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.productChar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.charLabel {
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.charValue {
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.productId {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: right;
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: #4b5563;
+}
+
+.closeModalButton {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.closeModalButton:hover {
+  background-color: #e5e7eb;
+}
+
+.productNameBlock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  cursor: pointer;
+}
+/* SuppliersPage.module.css - добавьте или обновите */
+
+.productDetails {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.priceBlock {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  background-color: #f3f4f6;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.priceBlock span {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.priceBlock strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.priceValue {
+  color: #10b981 !important;
+}
+
+.totalPriceBlock {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  background-color: #e0f2e9;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.totalPriceBlock span {
+  font-size: 12px;
+  color: #065f46;
+}
+
+.totalPriceValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: #065f46;
+}
+
+.productLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.productLine:last-child {
+  border-bottom: none;
+}
+
+.productNameBlock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 200px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.productActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .productDetails {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+  
+  .priceBlock,
+  .totalPriceBlock {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .productLine {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .productActions {
+    align-self: flex-end;
+  }
+}

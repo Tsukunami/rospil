@@ -233,3 +233,463 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* ContractsPage.module.css */
+
+.statusSelect {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: white;
+}
+
+.statusSelect:hover {
+  filter: brightness(0.95);
+}
+
+.statusSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.statusSelect:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.statusSelect.statusDoing {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.statusSelect.statusProgress {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.statusSelect.statusReady {
+  background-color: #dcfce7;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.colStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 2;
+}
+
+.statusUpdating {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  font-size: 1rem;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* ContractsPage.module.css - добавьте в конец файла */
+
+.clickableNumber {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #0066cc;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.clickableNumber:hover {
+  color: #0052a3;
+  text-decoration: underline;
+  text-decoration-style: solid;
+  background-color: rgba(0, 102, 204, 0.05);
+}
+
+.deliveriesModal {
+  max-width: 800px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.contractInfo {
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.contractInfoRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.contractInfoRow:last-child {
+  border-bottom: none;
+}
+
+.contractInfoLabel {
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.contractInfoValue {
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.contractStatusBadge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.deliveriesSection {
+  margin-top: 20px;
+}
+
+.deliveriesTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #374151;
+}
+
+.deliveriesList {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.deliveriesHeader {
+  display: grid;
+  grid-template-columns: 1fr 100px 120px 120px;
+  background-color: #f3f4f6;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #4b5563;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.deliveryRow {
+  display: grid;
+  grid-template-columns: 1fr 100px 120px 120px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.deliveryRow:hover {
+  background-color: #f9fafb;
+}
+
+.deliveryRow:last-child {
+  border-bottom: none;
+}
+
+.deliveryColMaterial {
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.deliveryColScope {
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.deliveryColDate {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.deliveryColStatus {
+  display: flex;
+  align-items: center;
+}
+
+.deliveryStatusBadge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.deliveryStatusDoing {
+  background-color: #fff3e0;
+  color: #f59e0b;
+}
+
+.deliveryStatusReady {
+  background-color: #e0f2e9;
+  color: #10b981;
+}
+
+.deliveryStatusProgress {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.noDeliveries {
+  text-align: center;
+  padding: 40px;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: #4b5563;
+}
+
+.closeModalButton {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.closeModalButton:hover {
+  background-color: #e5e7eb;
+}
+
+.statusSelect {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.statusSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.statusSelect.statusDoing {
+  background-color: #fff3e0;
+  color: #f59e0b;
+}
+
+.statusSelect.statusReady {
+  background-color: #e0f2e9;
+  color: #10b981;
+}
+
+.statusSelect.statusProgress {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.statusUpdating {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 14px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* ContractsPage.module.css - добавьте в конец файла */
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.filterButton:hover {
+  background-color: #e5e7eb;
+}
+
+.filterIcon {
+  font-size: 16px;
+}
+
+.filterBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  color: #ef4444;
+  font-size: 12px;
+}
+
+.filterPanel {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.filterGroup label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.filterSelect,
+.filterInput {
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.filterSelect:focus,
+.filterInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.clearFiltersButton {
+  padding: 6px 12px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+  height: 32px;
+  align-self: flex-end;
+}
+
+.clearFiltersButton:hover {
+  background-color: #dc2626;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.sortable:hover {
+  background-color: #f9fafb;
+}
+
+.topBar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  flex: 1;
+  position: relative;
+  min-width: 250px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  background: white;
+  transition: all 0.2s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .topBar {
+    flex-direction: column;
+  }
+  
+  .filterRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filterGroup {
+    width: 100%;
+  }
+  
+  .clearFiltersButton {
+    width: 100%;
+  }
+}

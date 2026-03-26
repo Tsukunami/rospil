@@ -26,10 +26,26 @@ type PaymentRow = {
   id: number;
   number: string;
   supplierName: string;
+  supplierId: number;
   status: string;
   create: string;
+  createRaw: string;
   cost: number;
   scope: number;
+};
+
+type Filters = {
+  supplier: string;
+  status: string;
+  dateFrom: string;
+  dateTo: string;
+  minCost: string;
+  maxCost: string;
+};
+
+type SortConfig = {
+  key: 'number' | 'supplierName' | 'status' | 'create' | 'cost' | 'scope';
+  direction: 'asc' | 'desc';
 };
 
 function formatDate(dateStr: string) {
@@ -42,12 +58,14 @@ function formatDate(dateStr: string) {
   }
 }
 
-function getTodayDate() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+function formatCurrency(amount: number) {
+  if (!amount) return '—';
+  return new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: 'RUB',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount);
 }
 
 export default function PaymentsPage() {
@@ -57,11 +75,21 @@ export default function PaymentsPage() {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   
-  const [formData, setFormData] = useState({
-    contractId: "",
-    status: "срок оплаты не наступил",
-    paymentDate: "",
+  // Состояния для сортировки и фильтрации
+  const [sortConfig, setSortConfig] = useState<SortConfig>({
+    key: 'create',
+    direction: 'desc'
+  });
+  const [filters, setFilters] = useState<Filters>({
+    supplier: "",
+    status: "",
+    dateFrom: "",
+    dateTo: "",
+    minCost: "",
+    maxCost: ""
   });
 
   useEffect(() => {
@@ -72,7 +100,6 @@ export default function PaymentsPage() {
     try {
       setLoading(true);
       
-      // Загружаем контракты и поставщиков
       const [contractsRes, suppliersRes] = await Promise.all([
         fetch('http://localhost:8000/api/table/suppliers_contract/'),
         fetch('http://localhost:8000/api/table/suppliers_info/')
@@ -103,81 +130,142 @@ export default function PaymentsPage() {
         id: item.suppliers_contract_id,
         number: item.contract_number,
         supplierName: supplier?.supplier_name || "Неизвестный поставщик",
+        supplierId: item.supplier_id,
         status: item.suppliers_contract_status,
         create: formatDate(item.suppliers_contract_date),
+        createRaw: item.suppliers_contract_date,
         cost: item.suppliers_contract_cost || 0,
         scope: item.suppliers_contract_scope || 0
       };
     });
   }, [payments, suppliers]);
 
-  const filteredRows = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-    if (!normalizedSearch) return rows;
-    
-    return rows.filter(
-      (row) =>
-        row.number.toLowerCase().includes(normalizedSearch) ||
-        row.supplierName.toLowerCase().includes(normalizedSearch)
-    );
-  }, [search, rows]);
+  // Получаем уникальные значения для фильтров
+  const uniqueSuppliers = useMemo(() => {
+    const suppliersList = rows.map(row => row.supplierName);
+    return [...new Set(suppliersList)].sort();
+  }, [rows]);
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Вы уверены, что хотите удалить этот контракт? Это действие необратимо.')) return;
+  const uniqueStatuses = useMemo(() => {
+    const statusesList = rows.map(row => row.status);
+    return [...new Set(statusesList)];
+  }, [rows]);
+
+  // Применяем фильтры и сортировку
+  const filteredAndSortedRows = useMemo(() => {
+    let filtered = rows;
     
-    try {
-      const response = await fetch(`http://localhost:8000/api/table/suppliers_contract/?id=${id}`, {
-        method: 'DELETE',
-      });
+    // Поиск по номеру контракта или поставщику
+    const normalizedSearch = search.trim().toLowerCase();
+    if (normalizedSearch) {
+      filtered = filtered.filter(
+        (row) =>
+          row.number.toLowerCase().includes(normalizedSearch) ||
+          row.supplierName.toLowerCase().includes(normalizedSearch)
+      );
+    }
+    
+    // Фильтр по поставщику
+    if (filters.supplier) {
+      filtered = filtered.filter(row => row.supplierName === filters.supplier);
+    }
+    
+    // Фильтр по статусу
+    if (filters.status) {
+      filtered = filtered.filter(row => row.status === filters.status);
+    }
+    
+    // Фильтр по дате (от)
+    if (filters.dateFrom) {
+      filtered = filtered.filter(row => row.createRaw >= filters.dateFrom);
+    }
+    
+    // Фильтр по дате (до)
+    if (filters.dateTo) {
+      filtered = filtered.filter(row => row.createRaw <= filters.dateTo);
+    }
+    
+    // Фильтр по минимальной стоимости
+    if (filters.minCost) {
+      const minCost = Number(filters.minCost);
+      filtered = filtered.filter(row => row.cost >= minCost);
+    }
+    
+    // Фильтр по максимальной стоимости
+    if (filters.maxCost) {
+      const maxCost = Number(filters.maxCost);
+      filtered = filtered.filter(row => row.cost <= maxCost);
+    }
+    
+    // Сортировка
+    filtered.sort((a, b) => {
+      let comparison = 0;
       
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Ошибка удаления');
+      switch (sortConfig.key) {
+        case 'number':
+          comparison = a.number.localeCompare(b.number);
+          break;
+        case 'supplierName':
+          comparison = a.supplierName.localeCompare(b.supplierName, 'ru');
+          break;
+        case 'status':
+          comparison = a.status.localeCompare(b.status, 'ru');
+          break;
+        case 'create':
+          comparison = a.createRaw.localeCompare(b.createRaw);
+          break;
+        case 'cost':
+          comparison = a.cost - b.cost;
+          break;
+        case 'scope':
+          comparison = a.scope - b.scope;
+          break;
       }
       
-      // Обновляем список
-      setPayments(prev => prev.filter(item => item.suppliers_contract_id !== id));
-      alert('Контракт удален');
-      
-    } catch (err) {
-      console.error('Ошибка удаления:', err);
-      alert('Ошибка удаления контракта');
-    }
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    });
+    
+    return filtered;
+  }, [search, filters, rows, sortConfig]);
+
+  // Функция для сортировки
+  const handleSort = (key: SortConfig['key']) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
   };
 
-  const handleOpenPdf = (number: string) => {
-    window.open(`/docs/${number}.pdf`, "_blank");
+  // Функция для сброса фильтров
+  const clearFilters = () => {
+    setFilters({
+      supplier: "",
+      status: "",
+      dateFrom: "",
+      dateTo: "",
+      minCost: "",
+      maxCost: ""
+    });
   };
 
-  const handleUpdateStatus = async () => {
-    if (!formData.contractId) {
-      alert("Выберите контракт");
-      return;
-    }
-    
-    if (!formData.status) {
-      alert("Выберите статус оплаты");
-      return;
-    }
-    
-    setIsUpdating(true);
+  // Функция для обновления статуса через выпадающий список
+  const handleStatusChange = async (contractId: number, newStatus: string) => {
+    setUpdatingStatus(contractId);
     
     try {
-      // Находим выбранный контракт
-      const selectedContract = payments.find(p => p.suppliers_contract_id === parseInt(formData.contractId));
-      if (!selectedContract) {
+      const contractToUpdate = payments.find(p => p.suppliers_contract_id === contractId);
+      if (!contractToUpdate) {
         throw new Error("Контракт не найден");
       }
       
-      // Обновляем статус контракта
       const updateData = {
-        suppliers_contract_id: selectedContract.suppliers_contract_id,
-        supplier_id: selectedContract.supplier_id,
-        contract_number: selectedContract.contract_number,
-        suppliers_contract_status: formData.status,
-        suppliers_contract_cost: selectedContract.suppliers_contract_cost,
-        suppliers_contract_scope: selectedContract.suppliers_contract_scope,
-        suppliers_contract_date: selectedContract.suppliers_contract_date
+        suppliers_contract_id: contractToUpdate.suppliers_contract_id,
+        supplier_id: contractToUpdate.supplier_id,
+        contract_number: contractToUpdate.contract_number,
+        suppliers_contract_status: newStatus,
+        suppliers_contract_cost: contractToUpdate.suppliers_contract_cost,
+        suppliers_contract_scope: contractToUpdate.suppliers_contract_scope,
+        suppliers_contract_date: contractToUpdate.suppliers_contract_date
       };
       
       const response = await fetch('http://localhost:8000/api/table/suppliers_contract/', {
@@ -193,25 +281,45 @@ export default function PaymentsPage() {
         throw new Error(error.error || 'Ошибка обновления статуса');
       }
       
-      alert('Статус оплаты успешно обновлен');
-      
-      // Обновляем список
-      await fetchAllData();
-      
-      // Закрываем модальное окно и сбрасываем форму
-      setFormData({
-        contractId: "",
-        status: "срок оплаты не наступил",
-        paymentDate: "",
-      });
-      setIsModalOpen(false);
+      // Обновляем локальное состояние
+      setPayments(prev => prev.map(p => 
+        p.suppliers_contract_id === contractId 
+          ? { ...p, suppliers_contract_status: newStatus }
+          : p
+      ));
       
     } catch (err) {
-      console.error('Ошибка:', err);
-      alert(err instanceof Error ? err.message : 'Ошибка обновления статуса');
+      console.error('Ошибка обновления статуса:', err);
+      alert('Ошибка обновления статуса оплаты');
     } finally {
-      setIsUpdating(false);
+      setUpdatingStatus(null);
     }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Вы уверены, что хотите удалить этот контракт? Это действие необратимо.')) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8000/api/table/suppliers_contract/?id=${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Ошибка удаления');
+      }
+      
+      setPayments(prev => prev.filter(item => item.suppliers_contract_id !== id));
+      alert('Контракт удален');
+      
+    } catch (err) {
+      console.error('Ошибка удаления:', err);
+      alert('Ошибка удаления контракта');
+    }
+  };
+
+  const handleOpenPdf = (number: string) => {
+    window.open(`/docs/${number}.pdf`, "_blank");
   };
 
   const getStatusClass = (status: string) => {
@@ -239,14 +347,9 @@ export default function PaymentsPage() {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    if (!amount) return '—';
-    return new Intl.NumberFormat('ru-RU', {
-      style: 'currency',
-      currency: 'RUB',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
+  const getSortIcon = (key: SortConfig['key']) => {
+    if (sortConfig.key !== key) return '↕️';
+    return sortConfig.direction === 'asc' ? '↑' : '↓';
   };
 
   if (loading) {
@@ -266,7 +369,108 @@ export default function PaymentsPage() {
           />
           <span className={styles.searchIcon}>⌕</span>
         </div>
+        
+        <button
+          type="button"
+          className={styles.filterButton}
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+        >
+          <span className={styles.filterIcon}>🔍</span>
+          Фильтры
+          {(filters.supplier || filters.status || filters.dateFrom || filters.dateTo || filters.minCost || filters.maxCost) && (
+            <span className={styles.filterBadge}>●</span>
+          )}
+        </button>
       </div>
+
+      {/* Панель фильтров */}
+      {isFilterOpen && (
+        <div className={styles.filterPanel}>
+          <div className={styles.filterRow}>
+            <div className={styles.filterGroup}>
+              <label>Поставщик</label>
+              <select
+                value={filters.supplier}
+                onChange={(e) => setFilters({...filters, supplier: e.target.value})}
+                className={styles.filterSelect}
+              >
+                <option value="">Все поставщики</option>
+                {uniqueSuppliers.map(supplier => (
+                  <option key={supplier} value={supplier}>{supplier}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Статус</label>
+              <select
+                value={filters.status}
+                onChange={(e) => setFilters({...filters, status: e.target.value})}
+                className={styles.filterSelect}
+              >
+                <option value="">Все статусы</option>
+                {uniqueStatuses.map(status => (
+                  <option key={status} value={status}>
+                    {getStatusText(status)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Дата от</label>
+              <input
+                type="date"
+                value={filters.dateFrom}
+                onChange={(e) => setFilters({...filters, dateFrom: e.target.value})}
+                className={styles.filterInput}
+              />
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Дата до</label>
+              <input
+                type="date"
+                value={filters.dateTo}
+                onChange={(e) => setFilters({...filters, dateTo: e.target.value})}
+                className={styles.filterInput}
+              />
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Стоимость от (₽)</label>
+              <input
+                type="number"
+                step="1000"
+                placeholder="0"
+                value={filters.minCost}
+                onChange={(e) => setFilters({...filters, minCost: e.target.value})}
+                className={styles.filterInput}
+              />
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label>Стоимость до (₽)</label>
+              <input
+                type="number"
+                step="1000"
+                placeholder="9999999"
+                value={filters.maxCost}
+                onChange={(e) => setFilters({...filters, maxCost: e.target.value})}
+                className={styles.filterInput}
+              />
+            </div>
+            
+            <button
+              type="button"
+              className={styles.clearFiltersButton}
+              onClick={clearFilters}
+            >
+              Сбросить
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className={styles.tableWrapper}>
         <div className={styles.tableActions}>
@@ -287,21 +491,63 @@ export default function PaymentsPage() {
 
         <div className={styles.table}>
           <div className={`${styles.row} ${styles.headerRow}`}>
-            <div className={styles.colNumber}>Номер контракта</div>
-            <div className={styles.colSupplier}>Поставщик</div>
-            <div className={styles.colStatus}>Статус оплаты</div>
-            <div className={styles.colDate}>Дата контракта</div>
-            <div className={styles.colCost}>Стоимость</div>
-            <div className={styles.colScope}>Объем</div>
+            <div 
+              className={`${styles.colNumber} ${styles.sortable}`}
+              onClick={() => handleSort('number')}
+            >
+              Номер контракта {getSortIcon('number')}
+            </div>
+            <div 
+              className={`${styles.colSupplier} ${styles.sortable}`}
+              onClick={() => handleSort('supplierName')}
+            >
+              Поставщик {getSortIcon('supplierName')}
+            </div>
+            <div 
+              className={`${styles.colStatus} ${styles.sortable}`}
+              onClick={() => handleSort('status')}
+            >
+              Статус оплаты {getSortIcon('status')}
+            </div>
+            <div 
+              className={`${styles.colDate} ${styles.sortable}`}
+              onClick={() => handleSort('create')}
+            >
+              Дата контракта {getSortIcon('create')}
+            </div>
+            <div 
+              className={`${styles.colCost} ${styles.sortable}`}
+              onClick={() => handleSort('cost')}
+            >
+              Стоимость {getSortIcon('cost')}
+            </div>
+            <div 
+              className={`${styles.colScope} ${styles.sortable}`}
+              onClick={() => handleSort('scope')}
+            >
+              Объем {getSortIcon('scope')}
+            </div>
             <div className={styles.colActions}>Действия</div>
           </div>
 
-          {filteredRows.map((row) => (
+          {filteredAndSortedRows.map((row) => (
             <div key={row.id} className={styles.row}>
               <div className={styles.colNumber}>№{row.number}</div>
               <div className={styles.colSupplier}>{row.supplierName}</div>
-              <div className={`${styles.colStatus} ${getStatusClass(row.status)}`}>
-                {getStatusText(row.status)}
+              <div className={styles.colStatus}>
+                <select
+                  value={row.status}
+                  onChange={(e) => handleStatusChange(row.id, e.target.value)}
+                  className={`${styles.statusSelect} ${getStatusClass(row.status)}`}
+                  disabled={updatingStatus === row.id}
+                >
+                  <option value="срок оплаты не наступил">Срок оплаты не наступил</option>
+                  <option value="оплачено">Оплачено</option>
+                  <option value="просрочено">Просрочено</option>
+                </select>
+                {updatingStatus === row.id && (
+                  <span className={styles.statusUpdating}>⏳</span>
+                )}
               </div>
               <div className={styles.colDate}>{row.create}</div>
               <div className={styles.colCost}>{formatCurrency(row.cost)}</div>
@@ -337,93 +583,11 @@ export default function PaymentsPage() {
             </div>
           ))}
 
-          {filteredRows.length === 0 && (
+          {filteredAndSortedRows.length === 0 && (
             <div className={styles.empty}>Контракты не найдены</div>
           )}
         </div>
       </div>
-
-      {isModalOpen && (
-        <div className={styles.overlay} onClick={() => setIsModalOpen(false)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalTitle}>Обновление статуса оплаты</div>
-
-            <div className={styles.form}>
-              <select
-                value={formData.contractId}
-                onChange={(e) => setFormData({...formData, contractId: e.target.value})}
-                className={styles.input}
-                required
-              >
-                <option value="">Выберите контракт *</option>
-                {rows.map((contract) => (
-                  <option key={contract.id} value={contract.id}>
-                    {contract.number} - {contract.supplierName}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({...formData, status: e.target.value})}
-                className={styles.input}
-                required
-              >
-                <option value="срок оплаты не наступил">Срок оплаты не наступил</option>
-                <option value="оплачено">Оплачено</option>
-                <option value="просрочено">Просрочено</option>
-              </select>
-
-              <input
-                type="date"
-                placeholder="Дата оплаты (необязательно)"
-                value={formData.paymentDate}
-                onChange={(e) => setFormData({...formData, paymentDate: e.target.value})}
-                className={styles.input}
-              />
-              <small className={styles.hint}>
-                Если статус "Оплачено", рекомендуется указать дату оплаты
-              </small>
-
-              {formData.contractId && (
-                <div className={styles.contractInfo}>
-                  <h4>Информация о контракте:</h4>
-                  {(() => {
-                    const selectedContract = rows.find(r => r.id === parseInt(formData.contractId));
-                    if (!selectedContract) return null;
-                    return (
-                      <>
-                        <p><strong>Стоимость:</strong> {formatCurrency(selectedContract.cost)}</p>
-                        <p><strong>Объем:</strong> {selectedContract.scope} м³</p>
-                        <p><strong>Дата контракта:</strong> {selectedContract.create}</p>
-                      </>
-                    );
-                  })()}
-                </div>
-              )}
-
-              <div className={styles.modalActions}>
-                <button
-                  type="button"
-                  className={styles.cancelButton}
-                  onClick={() => setIsModalOpen(false)}
-                  disabled={isUpdating}
-                >
-                  Отмена
-                </button>
-                <button
-                  type="button"
-                  className={styles.submitButton}
-                  onClick={handleUpdateStatus}
-                  disabled={isUpdating}
-                >
-                  {isUpdating ? 'Обновление...' : 'Обновить статус'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

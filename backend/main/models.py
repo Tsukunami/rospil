@@ -47,14 +47,28 @@ class Product(models.Model):
 
 
 class SupplierWood(models.Model):
-    supplier = models.ForeignKey(SuppliersInfo, models.DO_NOTHING, db_column='supplier_id')
-    wood = models.ForeignKey(Product, models.DO_NOTHING, db_column='wood_id')
+    id = models.AutoField(primary_key=True)
+    supplier = models.ForeignKey(
+        SuppliersInfo, 
+        models.DO_NOTHING, 
+        db_column='supplier_id'
+    )
+    wood = models.ForeignKey(
+        Product, 
+        models.DO_NOTHING, 
+        db_column='wood_id'
+    )
     available_quantity = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
         managed = False
         db_table = 'supplier_wood'
-        unique_together = (('supplier', 'wood'),)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['supplier', 'wood'], 
+                name='unique_supplier_wood_pair'
+            )
+        ]
         verbose_name = 'Материал поставщика'
         verbose_name_plural = 'Материалы поставщиков'
 
@@ -150,7 +164,7 @@ class Delivery(models.Model):
 class Expenditure(models.Model):
     expenditure_id = models.AutoField(primary_key=True)
     wood = models.ForeignKey(Product, models.DO_NOTHING, db_column='wood_id')
-    expenditure_scope_id = models.IntegerField(blank=True, null=True)
+    expenditure_scope = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     expenditure_data = models.DateField()
 
     class Meta:
@@ -163,7 +177,6 @@ class Expenditure(models.Model):
         return f"Расход {self.expenditure_id} от {self.expenditure_data}"
 
 
-# Эти модели можно оставить, если они нужны для вашей бизнес-логики
 class Roles(models.Model):
     role_id = models.AutoField(primary_key=True)
     role_name = models.TextField(unique=True)
@@ -196,12 +209,21 @@ class Users(models.Model):
 
 
 class UserRoles(models.Model):
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(Users, models.DO_NOTHING, db_column='user_id')
     role = models.ForeignKey(Roles, models.DO_NOTHING, db_column='role_id')
 
     class Meta:
         managed = False
         db_table = 'user_roles'
-        unique_together = (('user', 'role'),)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'role'], 
+                name='unique_user_roles_pair'
+            )
+        ]
         verbose_name = 'Роль пользователя'
         verbose_name_plural = 'Роли пользователей'
+
+    def __str__(self):
+        return f"{self.user.user_name} - {self.role.role_name}"

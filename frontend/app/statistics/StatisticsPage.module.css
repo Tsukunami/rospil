@@ -1,141 +1,1137 @@
+/* StatisticsPage.module.css */
+
 .page {
-  width: 100%;
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
 }
 
 .topControls {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-  background: #f3eddd;
-  border: 1px solid #8d8d8d;
-  border-radius: 10px;
-  padding: 12px 14px;
   align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .periodBlock {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #000000;
+  background: white;
+  padding: 8px 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .periodLabel {
   font-size: 14px;
-  color: #000000;
+  font-weight: 500;
+  color: #4b5563;
 }
 
 .dateInput {
-  height: 34px;
-  border: 1px solid #9a9a9a;
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  background: #ffffff;
-  color: #000000;
-  padding: 0 10px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.dateSeparator {
+  color: #9ca3af;
   font-size: 14px;
 }
 
-.select {
-  min-width: 170px;
-  height: 34px;
-  border: 1px solid #9a9a9a;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #000000;
-  padding: 0 10px;
-  font-size: 14px;
-}
-
-.content {
+.statsCards {
   display: grid;
-  grid-template-columns: 1fr 165px;
-  gap: 18px;
-  align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
-.chartPanel {
-  background: #f3eddd;
-  border: 1px solid #8d8d8d;
-  border-radius: 10px;
-  padding: 14px;
+.statCard {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.statCardTitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.statCardValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.statCardPercent {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.chartContainer {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chartNavigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.navButton {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navButton:hover {
+  background: #f3f4f6;
+  border-color: #3b82f6;
+  color: #3b82f6;
 }
 
 .chartTitle {
-  color: #000000;
-  font-size: 16px;
-  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .chartArea {
   width: 100%;
-  height: 360px;
+  height: 400px;
 }
 
-.sidebarPanel {
+.pieChartContainer {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 24px;
 }
 
-.tabs {
-  background: #f3eddd;
-  border: 1px solid #8d8d8d;
-  border-radius: 10px;
-  padding: 12px;
+.pieStats {
   display: flex;
-  flex-direction: column;
+  gap: 32px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.pieStatItem {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.pieStatLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.pieStatValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+  
+  .topControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .periodBlock {
+    justify-content: center;
+  }
+  
+  .statsCards {
+    grid-template-columns: 1fr;
+  }
+  
+  .chartArea {
+    height: 300px;
+  }
+  
+  .pieStats {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+}
+/* StatisticsPage.module.css - добавьте или обновите */
+
+.chartContainer {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chartNavigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.navButton {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navButton:hover {
+  background: #f3f4f6;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.chartTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.tabButton {
-  height: 38px;
-  border: none;
-  background: transparent;
-  color: #000000;
-  text-align: left;
-  padding: 0 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
+.chartArea {
+  width: 100%;
+  height: 400px;
 }
 
-.tabButton:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.tabButtonActive {
-  background: rgba(0, 0, 0, 0.08);
-}
-
-.legendBox {
-  background: #f3eddd;
-  border: 1px solid #8d8d8d;
-  border-radius: 10px;
-  padding: 14px 12px;
+.pieChartContainer {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  gap: 24px;
 }
 
-.legendItem {
+.pieStats {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.pieStatItem {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.pieStatLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.pieStatValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+  
+  .topControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .periodBlock {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .statsCards {
+    grid-template-columns: 1fr;
+  }
+  
+  .chartArea {
+    height: 300px;
+  }
+  
+  .pieStats {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .chartTitle {
+    font-size: 14px;
+  }
+  
+  .navButton {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}
+/* StatisticsPage.module.css - добавьте в конец файла */
+
+.legendControls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.legendButton {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #000000;
-  font-size: 14px;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.legendButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.legendButton.active {
+  background: white;
+  border-color: #3b82f6;
+  color: #1f2937;
+}
+
+.legendButton.inactive {
+  opacity: 0.5;
+  background: #f3f4f6;
+}
+
+.legendButton.inactive:hover {
+  opacity: 0.7;
 }
 
 .legendDot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
+  display: inline-block;
 }
 
-.green {
-  background: #7be08a;
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+  .legendControls {
+    gap: 10px;
+  }
+  
+  .legendButton {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+}
+/* StatisticsPage.module.css - добавьте или обновите */
+
+.statsCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
-.red {
-  background: #ff5b57;
+/* Для 5 карточек на больших экранах */
+@media (min-width: 1200px) {
+  .statsCards {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Для планшетов */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .statsCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Для мобильных */
+@media (max-width: 767px) {
+  .statsCards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.statCard {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.statCardTitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.statCardValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.statCardPercent {
+  font-size: 12px;
+  color: #9ca3af;
+}
+/* StatisticsPage.module.css - обновите */
+
+.statsCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+/* Для 5 карточек на больших экранах */
+@media (min-width: 1200px) {
+  .statsCards {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Для планшетов */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .statsCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Для мобильных */
+@media (max-width: 767px) {
+  .statsCards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.statCard {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.statCardTitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.statCardValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.statCardPercent {
+  font-size: 12px;
+  color: #9ca3af;
+}
+/* StatisticsPage.module.css - добавьте в конец файла */
+
+.tabsContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0;
+}
+
+.tabButton {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  border-radius: 8px 8px 0 0;
+}
+
+.tabButton:hover {
+  color: #374151;
+  background-color: #f9fafb;
+}
+
+.activeTab {
+  color: #3b82f6;
+  background-color: white;
+}
+
+.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #3b82f6;
+  border-radius: 2px;
+}
+
+.expenseStats {
+  margin-top: 24px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.expenseStatItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.expenseStatLabel {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.expenseStatValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+@media (max-width: 768px) {
+  .tabsContainer {
+    justify-content: center;
+  }
+  
+  .tabButton {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  .expenseStats {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .expenseStatItem {
+    width: 100%;
+    text-align: center;
+  }
+}
+/* StatisticsPage.module.css - добавьте в конец файла */
+
+/* Стили для вкладки сравнения цен */
+.priceComparisonContainer {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.priceFilters {
+  margin-bottom: 24px;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filterLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.filterSelect {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  min-width: 250px;
+  cursor: pointer;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.selectedWoodInfo {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.selectedWoodInfo h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1f2937;
+}
+
+.woodInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.woodInfoItem {
+  display: flex;
+  gap: 8px;
+}
+
+.woodInfoLabel {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.woodInfoValue {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.priceTable {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.priceTableHeader {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.priceTableRow {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.priceTableRow:hover {
+  background-color: #f9fafb;
+}
+
+.priceTableRow:last-child {
+  border-bottom: none;
+}
+
+.priceTableCol {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #1f2937;
+  word-break: break-word;
+}
+
+.priceTableHeader .priceTableCol {
+  font-weight: 600;
+  color: #374151;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.sortable:hover {
+  background-color: #e5e7eb;
+}
+
+.priceTableEmpty {
+  padding: 40px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.priceStats {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.priceStatItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.priceStatLabel {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.priceStatValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+@media (max-width: 768px) {
+  .priceTableHeader,
+  .priceTableRow {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    font-size: 12px;
+  }
+  
+  .priceTableCol {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  .filterGroup {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .filterSelect {
+    width: 100%;
+  }
+  
+  .woodInfoGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .priceStats {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+/* StatisticsPage.module.css - добавьте в конец файла */
+
+/* Стили для вкладки анализа поставок */
+.deliveriesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.chartCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chartCardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.statusFilterButtons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filterChip {
+  padding: 6px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+  color: #1f2937;
+}
+
+.filterChip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.activeChip {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.supplierSelect {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  min-width: 200px;
+  cursor: pointer;
+}
+
+.supplierSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.noData {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .chartCardTitle {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .statusFilterButtons {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .supplierSelect {
+    width: 100%;
+  }
+}
+/* StatisticsPage.module.css - добавьте в конец файла */
+
+/* Стили для вкладки анализа поставок */
+.deliveriesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.chartCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chartCardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.sortControls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sortButton {
+  padding: 4px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.sortButton:hover {
+  background: #f3f4f6;
+  border-color: #3b82f6;
+}
+
+.activeSort {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.statusFilterButtons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filterChip {
+  padding: 6px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+  color: #1f2937;
+}
+
+.filterChip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.activeChip {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.supplierSelect {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  min-width: 200px;
+  cursor: pointer;
+}
+
+.supplierSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.supplierStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.supplierStatCard {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.supplierStatCard:hover {
+  transform: translateY(-2px);
+}
+
+.supplierStatTitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.supplierStatValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.supplierStatSub {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.noData {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .chartCardTitle {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .statusFilterButtons {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .supplierSelect {
+    width: 100%;
+  }
+  
+  .sortControls {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .supplierStats {
+    grid-template-columns: 1fr;
+  }
+}
+/* StatisticsPage.module.css - добавьте в конец файла */
+
+/* Стили для панели управления видимостью линий поставок */
+.deliveryLegendControls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.deliveryLegendButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.deliveryLegendButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.activeDelivery {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.inactiveDelivery {
+  opacity: 0.5;
+  background: #f3f4f6;
+}
+
+.inactiveDelivery:hover {
+  opacity: 0.7;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
 }

@@ -16,6 +16,7 @@ type SupplierWood = {
   supplier_id: number;
   wood_id: number;
   available_quantity: number;
+  offered_price: number;
 };
 
 type Product = {
@@ -23,6 +24,10 @@ type Product = {
   wood_type: string;
   wood_grade: string;
   wood_length: number;
+  wood_diameter: number;
+  wood_the_upper_end_diameter?: number;
+  wood_lower_end_diameter?: number;
+  wood_graduation: string;
   wood_cross_section: string;
 };
 
@@ -31,7 +36,14 @@ type SupplierWithProducts = Supplier & {
     wood_id: number;
     wood_type: string;
     wood_grade: string;
+    wood_length: number;
+    wood_diameter: number;
+    wood_the_upper_end_diameter?: number;
+    wood_lower_end_diameter?: number;
+    wood_graduation: string;
+    wood_cross_section: string;
     available_quantity: number;
+    offered_price: number;
   }[];
 };
 
@@ -47,6 +59,10 @@ export default function SuppliersPage() {
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [expandedSuppliers, setExpandedSuppliers] = useState<Set<number>>(new Set());
+  
+  // Состояние для карточки товара
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isProductInfoModalOpen, setIsProductInfoModalOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -58,6 +74,7 @@ export default function SuppliersPage() {
   const [productFormData, setProductFormData] = useState({
     wood_id: "",
     available_quantity: "",
+    offered_price: "",
   });
 
   useEffect(() => {
@@ -83,6 +100,7 @@ export default function SuppliersPage() {
 
       console.log("Загружено поставщиков:", suppliersData.length);
       console.log("Загружено связей поставщик-материал:", supplierWoodData.length);
+      console.log("Загружено продуктов:", productsData.length);
 
       setSuppliers(suppliersData);
       setSupplierWood(supplierWoodData);
@@ -92,6 +110,22 @@ export default function SuppliersPage() {
       alert("Ошибка загрузки данных");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Функция для открытия карточки товара
+  const handleProductClick = (woodId: number) => {
+    console.log("=== КЛИК ПО МАТЕРИАЛУ В ПОСТАВЩИКЕ ===");
+    console.log("woodId:", woodId);
+    
+    const product = products.find(p => p.wood_id === woodId);
+    console.log("Найденный продукт:", product);
+    
+    if (product) {
+      setSelectedProduct(product);
+      setIsProductInfoModalOpen(true);
+    } else {
+      alert(`Информация о материале не найдена (ID: ${woodId})`);
     }
   };
 
@@ -114,7 +148,14 @@ export default function SuppliersPage() {
             wood_id: sw.wood_id,
             wood_type: product.wood_type,
             wood_grade: product.wood_grade,
+            wood_length: product.wood_length,
+            wood_diameter: product.wood_diameter,
+            wood_the_upper_end_diameter: product.wood_the_upper_end_diameter,
+            wood_lower_end_diameter: product.wood_lower_end_diameter,
+            wood_graduation: product.wood_graduation,
+            wood_cross_section: product.wood_cross_section,
             available_quantity: sw.available_quantity,
+            offered_price: sw.offered_price || 0,
           });
         }
       }
@@ -288,6 +329,14 @@ export default function SuppliersPage() {
       return;
     }
 
+    if (
+      !productFormData.offered_price ||
+      parseFloat(productFormData.offered_price) <= 0
+    ) {
+      alert("Введите корректную цену");
+      return;
+    }
+
     setIsAddingProduct(true);
 
     try {
@@ -295,6 +344,7 @@ export default function SuppliersPage() {
         supplier_id: selectedSupplier.supplier_id,
         wood_id: parseInt(productFormData.wood_id),
         available_quantity: parseFloat(productFormData.available_quantity),
+        offered_price: parseFloat(productFormData.offered_price),
       };
 
       const response = await fetch("http://localhost:8000/api/table/supplier_wood/", {
@@ -319,6 +369,7 @@ export default function SuppliersPage() {
       setProductFormData({
         wood_id: "",
         available_quantity: "",
+        offered_price: "",
       });
     } catch (err) {
       console.error("Ошибка:", err);
@@ -336,6 +387,7 @@ export default function SuppliersPage() {
     setProductFormData({
       wood_id: "",
       available_quantity: "",
+      offered_price: "",
     });
     setIsProductModalOpen(true);
   };
@@ -350,6 +402,16 @@ export default function SuppliersPage() {
     return address;
   };
 
+  const formatCurrency = (amount: number) => {
+    if (!amount) return "—";
+    return new Intl.NumberFormat('ru-RU', {
+      style: 'currency',
+      currency: 'RUB',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
   const getAvailableProducts = () => {
     if (!selectedSupplier) return [];
 
@@ -359,6 +421,38 @@ export default function SuppliersPage() {
     const currentProductIds = currentSupplier?.products.map((p) => p.wood_id) || [];
 
     return products.filter((product) => !currentProductIds.includes(product.wood_id));
+  };
+
+  // Функция для форматирования характеристик товара
+  const formatProductCharacteristics = (product: Product) => {
+    const characteristics = [];
+    
+    if (product.wood_type) {
+      characteristics.push({ label: 'Порода', value: product.wood_type });
+    }
+    if (product.wood_grade) {
+      characteristics.push({ label: 'Сорт', value: product.wood_grade });
+    }
+    if (product.wood_length) {
+      characteristics.push({ label: 'Длина', value: `${product.wood_length} м` });
+    }
+    if (product.wood_diameter) {
+      characteristics.push({ label: 'Диаметр', value: `${product.wood_diameter} мм` });
+    }
+    if (product.wood_the_upper_end_diameter) {
+      characteristics.push({ label: 'Верхний диаметр', value: `${product.wood_the_upper_end_diameter} мм` });
+    }
+    if (product.wood_lower_end_diameter) {
+      characteristics.push({ label: 'Нижний диаметр', value: `${product.wood_lower_end_diameter} мм` });
+    }
+    if (product.wood_graduation) {
+      characteristics.push({ label: 'Градация', value: product.wood_graduation });
+    }
+    if (product.wood_cross_section) {
+      characteristics.push({ label: 'Сечение', value: product.wood_cross_section });
+    }
+    
+    return characteristics;
   };
 
   if (loading) {
@@ -458,14 +552,17 @@ export default function SuppliersPage() {
                       <div className={styles.productsBlock}>
                         {supplier.products.map((product) => (
                           <div key={product.wood_id} className={styles.productLine}>
-                            <div className={styles.productNameBlock}>
+                            <div 
+                              className={styles.productNameBlock}
+                              onClick={() => handleProductClick(product.wood_id)}
+                            >
                               <span className={styles.productIcon}>📦</span>
-                              <span>
+                              <span className={styles.clickableProduct}>
                                 {product.wood_type}{" "}
                                 {product.wood_grade && `(${product.wood_grade})`}
                               </span>
                             </div>
-                            <div className={styles.productActions}>
+                            <div className={styles.productDetails}>
                               <div className={styles.priceBlock}>
                                 <span>Доступно:</span>
                                 <strong>
@@ -476,6 +573,20 @@ export default function SuppliersPage() {
                                   м³
                                 </strong>
                               </div>
+                              <div className={styles.priceBlock}>
+                                <span>Цена:</span>
+                                <strong className={styles.priceValue}>
+                                  {formatCurrency(product.offered_price)}/м³
+                                </strong>
+                              </div>
+                              <div className={styles.totalPriceBlock}>
+                                <span>Итого:</span>
+                                <strong className={styles.totalPriceValue}>
+                                  {formatCurrency(product.available_quantity * product.offered_price)}
+                                </strong>
+                              </div>
+                            </div>
+                            <div className={styles.productActions}>
                               <button
                                 type="button"
                                 className={styles.deleteProductButton}
@@ -529,6 +640,7 @@ export default function SuppliersPage() {
         )}
       </div>
 
+      {/* Модальное окно создания поставщика */}
       {isModalOpen && (
         <div className={styles.overlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -612,6 +724,7 @@ export default function SuppliersPage() {
         </div>
       )}
 
+      {/* Модальное окно добавления материала */}
       {isProductModalOpen && selectedSupplier && (
         <div className={styles.overlay} onClick={() => setIsProductModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -664,6 +777,26 @@ export default function SuppliersPage() {
                 />
               </div>
 
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Цена за м³ (₽) *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={productFormData.offered_price}
+                  onChange={(e) =>
+                    setProductFormData({
+                      ...productFormData,
+                      offered_price: e.target.value,
+                    })
+                  }
+                  className={styles.input}
+                  required
+                />
+              </div>
+
               <div className={styles.modalActions}>
                 <button
                   type="button"
@@ -682,6 +815,50 @@ export default function SuppliersPage() {
                   {isAddingProduct ? "Добавление..." : "Добавить"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно карточки товара */}
+      {isProductInfoModalOpen && selectedProduct && (
+        <div className={styles.overlay} onClick={() => setIsProductInfoModalOpen(false)}>
+          <div className={`${styles.modal} ${styles.productModal}`} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalTitle}>
+              Характеристики материала
+              <button
+                className={styles.closeButton}
+                onClick={() => setIsProductInfoModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className={styles.productContent}>
+              <div className={styles.productInfo}>
+                {formatProductCharacteristics(selectedProduct).map((char, index) => (
+                  <div key={index} className={styles.productChar}>
+                    <span className={styles.charLabel}>{char.label}:</span>
+                    <span className={styles.charValue}>{char.value}</span>
+                  </div>
+                ))}
+              </div>
+              
+              {selectedProduct.wood_id && (
+                <div className={styles.productId}>
+                  ID материала: {selectedProduct.wood_id}
+                </div>
+              )}
+            </div>
+            
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={styles.closeModalButton}
+                onClick={() => setIsProductInfoModalOpen(false)}
+              >
+                Закрыть
+              </button>
             </div>
           </div>
         </div>

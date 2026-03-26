@@ -85,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'rospil',           # Название вашей базы данных
         'USER': 'postgres',          # Имя пользователя
-        'PASSWORD': '9352',  # Пароль
+        'PASSWORD': 'nutakoe2020',  # Пароль
         'HOST': 'localhost',        # Адрес сервера (или IP)
         'PORT': '5432',
         'OPTIONS': {

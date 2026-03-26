@@ -1,3 +1,4 @@
+# urls.py
 from django.contrib import admin
 from django.urls import path, include
 from . import views
@@ -17,4 +18,5 @@ urlpatterns = [
     path('api/contract/create/', views.create_contract, name='create_contract'),
     path('api/suppliers/', views.get_suppliers, name='get_suppliers'),
     path('api/supplier_wood/update/', views.update_supplier_wood, name='update_supplier_wood'),
+    path('api/supplier_wood/delete/', views.delete_supplier_wood, name='delete_supplier_wood'),
 ]
