@@ -12,6 +12,7 @@ type DocumentItem = {
   createRaw: string;
   supplierName: string;
   supplierId?: number;
+  supplierInn?: string;
   cost?: number;
   scope?: number;
 };
@@ -19,6 +20,7 @@ type DocumentItem = {
 type Supplier = {
   id: number;
   name: string;
+  supplier_inn?: string;
 };
 
 type Delivery = {
@@ -65,8 +67,8 @@ type Filters = {
 };
 
 type SortConfig = {
-  key: 'number' | 'supplierName' | 'status' | 'create';
-  direction: 'asc' | 'desc';
+  key: "number" | "supplierName" | "status" | "create";
+  direction: "asc" | "desc";
 };
 
 export default function ContractsPage() {
@@ -82,14 +84,14 @@ export default function ContractsPage() {
   const [isDeliveriesModalOpen, setIsDeliveriesModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: 'create',
-    direction: 'desc'
+    key: "create",
+    direction: "desc",
   });
   const [filters, setFilters] = useState<Filters>({
     supplier: "",
     status: "",
     dateFrom: "",
-    dateTo: ""
+    dateTo: "",
   });
   const [formData, setFormData] = useState({
     number: "",
@@ -98,10 +100,11 @@ export default function ContractsPage() {
     supplierId: "",
     supplierName: "",
     cost: "",
-    scope: ""
+    scope: "",
   });
   const [isCreating, setIsCreating] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -110,85 +113,88 @@ export default function ContractsPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
-      const contractsRes = await fetch('http://localhost:8000/api/table/suppliers_contract/');
-      if (!contractsRes.ok) throw new Error('Ошибка загрузки контрактов');
+
+      const contractsRes = await fetch("http://localhost:8000/api/table/suppliers_contract/");
+      if (!contractsRes.ok) throw new Error("Ошибка загрузки контрактов");
       const contracts = await contractsRes.json();
-      
-      const suppliersRes = await fetch('http://localhost:8000/api/suppliers/');
-      if (!suppliersRes.ok) throw new Error('Ошибка загрузки поставщиков');
+
+      const suppliersRes = await fetch("http://localhost:8000/api/suppliers/");
+      if (!suppliersRes.ok) throw new Error("Ошибка загрузки поставщиков");
       const suppliersData = await suppliersRes.json();
       setSuppliers(suppliersData);
-      
-      const deliveriesRes = await fetch('http://localhost:8000/api/table/delivery/');
+
+      const deliveriesRes = await fetch("http://localhost:8000/api/table/delivery/");
       let deliveriesData = [];
       if (deliveriesRes.ok) {
         deliveriesData = await deliveriesRes.json();
         setDeliveries(deliveriesData);
       }
-      
-      const productsRes = await fetch('http://localhost:8000/api/table/product/');
+
+      const productsRes = await fetch("http://localhost:8000/api/table/product/");
       let productsData = [];
       if (productsRes.ok) {
         productsData = await productsRes.json();
         setProducts(productsData);
       }
-      
-      const supplierWoodRes = await fetch('http://localhost:8000/api/table/supplier_wood/');
+
+      const supplierWoodRes = await fetch("http://localhost:8000/api/table/supplier_wood/");
       let supplierWoodData = [];
       if (supplierWoodRes.ok) {
         supplierWoodData = await supplierWoodRes.json();
         setSupplierWood(supplierWoodData);
       }
-      
-      const supplierMap = new Map<number, string>();
-      suppliersData.forEach((s: Supplier) => {
-        supplierMap.set(s.id, s.name);
-      });
-      
-      const mapped = contracts.map((contract: any) => ({
-        id: contract.suppliers_contract_id,
-        number: contract.contract_number,
-        status: contract.suppliers_contract_status,
-        create: formatDate(contract.suppliers_contract_date),
-        createRaw: contract.suppliers_contract_date,
-        supplierName: supplierMap.get(contract.supplier_id) || 'Неизвестный поставщик',
-        supplierId: contract.supplier_id,
-        cost: contract.suppliers_contract_cost,
-        scope: contract.suppliers_contract_scope
-      }));
-      
+
+const supplierNameMap = new Map<number, string>();
+const supplierInnMap = new Map<number, string>();
+
+suppliersData.forEach((s: Supplier) => {
+  supplierNameMap.set(s.id, s.name);
+  supplierInnMap.set(s.id, s.supplier_inn || "");
+});
+const mapped = contracts.map((contract: any) => ({
+  id: contract.suppliers_contract_id,
+  number: contract.contract_number,
+  status: contract.suppliers_contract_status,
+  create: formatDate(contract.suppliers_contract_date),
+  createRaw: contract.suppliers_contract_date,
+  supplierName: supplierNameMap.get(contract.supplier_id) || "Неизвестный поставщик",
+  supplierInn: supplierInnMap.get(contract.supplier_id) || "",
+  supplierId: contract.supplier_id,
+  cost: contract.suppliers_contract_cost,
+  scope: contract.suppliers_contract_scope,
+}));
+
       setDocuments(mapped);
     } catch (err) {
-      console.error('Ошибка загрузки:', err);
-      alert('Ошибка загрузки данных');
+      console.error("Ошибка загрузки:", err);
+      alert("Ошибка загрузки данных");
     } finally {
       setLoading(false);
     }
   };
 
   const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
+    if (!dateStr) return "";
     const date = new Date(dateStr);
-    return date.toLocaleDateString('ru-RU');
+    return date.toLocaleDateString("ru-RU");
   };
 
   const getMaterialForDelivery = (delivery: Delivery, contractSupplierId: number): string => {
     if (delivery.wood_id) {
-      const product = products.find(p => p.wood_id === delivery.wood_id);
+      const product = products.find((p) => p.wood_id === delivery.wood_id);
       if (product) {
         return `${product.wood_type} (${product.wood_grade})`;
       }
     }
-    
-    const supplierWoodItem = supplierWood.find(sw => sw.supplier_id === contractSupplierId);
+
+    const supplierWoodItem = supplierWood.find((sw) => sw.supplier_id === contractSupplierId);
     if (supplierWoodItem) {
-      const product = products.find(p => p.wood_id === supplierWoodItem.wood_id);
+      const product = products.find((p) => p.wood_id === supplierWoodItem.wood_id);
       if (product) {
         return `${product.wood_type} (${product.wood_grade})`;
       }
     }
-    
+
     return "Материал не указан";
   };
 
@@ -197,68 +203,69 @@ export default function ContractsPage() {
     setIsDeliveriesModalOpen(true);
   };
 
-  const contractDeliveries = useMemo(() => {
+  const contractDeliveries: DeliveryItem[] = useMemo(() => {
     if (!selectedContract) return [];
-    
+
     const contractDeliveriesList = deliveries.filter(
-      d => d.suppliers_contract_id === selectedContract.id
+      (d) => d.suppliers_contract_id === selectedContract.id
     );
-    
-    return contractDeliveriesList.map(delivery => {
-      const material = getMaterialForDelivery(delivery, selectedContract.supplierId || 0);
-      
-      return {
-        id: delivery.delivery_id,
-        scope: delivery.delivery_scope,
-        date: formatDate(delivery.delivery_date),
-        status: delivery.delivery_status,
-        material: material
-      };
-    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return contractDeliveriesList
+      .map((delivery) => {
+        const material = getMaterialForDelivery(delivery, selectedContract.supplierId || 0);
+
+        return {
+          id: delivery.delivery_id,
+          scope: delivery.delivery_scope,
+          date: formatDate(delivery.delivery_date),
+          status: delivery.delivery_status,
+          material,
+        };
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [selectedContract, deliveries, products, supplierWood]);
 
   const handleStatusChange = async (id: number, newStatus: string) => {
     setUpdatingStatus(id);
-    
+
     try {
       const response = await fetch(`http://localhost:8000/api/table/suppliers_contract/`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           suppliers_contract_id: id,
-          suppliers_contract_status: newStatus
+          suppliers_contract_status: newStatus,
         }),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Ошибка обновления статуса');
+        throw new Error(error.error || "Ошибка обновления статуса");
       }
-      
-      setDocuments(prev => prev.map(doc => 
-        doc.id === id ? { ...doc, status: newStatus } : doc
-      ));
-      
+
+      setDocuments((prev) =>
+        prev.map((doc) => (doc.id === id ? { ...doc, status: newStatus } : doc))
+      );
     } catch (err) {
-      console.error('Ошибка обновления статуса:', err);
-      alert('Ошибка обновления статуса контракта');
+      console.error("Ошибка обновления статуса:", err);
+      alert("Ошибка обновления статуса контракта");
     } finally {
       setUpdatingStatus(null);
     }
   };
 
-  const handleSort = (key: SortConfig['key']) => {
-    setSortConfig(prev => ({
+  const handleSort = (key: SortConfig["key"]) => {
+    setSortConfig((prev) => ({
       key,
-      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
   };
 
-  const getSortIcon = (key: SortConfig['key']) => {
-    if (sortConfig.key !== key) return '';
-    return sortConfig.direction === 'asc' ? '↑' : '↓';
+  const getSortIcon = (key: SortConfig["key"]) => {
+    if (sortConfig.key !== key) return "";
+    return sortConfig.direction === "asc" ? "↑" : "↓";
   };
 
   const clearFilters = () => {
@@ -266,74 +273,69 @@ export default function ContractsPage() {
       supplier: "",
       status: "",
       dateFrom: "",
-      dateTo: ""
+      dateTo: "",
     });
   };
 
   const uniqueSuppliers = useMemo(() => {
-    const suppliersList = documents.map(doc => doc.supplierName);
+    const suppliersList = documents.map((doc) => doc.supplierName);
     return [...new Set(suppliersList)].sort();
   }, [documents]);
 
   const uniqueStatuses = useMemo(() => {
-    const statusesList = documents.map(doc => doc.status);
+    const statusesList = documents.map((doc) => doc.status);
     return [...new Set(statusesList)];
   }, [documents]);
 
   const filteredAndSortedDocuments = useMemo(() => {
     let filtered = [...documents];
-    
-    // Поиск
+
     const normalizedSearch = search.trim().toLowerCase();
     if (normalizedSearch) {
-      filtered = filtered.filter(doc =>
-        doc.number.toLowerCase().includes(normalizedSearch) ||
-        doc.supplierName.toLowerCase().includes(normalizedSearch)
+      filtered = filtered.filter(
+        (doc) =>
+          doc.number.toLowerCase().includes(normalizedSearch) ||
+          doc.supplierName.toLowerCase().includes(normalizedSearch)
       );
     }
-    
-    // Фильтр по поставщику
+
     if (filters.supplier) {
-      filtered = filtered.filter(doc => doc.supplierName === filters.supplier);
+      filtered = filtered.filter((doc) => doc.supplierName === filters.supplier);
     }
-    
-    // Фильтр по статусу
+
     if (filters.status) {
-      filtered = filtered.filter(doc => doc.status === filters.status);
+      filtered = filtered.filter((doc) => doc.status === filters.status);
     }
-    
-    // Фильтр по дате (от)
+
     if (filters.dateFrom) {
-      filtered = filtered.filter(doc => doc.createRaw >= filters.dateFrom);
+      filtered = filtered.filter((doc) => doc.createRaw >= filters.dateFrom);
     }
-    
-    // Фильтр по дате (до)
+
     if (filters.dateTo) {
-      filtered = filtered.filter(doc => doc.createRaw <= filters.dateTo);
+      filtered = filtered.filter((doc) => doc.createRaw <= filters.dateTo);
     }
-    
-    // Сортировка
+
     filtered.sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortConfig.key) {
-        case 'number':
+        case "number":
           comparison = a.number.localeCompare(b.number);
           break;
-        case 'supplierName':
-          comparison = a.supplierName.localeCompare(b.supplierName, 'ru');
+        case "supplierName":
+          comparison = a.supplierName.localeCompare(b.supplierName, "ru");
           break;
-        case 'status':
-          comparison = a.status.localeCompare(b.status, 'ru');
+        case "status":
+          comparison = a.status.localeCompare(b.status, "ru");
           break;
-        case 'create':
+        case "create":
           comparison = a.createRaw.localeCompare(b.createRaw);
           break;
       }
-      
-      return sortConfig.direction === 'asc' ? comparison : -comparison;
+
+      return sortConfig.direction === "asc" ? comparison : -comparison;
     });
-    
+
     return filtered;
   }, [documents, search, filters, sortConfig]);
 
@@ -342,56 +344,56 @@ export default function ContractsPage() {
       alert("Введите номер документа");
       return;
     }
-    
+
     if (!formData.supplierId && !formData.supplierName.trim()) {
       alert("Выберите или введите поставщика");
       return;
     }
-    
+
     if (!formData.date) {
       alert("Введите дату контракта");
       return;
     }
-    
+
     setIsCreating(true);
-    
+
     try {
       const payload: any = {
         contract_number: formData.number.trim(),
         contract_date: formData.date,
         status: formData.status,
       };
-      
+
       if (formData.supplierId) {
-        const selectedSupplier = suppliers.find(s => s.id === Number(formData.supplierId));
+        const selectedSupplier = suppliers.find((s) => s.id === Number(formData.supplierId));
         payload.supplier_name = selectedSupplier?.name || formData.supplierName;
       } else {
         payload.supplier_name = formData.supplierName.trim();
       }
-      
+
       if (formData.cost) {
         payload.cost = parseFloat(formData.cost);
       }
       if (formData.scope) {
         payload.scope = parseFloat(formData.scope);
       }
-      
-      const response = await fetch('http://localhost:8000/api/contract/create/', {
-        method: 'POST',
+
+      const response = await fetch("http://localhost:8000/api/contract/create/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Ошибка создания контракта');
+        throw new Error(error.error || "Ошибка создания контракта");
       }
-      
-      alert('Контракт успешно создан');
+
+      alert("Контракт успешно создан");
       await fetchData();
-      
+
       setFormData({
         number: "",
         date: "",
@@ -399,47 +401,93 @@ export default function ContractsPage() {
         supplierId: "",
         supplierName: "",
         cost: "",
-        scope: ""
+        scope: "",
       });
       setIsModalOpen(false);
-      
     } catch (err) {
-      console.error('Ошибка:', err);
-      alert(err instanceof Error ? err.message : 'Ошибка создания контракта');
+      console.error("Ошибка:", err);
+      alert(err instanceof Error ? err.message : "Ошибка создания контракта");
     } finally {
       setIsCreating(false);
     }
   };
 
   const handleDeleteContract = async (id: number) => {
-    if (!confirm('Вы уверены, что хотите удалить этот контракт?')) return;
-    
+    if (!confirm("Вы уверены, что хотите удалить этот контракт?")) return;
+
     try {
-      const response = await fetch(`http://localhost:8000/api/table/suppliers_contract/?id=${id}`, {
-        method: 'DELETE',
-      });
-      
+      const response = await fetch(
+        `http://localhost:8000/api/table/suppliers_contract/?id=${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Ошибка удаления');
+        throw new Error(error.error || "Ошибка удаления");
       }
-      
-      setDocuments(prev => prev.filter(doc => doc.id !== id));
-      alert('Контракт удален');
-      
+
+      setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+      alert("Контракт удален");
     } catch (err) {
-      console.error('Ошибка удаления:', err);
-      alert('Ошибка удаления контракта');
+      console.error("Ошибка удаления:", err);
+      alert("Ошибка удаления контракта");
     }
   };
 
+const handleDownloadContract = async (doc: DocumentItem) => {
+  try {
+    const response = await fetch("/api/contracts/download", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+body: JSON.stringify({
+  number: doc.number,
+  cost: doc.cost,
+  date: doc.create,
+  supplierName: doc.supplierName,
+  supplierInn: doc.supplierInn,
+  scope: doc.scope,
+}),
+    });
+
+    if (!response.ok) {
+      let errorMessage = "Ошибка генерации PDF";
+
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch {}
+
+      throw new Error(errorMessage);
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `contract-${doc.number}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Ошибка скачивания PDF:", error);
+    alert(error instanceof Error ? error.message : "Не удалось скачать PDF");
+  }
+};
+
   const getStatusClass = (status: string) => {
     switch (status) {
-      case 'оплачено':
+      case "оплачено":
         return styles.statusReady;
-      case 'просрочено':
+      case "просрочено":
         return styles.statusProgress;
-      case 'срок оплаты не наступил':
+      case "срок оплаты не наступил":
       default:
         return styles.statusDoing;
     }
@@ -447,12 +495,12 @@ export default function ContractsPage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'оплачено':
-        return 'Оплачено';
-      case 'просрочено':
-        return 'Просрочено';
-      case 'срок оплаты не наступил':
-        return 'Срок оплаты не наступил';
+      case "оплачено":
+        return "Оплачено";
+      case "просрочено":
+        return "Просрочено";
+      case "срок оплаты не наступил":
+        return "Срок оплаты не наступил";
       default:
         return status;
     }
@@ -460,11 +508,11 @@ export default function ContractsPage() {
 
   const getDeliveryStatusClass = (status: string) => {
     switch (status) {
-      case 'доставлено':
+      case "доставлено":
         return styles.deliveryStatusReady;
-      case 'нарушение':
+      case "нарушение":
         return styles.deliveryStatusProgress;
-      case 'ожидается':
+      case "ожидается":
       default:
         return styles.deliveryStatusDoing;
     }
@@ -472,12 +520,12 @@ export default function ContractsPage() {
 
   const getDeliveryStatusText = (status: string) => {
     switch (status) {
-      case 'доставлено':
-        return 'Доставлено';
-      case 'нарушение':
-        return 'Нарушение';
-      case 'ожидается':
-        return 'Ожидается';
+      case "доставлено":
+        return "Доставлено";
+      case "нарушение":
+        return "Нарушение";
+      case "ожидается":
+        return "Ожидается";
       default:
         return status;
     }
@@ -500,7 +548,7 @@ export default function ContractsPage() {
           />
           <span className={styles.searchIcon}>⌕</span>
         </div>
-        
+
         <button
           type="button"
           className={styles.filterButton}
@@ -514,7 +562,6 @@ export default function ContractsPage() {
         </button>
       </div>
 
-      {/* Панель фильтров */}
       {isFilterOpen && (
         <div className={styles.filterPanel}>
           <div className={styles.filterRow}>
@@ -522,52 +569,54 @@ export default function ContractsPage() {
               <label>Поставщик</label>
               <select
                 value={filters.supplier}
-                onChange={(e) => setFilters({...filters, supplier: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, supplier: e.target.value })}
                 className={styles.filterSelect}
               >
                 <option value="">Все поставщики</option>
-                {uniqueSuppliers.map(supplier => (
-                  <option key={supplier} value={supplier}>{supplier}</option>
+                {uniqueSuppliers.map((supplier) => (
+                  <option key={supplier} value={supplier}>
+                    {supplier}
+                  </option>
                 ))}
               </select>
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Статус</label>
               <select
                 value={filters.status}
-                onChange={(e) => setFilters({...filters, status: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                 className={styles.filterSelect}
               >
                 <option value="">Все статусы</option>
-                {uniqueStatuses.map(status => (
+                {uniqueStatuses.map((status) => (
                   <option key={status} value={status}>
                     {getStatusText(status)}
                   </option>
                 ))}
               </select>
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Дата от</label>
               <input
                 type="date"
                 value={filters.dateFrom}
-                onChange={(e) => setFilters({...filters, dateFrom: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
                 className={styles.filterInput}
               />
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Дата до</label>
               <input
                 type="date"
                 value={filters.dateTo}
-                onChange={(e) => setFilters({...filters, dateTo: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
                 className={styles.filterInput}
               />
             </div>
-            
+
             <button
               type="button"
               className={styles.clearFiltersButton}
@@ -598,43 +647,45 @@ export default function ContractsPage() {
 
         <div className={styles.table}>
           <div className={`${styles.row} ${styles.headerRow}`}>
-            <div 
+            <div
               className={`${styles.colNumber} ${styles.sortable}`}
-              onClick={() => handleSort('number')}
+              onClick={() => handleSort("number")}
             >
-              Номер контракта {getSortIcon('number')}
+              Номер контракта {getSortIcon("number")}
             </div>
-            <div 
+            <div
               className={`${styles.colSupplier} ${styles.sortable}`}
-              onClick={() => handleSort('supplierName')}
+              onClick={() => handleSort("supplierName")}
             >
-              Поставщик {getSortIcon('supplierName')}
+              Поставщик {getSortIcon("supplierName")}
             </div>
-            <div 
+            <div
               className={`${styles.colStatus} ${styles.sortable}`}
-              onClick={() => handleSort('status')}
+              onClick={() => handleSort("status")}
             >
-              Статус {getSortIcon('status')}
+              Статус {getSortIcon("status")}
             </div>
-            <div 
+            <div
               className={`${styles.colDate} ${styles.sortable}`}
-              onClick={() => handleSort('create')}
+              onClick={() => handleSort("create")}
             >
-              Дата {getSortIcon('create')}
+              Дата {getSortIcon("create")}
             </div>
             <div className={styles.colActions}>Действия</div>
           </div>
 
           {filteredAndSortedDocuments.map((doc) => (
             <div key={doc.id} className={styles.row}>
-              <div 
+              <div
                 className={`${styles.colNumber} ${styles.clickableNumber}`}
                 onClick={() => handleContractClick(doc)}
                 title="Нажмите для просмотра поставок"
               >
                 ДОГ-№{doc.number}
               </div>
+
               <div className={styles.colSupplier}>{doc.supplierName}</div>
+
               <div className={styles.colStatus}>
                 <select
                   value={doc.status}
@@ -650,8 +701,25 @@ export default function ContractsPage() {
                   <span className={styles.statusUpdating}>⏳</span>
                 )}
               </div>
+
               <div className={styles.colDate}>{doc.create}</div>
+
               <div className={styles.colActions}>
+                <button
+                  type="button"
+                  className={styles.iconButton}
+                  onClick={() => handleDownloadContract(doc)}
+                  title="Скачать PDF"
+                  disabled={downloadingId === doc.id}
+                >
+                  <Image
+                    src="/icons/download.svg"
+                    alt="Скачать"
+                    width={50}
+                    height={50}
+                  />
+                </button>
+
                 <button
                   type="button"
                   className={styles.iconButton}
@@ -675,7 +743,6 @@ export default function ContractsPage() {
         </div>
       </div>
 
-      {/* Модальное окно создания контракта */}
       {isModalOpen && (
         <div className={styles.overlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -685,60 +752,58 @@ export default function ContractsPage() {
                 type="text"
                 placeholder="Номер контракта *"
                 value={formData.number}
-                onChange={(e) => setFormData({...formData, number: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, number: e.target.value })}
                 className={styles.input}
                 required
               />
-              
+
               <select
                 value={formData.supplierId}
                 onChange={(e) => {
                   setFormData({
-                    ...formData, 
+                    ...formData,
                     supplierId: e.target.value,
-                    supplierName: e.target.value ? "" : formData.supplierName
+                    supplierName: e.target.value ? "" : formData.supplierName,
                   });
                 }}
                 className={styles.input}
               >
                 <option value="">Выберите существующего поставщика</option>
-                {suppliers.map(supplier => (
+                {suppliers.map((supplier) => (
                   <option key={supplier.id} value={supplier.id}>
                     {supplier.name}
                   </option>
                 ))}
               </select>
-              
-              
-              
+
               <input
                 type="date"
                 placeholder="Дата контракта *"
                 value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 className={styles.input}
                 required
               />
-              
+
               <select
                 value={formData.status}
-                onChange={(e) => setFormData({...formData, status: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 className={styles.input}
               >
                 <option value="срок оплаты не наступил">Срок оплаты не наступил</option>
                 <option value="оплачено">Оплачено</option>
                 <option value="просрочено">Просрочено</option>
               </select>
-              
+
               <input
                 type="number"
                 step="0.01"
                 placeholder="Стоимость"
                 value={formData.cost}
-                onChange={(e) => setFormData({...formData, cost: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
                 className={styles.input}
               />
-              
+
               <div className={styles.modalActions}>
                 <button
                   type="button"
@@ -754,7 +819,7 @@ export default function ContractsPage() {
                   onClick={handleCreateContract}
                   disabled={isCreating}
                 >
-                  {isCreating ? 'Создание...' : 'Создать'}
+                  {isCreating ? "Создание..." : "Создать"}
                 </button>
               </div>
             </div>
@@ -762,10 +827,12 @@ export default function ContractsPage() {
         </div>
       )}
 
-      {/* Модальное окно с поставками по контракту */}
       {isDeliveriesModalOpen && selectedContract && (
         <div className={styles.overlay} onClick={() => setIsDeliveriesModalOpen(false)}>
-          <div className={`${styles.modal} ${styles.deliveriesModal}`} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={`${styles.modal} ${styles.deliveriesModal}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.modalTitle}>
               Поставки по контракту {selectedContract.number}
               <button
@@ -775,43 +842,53 @@ export default function ContractsPage() {
                 ✕
               </button>
             </div>
-            
+
             <div className={styles.contractInfo}>
               <div className={styles.contractInfoRow}>
                 <span className={styles.contractInfoLabel}>Поставщик:</span>
                 <span className={styles.contractInfoValue}>{selectedContract.supplierName}</span>
               </div>
+
               <div className={styles.contractInfoRow}>
                 <span className={styles.contractInfoLabel}>Дата контракта:</span>
                 <span className={styles.contractInfoValue}>{selectedContract.create}</span>
               </div>
-              {selectedContract.cost && (
+
+              {selectedContract.cost !== undefined && selectedContract.cost !== null && (
                 <div className={styles.contractInfoRow}>
                   <span className={styles.contractInfoLabel}>Стоимость:</span>
                   <span className={styles.contractInfoValue}>
-                    {selectedContract.cost.toLocaleString('ru-RU')} ₽
+                    {selectedContract.cost.toLocaleString("ru-RU")} ₽
                   </span>
                 </div>
               )}
-              {selectedContract.scope && (
+
+              {selectedContract.scope !== undefined && selectedContract.scope !== null && (
                 <div className={styles.contractInfoRow}>
                   <span className={styles.contractInfoLabel}>Объем:</span>
-                  <span className={styles.contractInfoValue}>{selectedContract.scope} м³</span>
+                  <span className={styles.contractInfoValue}>
+                    {selectedContract.scope} м³
+                  </span>
                 </div>
               )}
+
               <div className={styles.contractInfoRow}>
                 <span className={styles.contractInfoLabel}>Статус оплаты:</span>
-                <span className={`${styles.contractStatusBadge} ${getStatusClass(selectedContract.status)}`}>
+                <span
+                  className={`${styles.contractStatusBadge} ${getStatusClass(
+                    selectedContract.status
+                  )}`}
+                >
                   {getStatusText(selectedContract.status)}
                 </span>
               </div>
             </div>
-            
+
             <div className={styles.deliveriesSection}>
               <h4 className={styles.deliveriesTitle}>
                 Список поставок ({contractDeliveries.length})
               </h4>
-              
+
               {contractDeliveries.length > 0 ? (
                 <div className={styles.deliveriesList}>
                   <div className={styles.deliveriesHeader}>
@@ -820,14 +897,18 @@ export default function ContractsPage() {
                     <div className={styles.deliveryColDate}>Дата</div>
                     <div className={styles.deliveryColStatus}>Статус</div>
                   </div>
-                  
+
                   {contractDeliveries.map((delivery) => (
                     <div key={delivery.id} className={styles.deliveryRow}>
                       <div className={styles.deliveryColMaterial}>{delivery.material}</div>
                       <div className={styles.deliveryColScope}>{delivery.scope} м³</div>
                       <div className={styles.deliveryColDate}>{delivery.date}</div>
                       <div className={styles.deliveryColStatus}>
-                        <span className={`${styles.deliveryStatusBadge} ${getDeliveryStatusClass(delivery.status)}`}>
+                        <span
+                          className={`${styles.deliveryStatusBadge} ${getDeliveryStatusClass(
+                            delivery.status
+                          )}`}
+                        >
                           {getDeliveryStatusText(delivery.status)}
                         </span>
                       </div>
@@ -840,7 +921,7 @@ export default function ContractsPage() {
                 </div>
               )}
             </div>
-            
+
             <div className={styles.modalActions}>
               <button
                 type="button"

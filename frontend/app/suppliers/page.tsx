@@ -437,7 +437,7 @@ export default function SuppliersPage() {
           onClick={() => setIsModalOpen(true)}
           title="Добавить поставщика"
         >
-          <Image src="/icons/create-document.svg" alt="Добавить" width={24} height={24} />
+          <Image src="/icons/create-document.svg" alt="Добавить" width={50} height={50} />
           <span>Добавить поставщика</span>
         </button>
       </div>
@@ -484,7 +484,7 @@ export default function SuppliersPage() {
                   onClick={() => handleDelete(supplier.supplier_id)}
                   title="Удалить поставщика"
                 >
-                  <Image src="/icons/delete-document.svg" alt="Удалить" width={20} height={20} />
+                  <Image src="/icons/delete-document.svg" alt="Удалить" width={50} height={50} />
                 </button>
               </div>
             </div>
