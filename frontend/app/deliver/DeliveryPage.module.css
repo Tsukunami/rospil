@@ -1,148 +1,144 @@
-/* DeliveryPage.module.css - полный исправленный файл */
-
 .page {
   width: 100%;
-  overflow-x: auto;
 }
 
 .topBar {
-  margin-bottom: 16px;
   display: flex;
-  gap: 1rem;
   align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
 }
 
 .searchBox {
-  flex: 1;
+  width: 420px;
+  height: 40px;
   position: relative;
-  min-width: 250px;
 }
 
 .searchInput {
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  background: white;
-  transition: all 0.2s;
+  height: 100%;
+  border: 1px solid #bdbdbd;
+  border-radius: 10px;
+  background: #f5f5f5;
+  padding: 0 40px 0 14px;
+  font-size: 14px;
+  box-sizing: border-box;
+  color: #1f1f1f;
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #8e8e8e;
 }
 
 .searchIcon {
   position: absolute;
-  left: 0.75rem;
+  right: 13px;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
-  font-size: 1.1rem;
+  font-size: 18px;
+  color: #666666;
+  pointer-events: none;
 }
 
 .filterButton {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  background: #f3eedf;
+  color: #1f1f1f;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   position: relative;
 }
 
 .filterButton:hover {
-  background-color: #e5e7eb;
+  background: #eee6d3;
 }
 
 .filterIcon {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .filterBadge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  color: #ef4444;
+  color: #b73b3b;
   font-size: 12px;
+  line-height: 1;
 }
 
 .filterPanel {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+  background: #f3eedf;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  padding: 14px;
 }
 
 .filterRow {
   display: flex;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-end;
+  align-items: end;
 }
 
 .filterGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 140px;
+  gap: 6px;
+  min-width: 170px;
 }
 
 .filterGroup label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #6b7280;
+  font-size: 13px;
+  color: #444444;
 }
 
 .filterSelect,
 .filterInput {
-  padding: 6px 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #9a9a9a;
+  border-radius: 8px;
+  background: #ffffff;
   font-size: 14px;
-  transition: all 0.2s;
+  color: #1f1f1f;
+  box-sizing: border-box;
 }
 
 .filterSelect:focus,
 .filterInput:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  border-color: #1f1f1f;
 }
 
 .clearFiltersButton {
-  padding: 6px 12px;
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 6px;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #8f8f8f;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f1f1f;
   cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-  height: 32px;
-  align-self: flex-end;
+  font-size: 14px;
 }
 
 .clearFiltersButton:hover {
-  background-color: #dc2626;
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .tableWrapper {
   width: 100%;
-  overflow-x: auto;
+  max-width: 1260px;
   background: #f3eedf;
   border: 1px solid #8d8d8d;
   border-radius: 10px;
+  overflow: hidden;
 }
 
 .tableActions {
@@ -153,15 +149,14 @@
 
 .table {
   width: 100%;
-  min-width: 1000px;
   padding: 8px 0 0;
 }
 
 .row {
   display: grid;
-  grid-template-columns: 1.2fr 1.5fr 1.5fr 1.1fr 1.2fr 0.8fr 0.8fr 0.8fr;
+  grid-template-columns: 1.2fr 1.5fr 1.6fr 1.3fr 1.2fr 1fr 0.9fr 1.2fr;
   align-items: center;
-  min-height: 64px;
+  min-height: 62px;
   padding: 0 12px;
   border-top: 1px solid #b5b5b5;
   box-sizing: border-box;
@@ -196,57 +191,46 @@
 .colAct {
   font-size: 14px;
   color: #1f1f1f;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  opacity: 0.7;
+}
+
+.clickableProduct {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.clickableProduct:hover {
+  opacity: 0.7;
+}
+
+.colSupplier,
+.colProduct {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.colNumber {
-  min-width: 100px;
-}
-
-.colSupplier {
-  min-width: 120px;
-}
-
-.colProduct {
-  min-width: 150px;
-}
-
-.colStatus {
-  min-width: 130px;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.colDate {
-  min-width: 100px;
-}
-
 .colScope {
-  min-width: 80px;
   white-space: nowrap;
 }
 
 .colActions {
-  min-width: 60px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 8px;
-}
-
-.colAct {
-  min-width: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
 }
 
 .iconButton {
-  width: 48px;
-  height: 48px;
+  width: 54px;
+  height: 54px;
   border: none;
   background: transparent;
   display: inline-flex;
@@ -262,6 +246,28 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
+.statusSelect {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid #9a9a9a;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 13px;
+  box-sizing: border-box;
+  color: #1f1f1f;
+}
+
+.statusSelect:focus {
+  outline: none;
+  border-color: #1f1f1f;
+}
+
+.statusUpdating {
+  margin-left: 8px;
+  font-size: 13px;
+}
+
 .statusReady {
   color: #1f1f1f;
 }
@@ -272,6 +278,30 @@
 
 .statusProgress {
   color: #d94a4a;
+}
+
+.actButton {
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid #8d8d8d;
+  border-radius: 8px;
+  background: #faf6ec;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.actButton:hover {
+  background: #eee6d3;
+}
+
+.actIcon {
+  font-size: 14px;
+  line-height: 1;
 }
 
 .empty {
@@ -291,29 +321,59 @@
 }
 
 .modal {
-  width: 500px;
-  max-width: 90vw;
+  width: 520px;
   background: #f3eedf;
   border: 2px solid #1f1f1f;
   border-radius: 12px;
   padding: 22px;
   box-sizing: border-box;
-  max-height: 90vh;
-  overflow-y: auto;
+  position: relative;
+}
+
+.productModal {
+  width: 520px;
 }
 
 .modalTitle {
   font-size: 22px;
   margin-bottom: 16px;
   color: #1f1f1f;
-  padding-right: 30px;
-  position: relative;
+  padding-right: 40px;
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #1f1f1f;
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .form {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  color: #444444;
 }
 
 .input {
@@ -334,22 +394,33 @@
 }
 
 .hint {
-  display: block;
-  margin-top: -4px;
   font-size: 12px;
   color: #666666;
+}
+
+.readonlyDate {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid #c8c1b3;
+  border-radius: 8px;
+  background: #faf6ec;
+  color: #1f1f1f;
+  font-size: 14px;
 }
 
 .modalActions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 .cancelButton,
-.submitButton {
-  min-width: 110px;
+.submitButton,
+.closeModalButton {
+  min-width: 120px;
   height: 38px;
   border-radius: 8px;
   cursor: pointer;
@@ -366,314 +437,60 @@
   background: rgba(0, 0, 0, 0.04);
 }
 
-.submitButton {
+.submitButton,
+.closeModalButton {
   border: 1px solid #1f1f1f;
   background: #1f1f1f;
   color: #ffffff;
 }
 
-.submitButton:hover {
+.submitButton:hover,
+.closeModalButton:hover {
   opacity: 0.92;
+}
+
+.actInfo,
+.productContent {
+  background: #faf6ec;
+  border: 1px solid #c8c1b3;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.actInfoRow,
+.productChar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 14px;
+}
+
+.actInfoLabel,
+.charLabel {
+  color: #555555;
+}
+
+.actInfoValue,
+.charValue {
+  color: #1f1f1f;
+  font-weight: 500;
+  text-align: right;
+}
+
+.productId {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #666666;
 }
 
 .cancelButton:disabled,
 .submitButton:disabled,
-.iconButton:disabled {
+.closeModalButton:disabled,
+.iconButton:disabled,
+.statusSelect:disabled,
+.actButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.statusSelect {
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
-  background-color: white;
-}
-
-.statusSelect:hover {
-  filter: brightness(0.95);
-}
-
-.statusSelect:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.statusSelect:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.statusSelect.statusDoing {
-  background-color: #fef3c7;
-  color: #92400e;
-  border-color: #fde68a;
-}
-
-.statusSelect.statusProgress {
-  background-color: #fee2e2;
-  color: #991b1b;
-  border-color: #fecaca;
-}
-
-.statusSelect.statusReady {
-  background-color: #dcfce7;
-  color: #166534;
-  border-color: #bbf7d0;
-}
-
-.statusUpdating {
-  display: inline-block;
-  animation: spin 1s linear infinite;
-  font-size: 1rem;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.sortable {
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s;
-}
-
-.sortable:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.clickableProduct {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #0066cc;
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 2px;
-}
-
-.clickableProduct:hover {
-  color: #0052a3;
-  text-decoration: underline;
-  text-decoration-style: solid;
-  background-color: rgba(0, 102, 204, 0.05);
-}
-
-/* Стили для модального окна товара */
-.productModal {
-  max-width: 500px;
-  width: 90%;
-}
-
-.productContent {
-  padding: 20px 0;
-}
-
-.productInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.productChar {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 8px 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.charLabel {
-  font-weight: 600;
-  color: #4b5563;
-  font-size: 14px;
-}
-
-.charValue {
-  color: #1f2937;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.productId {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
-  font-size: 12px;
-  color: #9ca3af;
-  text-align: right;
-}
-
-.closeButton {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #9ca3af;
-  transition: color 0.2s;
-}
-
-.closeButton:hover {
-  color: #4b5563;
-}
-
-.closeModalButton {
-  background-color: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.closeModalButton:hover {
-  background-color: #e5e7eb;
-}
-
-/* Стили для акта */
-.actButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  color: #4b5563;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.actButton:hover {
-  background-color: #e5e7eb;
-  border-color: #3b82f6;
-}
-
-.actIcon {
-  font-size: 14px;
-}
-
-.actInfo {
-  background-color: #f9fafb;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-}
-
-.actInfoRow {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.actInfoRow:last-child {
-  border-bottom: none;
-}
-
-.actInfoLabel {
-  font-weight: 600;
-  color: #4b5563;
-  font-size: 14px;
-}
-
-.actInfoValue {
-  color: #1f2937;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.formGroup {
-  margin-bottom: 16px;
-}
-
-.label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #374151;
-}
-
-.readonlyDate {
-  padding: 8px 12px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-/* Адаптация для мобильных устройств */
-@media (max-width: 768px) {
-  .topBar {
-    flex-direction: column;
-  }
-  
-  .filterRow {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .filterGroup {
-    width: 100%;
-  }
-  
-  .clearFiltersButton {
-    width: 100%;
-  }
-  
-  .tableWrapper {
-    overflow-x: scroll;
-  }
-  
-  .table {
-    min-width: 1000px;
-  }
-}
-/* DeliveryPage.module.css - обновите стили для модальных окон */
-
-.modalTitle {
-  font-size: 22px;
-  margin-bottom: 16px;
-  color: #1f1f1f;
-  padding-right: 30px;
-  position: relative;
-}
-
-.closeButton {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #9ca3af;
-  transition: color 0.2s;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.closeButton:hover {
-  color: #4b5563;
 }

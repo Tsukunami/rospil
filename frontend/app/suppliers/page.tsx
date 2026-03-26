@@ -552,16 +552,22 @@ export default function SuppliersPage() {
                       <div className={styles.productsBlock}>
                         {supplier.products.map((product) => (
                           <div key={product.wood_id} className={styles.productLine}>
-                            <div 
-                              className={styles.productNameBlock}
-                              onClick={() => handleProductClick(product.wood_id)}
-                            >
-                              <span className={styles.productIcon}>📦</span>
-                              <span className={styles.clickableProduct}>
-                                {product.wood_type}{" "}
-                                {product.wood_grade && `(${product.wood_grade})`}
-                              </span>
-                            </div>
+<div 
+  className={styles.productNameBlock}
+  onClick={() => handleProductClick(product.wood_id)}
+>
+  <Image
+    src="/icons/wood.svg"
+    alt="Материал"
+    width={16}
+    height={16}
+    className={styles.productIconImage}
+  />
+  <span className={styles.clickableProduct}>
+    {product.wood_type}{" "}
+    {product.wood_grade && `(${product.wood_grade})`}
+  </span>
+</div>
                             <div className={styles.productDetails}>
                               <div className={styles.priceBlock}>
                                 <span>Доступно:</span>

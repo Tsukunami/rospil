@@ -843,7 +843,7 @@ export default function DeliveryPage() {
   };
 
   const getSortIcon = (key: SortConfig['key']) => {
-    if (sortConfig.key !== key) return '↕️';
+    if (sortConfig.key !== key) return '';
     return sortConfig.direction === 'asc' ? '↑' : '↓';
   };
 

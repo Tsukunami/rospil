@@ -3,11 +3,15 @@
 }
 
 .topBar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .searchBox {
-  width: 320px;
+  width: 360px;
   height: 40px;
   position: relative;
 }
@@ -39,6 +43,95 @@
   pointer-events: none;
 }
 
+.filterButton {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  background: #f3eedf;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.filterButton:hover {
+  background: #eee6d3;
+}
+
+.filterIcon {
+  font-size: 14px;
+}
+
+.filterBadge {
+  color: #b73b3b;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.filterPanel {
+  margin-bottom: 16px;
+  background: #f3eedf;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.filterRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 170px;
+}
+
+.filterGroup label {
+  font-size: 13px;
+  color: #444444;
+}
+
+.filterSelect,
+.filterInput {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #9a9a9a;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #1f1f1f;
+  box-sizing: border-box;
+}
+
+.filterSelect:focus,
+.filterInput:focus {
+  outline: none;
+  border-color: #1f1f1f;
+}
+
+.clearFiltersButton {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #8f8f8f;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clearFiltersButton:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 .tableWrapper {
   width: 100%;
   max-width: 980px;
@@ -67,7 +160,7 @@
   display: grid;
   grid-template-columns: 2fr 1.4fr 1.2fr;
   align-items: center;
-  min-height: 64px;
+  min-height: 58px;
   padding: 0 12px;
   box-sizing: border-box;
   gap: 10px;
@@ -93,9 +186,37 @@
   color: #1f1f1f;
 }
 
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  opacity: 0.7;
+}
+
+.productButton {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  color: #1f1f1f;
+  font-size: 14px;
+  text-align: left;
+}
+
+.clickableProduct {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.clickableProduct:hover {
+  opacity: 0.7;
+}
+
 .iconButton {
-  width: 48px;
-  height: 48px;
+  width: 60px;
+  height: 60px;
   border: none;
   background: transparent;
   display: inline-flex;
@@ -111,26 +232,17 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
-.productButton {
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  color: #1f1f1f;
-  text-decoration: underline;
-  cursor: pointer;
-  font-size: 14px;
-  text-align: left;
-}
-
-.productButton:hover {
-  opacity: 0.7;
-}
-
 .characteristicsBox {
   padding: 10px 12px 14px;
   background: #faf6ec;
   border-top: 1px dashed #c9c0b0;
+}
+
+.characteristicsTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444444;
+  margin-bottom: 6px;
 }
 
 .characteristicLine {
@@ -162,12 +274,36 @@
   border-radius: 12px;
   padding: 22px;
   box-sizing: border-box;
+  position: relative;
+}
+
+.productModal {
+  width: 520px;
 }
 
 .modalTitle {
   font-size: 22px;
   margin-bottom: 16px;
   color: #1f1f1f;
+  padding-right: 40px;
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #1f1f1f;
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .form {
@@ -194,24 +330,28 @@
 }
 
 .readonlyDate {
-  font-size: 13px;
-  color: #555555;
-  background: #faf6ec;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
   border: 1px solid #c8c1b3;
   border-radius: 8px;
-  padding: 10px 12px;
+  background: #faf6ec;
+  color: #1f1f1f;
+  font-size: 14px;
 }
 
 .modalActions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 .cancelButton,
-.submitButton {
-  min-width: 110px;
+.submitButton,
+.closeModalButton {
+  min-width: 120px;
   height: 38px;
   border-radius: 8px;
   cursor: pointer;
@@ -228,232 +368,59 @@
   background: rgba(0, 0, 0, 0.04);
 }
 
-.submitButton {
+.submitButton,
+.closeModalButton {
   border: 1px solid #1f1f1f;
   background: #1f1f1f;
   color: #ffffff;
 }
 
-.submitButton:hover {
+.submitButton:hover,
+.closeModalButton:hover {
   opacity: 0.92;
-}
-/* MaterialsExpensePage.module.css - добавьте в конец файла */
-
-.clickableProduct {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #0066cc;
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 2px;
-  background: none;
-  border: none;
-  font-size: inherit;
-  font-family: inherit;
-  padding: 0;
-  text-align: left;
-  width: 100%;
-}
-
-.clickableProduct:hover {
-  color: #0052a3;
-  text-decoration: underline;
-  text-decoration-style: solid;
-  background-color: rgba(0, 102, 204, 0.05);
-}
-
-.productModal {
-  max-width: 500px;
-  width: 90%;
 }
 
 .productContent {
-  padding: 20px 0;
+  background: #faf6ec;
+  border: 1px solid #c8c1b3;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
 }
 
 .productInfo {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
 .productChar {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  padding: 8px 0;
-  border-bottom: 1px solid #e5e7eb;
+  gap: 12px;
+  font-size: 14px;
 }
 
 .charLabel {
-  font-weight: 600;
-  color: #4b5563;
-  font-size: 14px;
+  color: #555555;
 }
 
 .charValue {
-  color: #1f2937;
-  font-size: 14px;
+  color: #1f1f1f;
   font-weight: 500;
-}
-
-.productId {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
-  font-size: 12px;
-  color: #9ca3af;
   text-align: right;
 }
 
-.closeButton {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #9ca3af;
-  transition: color 0.2s;
-}
-
-.closeButton:hover {
-  color: #4b5563;
-}
-
-.closeModalButton {
-  background-color: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.closeModalButton:hover {
-  background-color: #e5e7eb;
-}
-
-.characteristicsTitle {
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #374151;
+.productId {
+  margin-top: 12px;
   font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #666666;
 }
 
-.productButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: inherit;
-  font-family: inherit;
-  padding: 0;
-  text-align: left;
-  width: 100%;
-}
-/* MaterialsExpensePage.module.css - добавьте в конец файла */
-
-.filterButton {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-  position: relative;
-}
-
-.filterButton:hover {
-  background-color: #e5e7eb;
-}
-
-.filterIcon {
-  font-size: 16px;
-}
-
-.filterBadge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  color: #ef4444;
-  font-size: 12px;
-}
-
-.filterPanel {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.filterRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-end;
-}
-
-.filterGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 120px;
-}
-
-.filterGroup label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #6b7280;
-}
-
-.filterSelect,
-.filterInput {
-  padding: 6px 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.filterSelect:focus,
-.filterInput:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-.clearFiltersButton {
-  padding: 6px 12px;
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-
-.clearFiltersButton:hover {
-  background-color: #dc2626;
-}
-
-.sortable {
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s;
-}
-
-.sortable:hover {
-  background-color: #f9fafb;
+.cancelButton:disabled,
+.submitButton:disabled,
+.closeModalButton:disabled,
+.iconButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

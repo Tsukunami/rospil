@@ -3,11 +3,15 @@
 }
 
 .topBar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .searchBox {
-  width: 360px;
+  width: 380px;
   height: 40px;
   position: relative;
 }
@@ -39,9 +43,98 @@
   pointer-events: none;
 }
 
+.filterButton {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  background: #f3eedf;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.filterButton:hover {
+  background: #eee6d3;
+}
+
+.filterIcon {
+  font-size: 14px;
+}
+
+.filterBadge {
+  color: #b73b3b;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.filterPanel {
+  margin-bottom: 16px;
+  background: #f3eedf;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.filterRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 170px;
+}
+
+.filterGroup label {
+  font-size: 13px;
+  color: #444444;
+}
+
+.filterSelect,
+.filterInput {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #9a9a9a;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #1f1f1f;
+  box-sizing: border-box;
+}
+
+.filterSelect:focus,
+.filterInput:focus {
+  outline: none;
+  border-color: #1f1f1f;
+}
+
+.clearFiltersButton {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #8f8f8f;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clearFiltersButton:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 .tableWrapper {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1260px;
   background: #f3eedf;
   border: 1px solid #8d8d8d;
   border-radius: 10px;
@@ -61,9 +154,9 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1.2fr 1.5fr 1.4fr 1.2fr 1.3fr 0.9fr 1.1fr;
+  grid-template-columns: 1.2fr 1.5fr 1.7fr 1.2fr 1.3fr 1fr 1.1fr;
   align-items: center;
-  min-height: 64px;
+  min-height: 62px;
   padding: 0 12px;
   border-top: 1px solid #b5b5b5;
   box-sizing: border-box;
@@ -98,6 +191,15 @@
   color: #1f1f1f;
 }
 
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  opacity: 0.7;
+}
+
 .colSupplier {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -117,8 +219,8 @@
 }
 
 .iconButton {
-  width: 48px;
-  height: 48px;
+  width: 54px;
+  height: 54px;
   border: none;
   background: transparent;
   display: inline-flex;
@@ -132,6 +234,28 @@
 
 .iconButton:hover {
   background: rgba(0, 0, 0, 0.05);
+}
+
+.statusSelect {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid #9a9a9a;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 13px;
+  box-sizing: border-box;
+  color: #1f1f1f;
+}
+
+.statusSelect:focus {
+  outline: none;
+  border-color: #1f1f1f;
+}
+
+.statusUpdating {
+  margin-left: 8px;
+  font-size: 13px;
 }
 
 .statusReady {
@@ -150,268 +274,4 @@
   padding: 20px 12px;
   font-size: 14px;
   color: #666666;
-}
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-
-.modal {
-  width: 500px;
-  background: #f3eedf;
-  border: 2px solid #1f1f1f;
-  border-radius: 12px;
-  padding: 22px;
-  box-sizing: border-box;
-}
-
-.modalTitle {
-  font-size: 22px;
-  margin-bottom: 16px;
-  color: #1f1f1f;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.input {
-  width: 100%;
-  min-height: 42px;
-  padding: 10px 12px;
-  border: 1px solid #9a9a9a;
-  border-radius: 8px;
-  background: #ffffff;
-  font-size: 14px;
-  box-sizing: border-box;
-  color: #1f1f1f;
-}
-
-.input:focus {
-  outline: none;
-  border-color: #1f1f1f;
-}
-
-.hint {
-  display: block;
-  margin-top: -4px;
-  font-size: 12px;
-  color: #666666;
-}
-
-.contractInfo {
-  background: #faf6ec;
-  border: 1px solid #c8c1b3;
-  border-radius: 8px;
-  padding: 12px;
-  color: #1f1f1f;
-}
-
-.contractInfo h4 {
-  margin: 0 0 8px;
-  font-size: 15px;
-}
-
-.contractInfo p {
-  margin: 4px 0;
-  font-size: 14px;
-}
-
-.modalActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.cancelButton,
-.submitButton {
-  min-width: 130px;
-  height: 38px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.cancelButton {
-  border: 1px solid #8f8f8f;
-  background: transparent;
-  color: #1f1f1f;
-}
-
-.cancelButton:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-.submitButton {
-  border: 1px solid #1f1f1f;
-  background: #1f1f1f;
-  color: #ffffff;
-}
-
-.submitButton:hover {
-  opacity: 0.92;
-}
-
-.cancelButton:disabled,
-.submitButton:disabled,
-.iconButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-/* PaymentsPage.module.css - добавьте или обновите */
-
-.filterButton {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-  position: relative;
-}
-
-.filterButton:hover {
-  background-color: #e5e7eb;
-}
-
-.filterIcon {
-  font-size: 16px;
-}
-
-.filterBadge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  color: #ef4444;
-  font-size: 12px;
-}
-
-.filterPanel {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.filterRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-end;
-}
-
-.filterGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 120px;
-}
-
-.filterGroup label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #6b7280;
-}
-
-.filterSelect,
-.filterInput {
-  padding: 6px 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.filterSelect:focus,
-.filterInput:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-.clearFiltersButton {
-  padding: 6px 12px;
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-
-.clearFiltersButton:hover {
-  background-color: #dc2626;
-}
-
-.sortable {
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s;
-}
-
-.sortable:hover {
-  background-color: #f9fafb;
-}
-
-.statusSelect {
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.statusSelect:focus {
-  outline: none;
-  border-color: #3b82f6;
-}
-
-.statusSelect.statusDoing {
-  background-color: #fff3e0;
-  color: #f59e0b;
-}
-
-.statusSelect.statusReady {
-  background-color: #e0f2e9;
-  color: #10b981;
-}
-
-.statusSelect.statusProgress {
-  background-color: #fee2e2;
-  color: #ef4444;
-}
-
-.statusUpdating {
-  display: inline-block;
-  margin-left: 8px;
-  font-size: 14px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }

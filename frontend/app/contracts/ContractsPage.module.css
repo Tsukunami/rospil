@@ -3,12 +3,16 @@
 }
 
 .topBar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .searchBox {
-  width: 320px;
-  height: 38px;
+  width: 360px;
+  height: 40px;
   position: relative;
 }
 
@@ -18,7 +22,7 @@
   border: 1px solid #bdbdbd;
   border-radius: 10px;
   background: #f5f5f5;
-  padding: 0 38px 0 14px;
+  padding: 0 40px 0 14px;
   font-size: 14px;
   box-sizing: border-box;
   color: #1f1f1f;
@@ -31,7 +35,7 @@
 
 .searchIcon {
   position: absolute;
-  right: 12px;
+  right: 13px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 18px;
@@ -39,9 +43,98 @@
   pointer-events: none;
 }
 
+.filterButton {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  background: #f3eedf;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.filterButton:hover {
+  background: #eee6d3;
+}
+
+.filterIcon {
+  font-size: 14px;
+}
+
+.filterBadge {
+  color: #b73b3b;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.filterPanel {
+  margin-bottom: 16px;
+  background: #f3eedf;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.filterRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.filterGroup label {
+  font-size: 13px;
+  color: #444444;
+}
+
+.filterSelect,
+.filterInput {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #9a9a9a;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #1f1f1f;
+  box-sizing: border-box;
+}
+
+.filterSelect:focus,
+.filterInput:focus {
+  outline: none;
+  border-color: #1f1f1f;
+}
+
+.clearFiltersButton {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #8f8f8f;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clearFiltersButton:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 .tableWrapper {
   width: 100%;
-  max-width: 980px;
+  max-width: 1100px;
   background: #f3eedf;
   border: 1px solid #8d8d8d;
   border-radius: 10px;
@@ -61,9 +154,9 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1.5fr 1.7fr 1.4fr 1.2fr 1fr;
+  grid-template-columns: 1.4fr 1.7fr 1.7fr 1.1fr 0.9fr;
   align-items: center;
-  min-height: 44px;
+  min-height: 58px;
   padding: 0 12px;
   border-top: 1px solid #b5b5b5;
   box-sizing: border-box;
@@ -94,6 +187,24 @@
   color: #1f1f1f;
 }
 
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  opacity: 0.7;
+}
+
+.clickableNumber {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.clickableNumber:hover {
+  opacity: 0.7;
+}
+
 .colSupplier {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -108,8 +219,8 @@
 }
 
 .iconButton {
-  width: 34px;
-  height: 34px;
+  width: 54px;
+  height: 54px;
   border: none;
   background: transparent;
   display: inline-flex;
@@ -117,7 +228,7 @@
   justify-content: center;
   cursor: pointer;
   padding: 0;
-  border-radius: 8px;
+  border-radius: 10px;
   flex-shrink: 0;
 }
 
@@ -125,12 +236,34 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
+.statusSelect {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid #9a9a9a;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 13px;
+  box-sizing: border-box;
+  color: #1f1f1f;
+}
+
+.statusSelect:focus {
+  outline: none;
+  border-color: #1f1f1f;
+}
+
+.statusUpdating {
+  margin-left: 8px;
+  font-size: 13px;
+}
+
 .statusReady {
   color: #1f1f1f;
 }
 
 .statusDoing {
-  color: #b08a2d;
+  color: #a27a1d;
 }
 
 .statusProgress {
@@ -154,18 +287,42 @@
 }
 
 .modal {
-  width: 460px;
+  width: 500px;
   background: #f3eedf;
   border: 2px solid #1f1f1f;
   border-radius: 12px;
   padding: 22px;
   box-sizing: border-box;
+  position: relative;
+}
+
+.deliveriesModal {
+  width: 760px;
+  max-width: calc(100vw - 40px);
 }
 
 .modalTitle {
   font-size: 22px;
   margin-bottom: 16px;
   color: #1f1f1f;
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #1f1f1f;
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .form {
@@ -195,12 +352,13 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 .cancelButton,
-.submitButton {
-  min-width: 110px;
+.submitButton,
+.closeModalButton {
+  min-width: 120px;
   height: 38px;
   border-radius: 8px;
   cursor: pointer;
@@ -217,479 +375,137 @@
   background: rgba(0, 0, 0, 0.04);
 }
 
-.submitButton {
+.submitButton,
+.closeModalButton {
   border: 1px solid #1f1f1f;
   background: #1f1f1f;
   color: #ffffff;
 }
 
-.submitButton:hover {
+.submitButton:hover,
+.closeModalButton:hover {
   opacity: 0.92;
 }
 
-.cancelButton:disabled,
-.submitButton:disabled,
-.iconButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* ContractsPage.module.css */
-
-.statusSelect {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s;
-  background-color: white;
-}
-
-.statusSelect:hover {
-  filter: brightness(0.95);
-}
-
-.statusSelect:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.statusSelect:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.statusSelect.statusDoing {
-  background-color: #fef3c7;
-  color: #92400e;
-  border-color: #fde68a;
-}
-
-.statusSelect.statusProgress {
-  background-color: #fee2e2;
-  color: #991b1b;
-  border-color: #fecaca;
-}
-
-.statusSelect.statusReady {
-  background-color: #dcfce7;
-  color: #166534;
-  border-color: #bbf7d0;
-}
-
-.colStatus {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 2;
-}
-
-.statusUpdating {
-  display: inline-block;
-  animation: spin 1s linear infinite;
-  font-size: 1rem;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-/* ContractsPage.module.css - добавьте в конец файла */
-
-.clickableNumber {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #0066cc;
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 2px;
-}
-
-.clickableNumber:hover {
-  color: #0052a3;
-  text-decoration: underline;
-  text-decoration-style: solid;
-  background-color: rgba(0, 102, 204, 0.05);
-}
-
-.deliveriesModal {
-  max-width: 800px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
 .contractInfo {
-  background-color: #f9fafb;
+  background: #faf6ec;
+  border: 1px solid #c8c1b3;
   border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
+  padding: 14px;
+  margin-bottom: 16px;
 }
 
 .contractInfoRow {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.contractInfoRow:last-child {
-  border-bottom: none;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 14px;
 }
 
 .contractInfoLabel {
-  font-weight: 600;
-  color: #4b5563;
-  font-size: 14px;
+  color: #555555;
 }
 
 .contractInfoValue {
-  color: #1f2937;
-  font-size: 14px;
+  color: #1f1f1f;
   font-weight: 500;
+  text-align: right;
 }
 
 .contractStatusBadge {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #ffffff;
 }
 
 .deliveriesSection {
-  margin-top: 20px;
+  margin-top: 12px;
 }
 
 .deliveriesTitle {
+  margin: 0 0 12px;
   font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #374151;
+  color: #1f1f1f;
 }
 
 .deliveriesList {
-  border: 1px solid #e5e7eb;
+  border: 1px solid #c8c1b3;
   border-radius: 8px;
   overflow: hidden;
+  background: #faf6ec;
+}
+
+.deliveriesHeader,
+.deliveryRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
 }
 
 .deliveriesHeader {
-  display: grid;
-  grid-template-columns: 1fr 100px 120px 120px;
-  background-color: #f3f4f6;
-  padding: 12px 16px;
-  font-weight: 600;
+  background: #f3eedf;
+  border-bottom: 1px solid #c8c1b3;
   font-size: 13px;
-  color: #4b5563;
-  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #202020;
 }
 
 .deliveryRow {
-  display: grid;
-  grid-template-columns: 1fr 100px 120px 120px;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  transition: background-color 0.2s;
-}
-
-.deliveryRow:hover {
-  background-color: #f9fafb;
-}
-
-.deliveryRow:last-child {
-  border-bottom: none;
-}
-
-.deliveryColMaterial {
+  border-top: 1px solid #ddd4c2;
   font-size: 14px;
-  color: #1f2937;
+  color: #1f1f1f;
 }
 
-.deliveryColScope {
-  font-size: 14px;
-  color: #1f2937;
+.deliveryRow:first-of-type {
+  border-top: none;
 }
 
-.deliveryColDate {
-  font-size: 14px;
-  color: #6b7280;
-}
-
+.deliveryColMaterial,
+.deliveryColScope,
+.deliveryColDate,
 .deliveryColStatus {
-  display: flex;
-  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .deliveryStatusBadge {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.deliveryStatusDoing {
-  background-color: #fff3e0;
-  color: #f59e0b;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 13px;
 }
 
 .deliveryStatusReady {
-  background-color: #e0f2e9;
-  color: #10b981;
+  color: #1f1f1f;
+}
+
+.deliveryStatusDoing {
+  color: #a27a1d;
 }
 
 .deliveryStatusProgress {
-  background-color: #fee2e2;
-  color: #ef4444;
+  color: #d94a4a;
 }
 
 .noDeliveries {
-  text-align: center;
-  padding: 40px;
-  color: #9ca3af;
+  padding: 18px 12px;
   font-size: 14px;
-}
-
-.closeButton {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #9ca3af;
-  transition: color 0.2s;
-}
-
-.closeButton:hover {
-  color: #4b5563;
-}
-
-.closeModalButton {
-  background-color: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.closeModalButton:hover {
-  background-color: #e5e7eb;
-}
-
-.statusSelect {
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.statusSelect:focus {
-  outline: none;
-  border-color: #3b82f6;
-}
-
-.statusSelect.statusDoing {
-  background-color: #fff3e0;
-  color: #f59e0b;
-}
-
-.statusSelect.statusReady {
-  background-color: #e0f2e9;
-  color: #10b981;
-}
-
-.statusSelect.statusProgress {
-  background-color: #fee2e2;
-  color: #ef4444;
-}
-
-.statusUpdating {
-  display: inline-block;
-  margin-left: 8px;
-  font-size: 14px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-/* ContractsPage.module.css - добавьте в конец файла */
-
-.filterButton {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  color: #666666;
+  background: #faf6ec;
+  border: 1px dashed #c8c1b3;
   border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-  position: relative;
 }
 
-.filterButton:hover {
-  background-color: #e5e7eb;
-}
-
-.filterIcon {
-  font-size: 16px;
-}
-
-.filterBadge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  color: #ef4444;
-  font-size: 12px;
-}
-
-.filterPanel {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.filterRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-end;
-}
-
-.filterGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 140px;
-}
-
-.filterGroup label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #6b7280;
-}
-
-.filterSelect,
-.filterInput {
-  padding: 6px 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.filterSelect:focus,
-.filterInput:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-.clearFiltersButton {
-  padding: 6px 12px;
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-  height: 32px;
-  align-self: flex-end;
-}
-
-.clearFiltersButton:hover {
-  background-color: #dc2626;
-}
-
-.sortable {
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s;
-}
-
-.sortable:hover {
-  background-color: #f9fafb;
-}
-
-.topBar {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.searchBox {
-  flex: 1;
-  position: relative;
-  min-width: 250px;
-}
-
-.searchInput {
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  background: white;
-  transition: all 0.2s;
-}
-
-.searchInput:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.searchIcon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  font-size: 1.1rem;
-}
-
-@media (max-width: 768px) {
-  .topBar {
-    flex-direction: column;
-  }
-  
-  .filterRow {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .filterGroup {
-    width: 100%;
-  }
-  
-  .clearFiltersButton {
-    width: 100%;
-  }
+.cancelButton:disabled,
+.submitButton:disabled,
+.closeModalButton:disabled,
+.iconButton:disabled,
+.statusSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

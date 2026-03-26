@@ -375,7 +375,7 @@ export default function MaterialsExpensePage() {
 
   // Получаем иконку сортировки
   const getSortIcon = (key: 'productName' | 'expenseScope' | 'expenseDate') => {
-    if (sortConfig.key !== key) return '↕️';
+    if (sortConfig.key !== key) return '';
     return sortConfig.direction === 'asc' ? '↑' : '↓';
   };
 

@@ -257,7 +257,7 @@ export default function ContractsPage() {
   };
 
   const getSortIcon = (key: SortConfig['key']) => {
-    if (sortConfig.key !== key) return '↕️';
+    if (sortConfig.key !== key) return '';
     return sortConfig.direction === 'asc' ? '↑' : '↓';
   };
 

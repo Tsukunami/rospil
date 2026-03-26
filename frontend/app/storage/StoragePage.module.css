@@ -1,13 +1,14 @@
 .page {
   width: 100%;
+  color: #1f1f1f;
 }
 
 .topBar {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
   align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .searchBox {
@@ -43,25 +44,100 @@
   pointer-events: none;
 }
 
-.dropdownBlock {
-  display: flex;
-  align-items: center;
-}
-
+.filterButton,
 .dropdownButton {
-  min-height: 40px;
+  height: 40px;
   padding: 0 14px;
-  border: 1px solid #8f8f8f;
+  border: 1px solid #8d8d8d;
   border-radius: 10px;
   background: #f3eedf;
   color: #1f1f1f;
   cursor: pointer;
   font-size: 14px;
-  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
 }
 
+.filterButton:hover,
 .dropdownButton:hover {
   background: #eee6d3;
+}
+
+.filterIcon {
+  font-size: 14px;
+}
+
+.filterBadge {
+  color: #b73b3b;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.dropdownBlock {
+  display: flex;
+  align-items: center;
+}
+
+.filterPanel {
+  margin-bottom: 16px;
+  background: #f3eedf;
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.filterRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 170px;
+}
+
+.filterGroup label {
+  font-size: 13px;
+  color: #444444;
+}
+
+.filterSelect,
+.filterInput {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #9a9a9a;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #1f1f1f;
+  box-sizing: border-box;
+}
+
+.filterSelect:focus,
+.filterInput:focus {
+  outline: none;
+  border-color: #1f1f1f;
+}
+
+.clearFiltersButton {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #8f8f8f;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clearFiltersButton:hover {
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .tableWrapper {
@@ -81,7 +157,7 @@
   display: grid;
   grid-template-columns: 2fr 1.2fr 1.4fr;
   align-items: center;
-  min-height: 54px;
+  min-height: 58px;
   padding: 0 14px;
   border-top: 1px solid #b5b5b5;
   box-sizing: border-box;
@@ -117,9 +193,15 @@
 }
 
 .woodLink {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
   color: #1f1f1f;
   text-decoration: underline;
   cursor: pointer;
+  font-size: 14px;
+  text-align: left;
 }
 
 .woodLink:hover {
@@ -180,123 +262,7 @@
   color: #1f1f1f;
   font-weight: 600;
 }
-/* StoragePage.module.css - добавьте в конец файла */
 
-.filterButton {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-  position: relative;
-}
-
-.filterButton:hover {
-  background-color: #e5e7eb;
-}
-
-.filterIcon {
-  font-size: 16px;
-}
-
-.filterBadge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  color: #ef4444;
-  font-size: 12px;
-}
-
-.filterPanel {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.filterRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-end;
-}
-
-.filterGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 140px;
-}
-
-.filterGroup label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #6b7280;
-}
-
-.filterSelect,
-.filterInput {
-  padding: 6px 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.filterSelect:focus,
-.filterInput:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-.clearFiltersButton {
-  padding: 6px 12px;
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-  height: 32px;
-  align-self: flex-end;
-}
-
-.clearFiltersButton:hover {
-  background-color: #dc2626;
-}
-
-.woodLink {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: inherit;
-  font-family: inherit;
-  padding: 0;
-  color: #0066cc;
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 2px;
-  transition: all 0.2s ease;
-}
-
-.woodLink:hover {
-  color: #0052a3;
-  text-decoration: underline;
-  text-decoration-style: solid;
-  background-color: rgba(0, 102, 204, 0.05);
-}
-
-/* Стили для модального окна */
 .overlay {
   position: fixed;
   inset: 0;
@@ -309,192 +275,98 @@
 
 .modal {
   width: 500px;
-  max-width: 90vw;
   background: #f3eedf;
   border: 2px solid #1f1f1f;
   border-radius: 12px;
   padding: 22px;
   box-sizing: border-box;
-  max-height: 90vh;
-  overflow-y: auto;
+  position: relative;
+}
+
+.productModal {
+  width: 520px;
 }
 
 .modalTitle {
   font-size: 22px;
   margin-bottom: 16px;
   color: #1f1f1f;
-  padding-right: 30px;
-  position: relative;
+  padding-right: 40px;
 }
 
 .closeButton {
   position: absolute;
-  top: 0;
-  right: 0;
-  background: none;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
   border: none;
-  font-size: 24px;
+  background: transparent;
+  border-radius: 8px;
   cursor: pointer;
-  color: #9ca3af;
-  transition: color 0.2s;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 18px;
+  color: #1f1f1f;
 }
 
 .closeButton:hover {
-  color: #4b5563;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.productContent {
+  background: #faf6ec;
+  border: 1px solid #c8c1b3;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.productChar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.charLabel {
+  color: #555555;
+}
+
+.charValue {
+  color: #1f1f1f;
+  font-weight: 500;
+  text-align: right;
+}
+
+.productId {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #666666;
 }
 
 .modalActions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 8px;
 }
 
 .closeModalButton {
-  background-color: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.closeModalButton:hover {
-  background-color: #e5e7eb;
-}
-
-.productModal {
-  max-width: 500px;
-  width: 90%;
-}
-
-.productContent {
-  padding: 20px 0;
-}
-
-.productInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.productChar {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 8px 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.charLabel {
-  font-weight: 600;
-  color: #4b5563;
-  font-size: 14px;
-}
-
-.charValue {
-  color: #1f2937;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.productId {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
-  font-size: 12px;
-  color: #9ca3af;
-  text-align: right;
-}
-
-.topBar {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.searchBox {
-  flex: 1;
-  position: relative;
-  min-width: 250px;
-}
-
-.searchInput {
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  background: white;
-  transition: all 0.2s;
-}
-
-.searchInput:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.searchIcon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  font-size: 1.1rem;
-}
-
-.dropdownBlock {
-  margin-left: auto;
-}
-
-.dropdownButton {
-  padding: 8px 16px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  min-width: 120px;
+  height: 38px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s;
+  border: 1px solid #1f1f1f;
+  background: #1f1f1f;
+  color: #ffffff;
 }
 
-.dropdownButton:hover {
-  background-color: #e5e7eb;
-}
-
-@media (max-width: 768px) {
-  .topBar {
-    flex-direction: column;
-  }
-  
-  .dropdownBlock {
-    margin-left: 0;
-    width: 100%;
-  }
-  
-  .dropdownButton {
-    width: 100%;
-  }
-  
-  .filterRow {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .filterGroup {
-    width: 100%;
-  }
-  
-  .clearFiltersButton {
-    width: 100%;
-  }
+.closeModalButton:hover {
+  opacity: 0.92;
 }

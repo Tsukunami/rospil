@@ -1,5 +1,6 @@
 .page {
   width: 100%;
+  color: #1f1f1f;
 }
 
 .searchRow {
@@ -7,6 +8,7 @@
   align-items: center;
   gap: 14px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .searchBox {
@@ -27,12 +29,10 @@
   box-sizing: border-box;
 }
 
-
 .searchInput:focus {
   outline: none;
   border-color: #8d8d8d;
 }
-
 
 .searchIcon {
   position: absolute;
@@ -43,11 +43,6 @@
   font-size: 18px;
   line-height: 1;
   pointer-events: none;
-}
-
-
-.tableActions {
-  margin-bottom: 18px;
 }
 
 .createButton {
@@ -73,7 +68,7 @@
 
 .list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(390px, 1fr));
   gap: 18px;
   width: 100%;
   align-items: start;
@@ -84,7 +79,7 @@
   border: 1px solid #8d8d8d;
   border-radius: 12px;
   overflow: hidden;
-  min-height: 220px;
+  min-height: 240px;
   display: flex;
   flex-direction: column;
 }
@@ -192,14 +187,14 @@
 .productsBlock {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .productLine {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 12px;
   border: 1px solid #c8c1b3;
   border-radius: 8px;
   background: #faf6ec;
@@ -211,6 +206,11 @@
   gap: 8px;
   font-size: 14px;
   color: #2c2c2c;
+  cursor: pointer;
+}
+
+.productNameBlock:hover {
+  opacity: 0.75;
 }
 
 .productIcon {
@@ -218,25 +218,43 @@
   line-height: 1;
 }
 
-.productActions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+.clickableProduct {
+  text-decoration: underline;
 }
 
-.priceBlock {
+.productDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.priceBlock,
+.totalPriceBlock {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 10px;
   font-size: 14px;
   color: #2c2c2c;
-  white-space: nowrap;
+}
+
+.priceValue {
+  color: #1f1f1f;
+}
+
+.totalPriceValue {
+  color: #2f6f3e;
+}
+
+.productActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .deleteProductButton {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border: 1px solid #d8b1b1;
   border-radius: 8px;
   background: #fff7f7;
@@ -306,18 +324,42 @@
 }
 
 .modal {
-  width: 420px;
+  width: 460px;
   background: #f3eedf;
   border: 2px solid #1f1f1f;
   border-radius: 12px;
   padding: 22px;
   box-sizing: border-box;
+  position: relative;
+}
+
+.productModal {
+  width: 520px;
 }
 
 .modalTitle {
   font-size: 22px;
   margin-bottom: 16px;
   color: #1f1f1f;
+  padding-right: 40px;
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #1f1f1f;
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .form {
@@ -358,16 +400,54 @@
   border-color: #1f1f1f;
 }
 
+.productContent {
+  background: #faf6ec;
+  border: 1px solid #c8c1b3;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.productChar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.charLabel {
+  color: #555555;
+}
+
+.charValue {
+  color: #1f1f1f;
+  font-weight: 500;
+  text-align: right;
+}
+
+.productId {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #666666;
+}
+
 .modalActions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .cancelButton,
-.submitButton {
-  min-width: 110px;
+.submitButton,
+.closeModalButton {
+  min-width: 120px;
   height: 38px;
   border-radius: 8px;
   cursor: pointer;
@@ -384,18 +464,21 @@
   background: rgba(0, 0, 0, 0.04);
 }
 
-.submitButton {
+.submitButton,
+.closeModalButton {
   border: 1px solid #1f1f1f;
   background: #1f1f1f;
   color: #ffffff;
 }
 
-.submitButton:hover {
+.submitButton:hover,
+.closeModalButton:hover {
   opacity: 0.92;
 }
 
 .cancelButton:disabled,
 .submitButton:disabled,
+.closeModalButton:disabled,
 .createButton:disabled,
 .addProductButton:disabled,
 .deleteButton:disabled,
@@ -403,208 +486,4 @@
 .expandButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* SuppliersPage.module.css - добавьте в конец файла */
-
-.clickableProduct {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #0066cc;
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 2px;
-}
-
-.clickableProduct:hover {
-  color: #0052a3;
-  text-decoration: underline;
-  text-decoration-style: solid;
-  background-color: rgba(0, 102, 204, 0.05);
-}
-
-.productModal {
-  max-width: 500px;
-  width: 90%;
-}
-
-.productContent {
-  padding: 20px 0;
-}
-
-.productInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.productChar {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 8px 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.charLabel {
-  font-weight: 600;
-  color: #4b5563;
-  font-size: 14px;
-}
-
-.charValue {
-  color: #1f2937;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.productId {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
-  font-size: 12px;
-  color: #9ca3af;
-  text-align: right;
-}
-
-.closeButton {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #9ca3af;
-  transition: color 0.2s;
-}
-
-.closeButton:hover {
-  color: #4b5563;
-}
-
-.closeModalButton {
-  background-color: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.closeModalButton:hover {
-  background-color: #e5e7eb;
-}
-
-.productNameBlock {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  cursor: pointer;
-}
-/* SuppliersPage.module.css - добавьте или обновите */
-
-.productDetails {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.priceBlock {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  background-color: #f3f4f6;
-  padding: 4px 10px;
-  border-radius: 6px;
-}
-
-.priceBlock span {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.priceBlock strong {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.priceValue {
-  color: #10b981 !important;
-}
-
-.totalPriceBlock {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  background-color: #e0f2e9;
-  padding: 4px 10px;
-  border-radius: 6px;
-}
-
-.totalPriceBlock span {
-  font-size: 12px;
-  color: #065f46;
-}
-
-.totalPriceValue {
-  font-size: 14px;
-  font-weight: 700;
-  color: #065f46;
-}
-
-.productLine {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.productLine:last-child {
-  border-bottom: none;
-}
-
-.productNameBlock {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 200px;
-  cursor: pointer;
-  flex: 1;
-}
-
-.productActions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-@media (max-width: 768px) {
-  .productDetails {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-  }
-  
-  .priceBlock,
-  .totalPriceBlock {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .productLine {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .productActions {
-    align-self: flex-end;
-  }
 }
