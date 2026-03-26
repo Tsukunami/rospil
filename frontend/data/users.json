@@ -3,30 +3,37 @@
     {
       "id": 1,
       "name": "Олексей Попов",
-      "login": "Alexey",
-      "password": "123123",
+      "login": "5",
+      "password": "5",
       "access": "5"
     },
         {
       "id": 2,
       "name": "Анастасия Шашева",
-      "login": "Nastya",
-      "password": "123123",
+      "login": "1",
+      "password": "1",
       "access": "1"
     },
         {
       "id": 3,
       "name": "Вильям Яцко",
-      "login": "William",
-      "password": "123123",
+      "login": "2",
+      "password": "2",
       "access": "2"
     },
     {
       "id": 4,
       "name": "Вильям Яцко",
-      "login": "William_",
-      "password": "123123",
+      "login": "4",
+      "password": "4",
       "access": "4"
+    },
+    {
+      "id": 4,
+      "name": "Вильям Яцко",
+      "login": "3",
+      "password": "3",
+      "access": "3"
     }
   ]
   }

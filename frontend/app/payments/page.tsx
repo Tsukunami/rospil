@@ -553,19 +553,7 @@ export default function PaymentsPage() {
               <div className={styles.colCost}>{formatCurrency(row.cost)}</div>
               <div className={styles.colScope}>{row.scope} м³</div>
               <div className={styles.colActions}>
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  onClick={() => handleOpenPdf(row.number)}
-                  title="Открыть PDF"
-                >
-                  <Image
-                    src="/icons/download-document.svg"
-                    alt="Открыть"
-                    width={50}
-                    height={50}
-                  />
-                </button>
+
                 <button
                   type="button"
                   className={styles.iconButton}

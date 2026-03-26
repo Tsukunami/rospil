@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import styles from "./StatisticsPage.module.css";
+import { useAuth } from "@/components/AuthContext";
 import {
   LineChart,
   Line,
@@ -129,6 +130,9 @@ const contractsChartTypes = [
 ] as const;
 
 export default function StatisticsPage() {
+  const { user } = useAuth();
+  const canSeeDeliveriesTab = user?.access !== "3";
+
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -164,6 +168,12 @@ export default function StatisticsPage() {
     просрочено: true,
     "срок оплаты не наступил": true,
   });
+
+  useEffect(() => {
+    if (!canSeeDeliveriesTab && activeTab === "deliveries") {
+      setActiveTab("contracts");
+    }
+  }, [canSeeDeliveriesTab, activeTab]);
 
   useEffect(() => {
     fetchAllData();
@@ -624,30 +634,32 @@ export default function StatisticsPage() {
           <span>Сравнение цен</span>
         </button>
 
-        <button
-          className={`${styles.tabButton} ${
-            activeTab === "deliveries" ? styles.activeTab : ""
-          }`}
-          onClick={() => setActiveTab("deliveries")}
-        >
-          <span>Анализ поставок</span>
-        </button>
+        {canSeeDeliveriesTab && (
+          <button
+            className={`${styles.tabButton} ${
+              activeTab === "deliveries" ? styles.activeTab : ""
+            }`}
+            onClick={() => setActiveTab("deliveries")}
+          >
+            <span>Анализ поставок</span>
+          </button>
+        )}
       </div>
 
       {activeTab === "contracts" && (
         <div className={styles.chartContainer}>
           <div className={styles.chartNavigation}>
-<button className={styles.navButton} onClick={handlePrevContractsChart}>
-  ←
-</button>
+            <button className={styles.navButton} onClick={handlePrevContractsChart}>
+              ←
+            </button>
 
             <div className={styles.chartTitleWithIcon}>
               <span>{contractsChartTypes[contractsCurrentPage].label}</span>
             </div>
 
-<button className={styles.navButton} onClick={handleNextContractsChart}>
-  →
-</button>
+            <button className={styles.navButton} onClick={handleNextContractsChart}>
+              →
+            </button>
           </div>
 
           <div className={styles.chartArea}>
@@ -944,7 +956,7 @@ export default function StatisticsPage() {
         </div>
       )}
 
-      {activeTab === "deliveries" && (
+      {canSeeDeliveriesTab && activeTab === "deliveries" && (
         <div className={styles.deliveriesContainer}>
           <div className={styles.deliveryLegendControls}>
             <button
