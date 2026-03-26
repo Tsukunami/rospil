@@ -709,19 +709,7 @@ export default function ContractsPage() {
                 ))}
               </select>
               
-              <input
-                type="text"
-                placeholder="Или введите нового поставщика *"
-                value={formData.supplierName}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData, 
-                    supplierName: e.target.value,
-                    supplierId: ""
-                  });
-                }}
-                className={styles.input}
-              />
+              
               
               <input
                 type="date"
@@ -745,7 +733,7 @@ export default function ContractsPage() {
               <input
                 type="number"
                 step="0.01"
-                placeholder="Стоимость (необязательно)"
+                placeholder="Стоимость"
                 value={formData.cost}
                 onChange={(e) => setFormData({...formData, cost: e.target.value})}
                 className={styles.input}
