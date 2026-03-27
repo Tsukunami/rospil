@@ -48,6 +48,7 @@ type SupplierWood = {
   supplier_id: number;
   wood_id: number;
   available_quantity: number;
+  offered_price?: number;
 };
 
 type StorageItem = {
@@ -86,6 +87,8 @@ type DeliveryRow = {
   actId: number;
   woodId?: number;
   contractId: number;
+  contractDate?: string;
+  offeredPrice?: number;
 };
 
 type Filters = {
@@ -100,27 +103,18 @@ type Filters = {
 };
 
 type SortConfig = {
-  key: 'number' | 'supplierName' | 'productName' | 'status' | 'create' | 'scope';
-  direction: 'asc' | 'desc';
+  key: "number" | "supplierName" | "productName" | "status" | "create" | "scope";
+  direction: "asc" | "desc";
 };
 
 function formatDate(dateStr: string) {
-  if (!dateStr) return '';
+  if (!dateStr) return "";
   try {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('ru-RU');
+    return date.toLocaleDateString("ru-RU");
   } catch {
     return dateStr;
   }
-}
-
-function formatDateForAPI(dateStr: string) {
-  if (!dateStr) return '';
-  const parts = dateStr.split('.');
-  if (parts.length === 3) {
-    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-  }
-  return dateStr;
 }
 
 export default function DeliveryPage() {
@@ -147,24 +141,22 @@ export default function DeliveryPage() {
     dateFrom: "",
     dateTo: "",
     minScope: "",
-    maxScope: ""
+    maxScope: "",
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: 'create',
-    direction: 'desc'
+    key: "create",
+    direction: "desc",
   });
-  
-  // Состояние для карточки товара
+
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  
-  // Состояние для формы акта
+
   const [actFormData, setActFormData] = useState({
     act_type: "акт приемки",
     employee_id: "",
   });
-  
+
   const [formData, setFormData] = useState({
     contractId: "",
     woodId: "",
@@ -181,24 +173,32 @@ export default function DeliveryPage() {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      console.log("Начинаем загрузку данных...");
-      
-      const [deliveriesRes, suppliersRes, productsRes, contractsRes, supplierWoodRes, storageRes, actsRes, employeesRes] = await Promise.all([
-        fetch('http://localhost:8000/api/table/delivery/'),
-        fetch('http://localhost:8000/api/table/suppliers_info/'),
-        fetch('http://localhost:8000/api/table/product/'),
-        fetch('http://localhost:8000/api/table/suppliers_contract/'),
-        fetch('http://localhost:8000/api/table/supplier_wood/'),
-        fetch('http://localhost:8000/api/table/storage/'),
-        fetch('http://localhost:8000/api/table/act/'),
-        fetch('http://localhost:8000/api/table/employees/')
+
+      const [
+        deliveriesRes,
+        suppliersRes,
+        productsRes,
+        contractsRes,
+        supplierWoodRes,
+        storageRes,
+        actsRes,
+        employeesRes,
+      ] = await Promise.all([
+        fetch("http://localhost:8000/api/table/delivery/"),
+        fetch("http://localhost:8000/api/table/suppliers_info/"),
+        fetch("http://localhost:8000/api/table/product/"),
+        fetch("http://localhost:8000/api/table/suppliers_contract/"),
+        fetch("http://localhost:8000/api/table/supplier_wood/"),
+        fetch("http://localhost:8000/api/table/storage/"),
+        fetch("http://localhost:8000/api/table/act/"),
+        fetch("http://localhost:8000/api/table/employees/"),
       ]);
-      
-      if (!deliveriesRes.ok) throw new Error('Ошибка загрузки поставок');
-      if (!suppliersRes.ok) throw new Error('Ошибка загрузки поставщиков');
-      if (!productsRes.ok) throw new Error('Ошибка загрузки продуктов');
-      if (!contractsRes.ok) throw new Error('Ошибка загрузки контрактов');
-      
+
+      if (!deliveriesRes.ok) throw new Error("Ошибка загрузки поставок");
+      if (!suppliersRes.ok) throw new Error("Ошибка загрузки поставщиков");
+      if (!productsRes.ok) throw new Error("Ошибка загрузки продуктов");
+      if (!contractsRes.ok) throw new Error("Ошибка загрузки контрактов");
+
       const deliveriesData = await deliveriesRes.json();
       const suppliersData = await suppliersRes.json();
       const productsData = await productsRes.json();
@@ -207,11 +207,7 @@ export default function DeliveryPage() {
       const storageData = storageRes.ok ? await storageRes.json() : [];
       const actsData = actsRes.ok ? await actsRes.json() : [];
       const employeesData = employeesRes.ok ? await employeesRes.json() : [];
-      
-      console.log("Загружено поставок:", deliveriesData.length);
-      console.log("Загружено актов:", actsData.length);
-      console.log("Загружено сотрудников:", employeesData.length);
-      
+
       setDeliveries(deliveriesData);
       setSuppliers(suppliersData);
       setProducts(productsData);
@@ -220,21 +216,19 @@ export default function DeliveryPage() {
       setStorage(storageData);
       setActs(actsData);
       setEmployees(employeesData);
-      
     } catch (err) {
-      console.error('Ошибка загрузки:', err);
-      alert('Ошибка загрузки данных');
+      console.error("Ошибка загрузки:", err);
+      alert("Ошибка загрузки данных");
     } finally {
       setLoading(false);
     }
   };
 
-  // Функция для открытия модального окна акта
   const handleOpenActModal = (delivery: DeliveryRow) => {
     setSelectedDelivery(delivery);
-    // Если у поставки уже есть акт, заполняем форму
+
     if (delivery.actId) {
-      const existingAct = acts.find(a => a.act_id === delivery.actId);
+      const existingAct = acts.find((a) => a.act_id === delivery.actId);
       if (existingAct) {
         setActFormData({
           act_type: existingAct.act_type,
@@ -252,124 +246,115 @@ export default function DeliveryPage() {
         employee_id: "",
       });
     }
+
     setIsActModalOpen(true);
   };
 
-  // Фильтруем сотрудников только с должностью "кладовщик"
   const storekeepers = useMemo(() => {
-    return employees.filter(emp => emp.employee_post === "Кладовщик");
+    return employees.filter((emp) => emp.employee_post === "Кладовщик");
   }, [employees]);
 
-  // Функция для сохранения/обновления акта
   const handleSaveAct = async () => {
     if (!selectedDelivery) return;
-    
+
     if (!actFormData.employee_id) {
       alert("Выберите сотрудника");
       return;
     }
-    
+
     setIsCreating(true);
-    
+
     try {
       const today = new Date();
-      const formattedDate = today.toISOString().split('T')[0];
-      
+      const formattedDate = today.toISOString().split("T")[0];
+
       const actData = {
         act_type: actFormData.act_type,
         act_date: formattedDate,
         employee_id: parseInt(actFormData.employee_id),
       };
-      
+
       let actId: number;
-      
+
       if (selectedDelivery.actId) {
-        // Обновляем существующий акт
         const updateResponse = await fetch(`http://localhost:8000/api/table/act/`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             act_id: selectedDelivery.actId,
-            ...actData
+            ...actData,
           }),
         });
-        
+
         if (!updateResponse.ok) {
-          throw new Error('Ошибка обновления акта');
+          throw new Error("Ошибка обновления акта");
         }
-        
+
         actId = selectedDelivery.actId;
       } else {
-        // Создаем новый акт
-        const createResponse = await fetch('http://localhost:8000/api/table/act/', {
-          method: 'POST',
+        const createResponse = await fetch("http://localhost:8000/api/table/act/", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(actData),
         });
-        
+
         if (!createResponse.ok) {
-          throw new Error('Ошибка создания акта');
+          throw new Error("Ошибка создания акта");
         }
-        
+
         const result = await createResponse.json();
         actId = result.id;
-        
-        // Обновляем поставку, добавляя act_id
+
         const updateDeliveryResponse = await fetch(`http://localhost:8000/api/table/delivery/`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             delivery_id: selectedDelivery.id,
-            act_id: actId
+            act_id: actId,
           }),
         });
-        
+
         if (!updateDeliveryResponse.ok) {
-          throw new Error('Ошибка обновления поставки');
+          throw new Error("Ошибка обновления поставки");
         }
       }
-      
-      alert('Акт успешно сохранен');
+
+      alert("Акт успешно сохранен");
       await fetchAllData();
       setIsActModalOpen(false);
       setSelectedDelivery(null);
-      
     } catch (err) {
-      console.error('Ошибка:', err);
-      alert('Ошибка сохранения акта: ' + (err instanceof Error ? err.message : 'Неизвестная ошибка'));
+      console.error("Ошибка:", err);
+      alert("Ошибка сохранения акта: " + (err instanceof Error ? err.message : "Неизвестная ошибка"));
     } finally {
       setIsCreating(false);
     }
   };
 
-  // Функция для получения wood_id для поставки
   const getWoodIdForDelivery = (delivery: DeliveryItem): number | undefined => {
-    if (delivery.wood_id) {
-      return delivery.wood_id;
-    }
-    
-    const contract = contracts.find(c => c.suppliers_contract_id === delivery.suppliers_contract_id);
+    if (delivery.wood_id) return delivery.wood_id;
+
+    const contract = contracts.find((c) => c.suppliers_contract_id === delivery.suppliers_contract_id);
     if (!contract) return undefined;
-    
-    const supplierWoodItem = supplierWood.find(sw => sw.supplier_id === contract.supplier_id);
+
+    const supplierWoodItem = supplierWood.find((sw) => sw.supplier_id === contract.supplier_id);
     return supplierWoodItem?.wood_id;
   };
 
-  // Функция для открытия карточки товара
   const handleProductClick = (woodId?: number) => {
     if (!woodId) {
       alert("Информация о материале недоступна (ID не найден)");
       return;
     }
-    
-    const product = products.find(p => p.wood_id === woodId);
-    
+
+    const product = products.find((p) => p.wood_id === woodId);
+
     if (product) {
       setSelectedProduct(product);
       setIsProductModalOpen(true);
@@ -378,95 +363,101 @@ export default function DeliveryPage() {
     }
   };
 
-  const handleSort = (key: SortConfig['key']) => {
-    setSortConfig(prev => ({
+  const handleSort = (key: SortConfig["key"]) => {
+    setSortConfig((prev) => ({
       key,
-      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
   };
 
-  const handleStatusChange = async (deliveryId: number, newStatus: string, woodId?: number, scope?: number, supplierId?: number) => {
+  const handleStatusChange = async (
+    deliveryId: number,
+    newStatus: string,
+    woodId?: number,
+    scope?: number
+  ) => {
     setUpdatingStatus(deliveryId);
-    
+
     try {
-      const currentDelivery = deliveries.find(d => d.delivery_id === deliveryId);
+      const currentDelivery = deliveries.find((d) => d.delivery_id === deliveryId);
       if (!currentDelivery) {
-        throw new Error('Поставка не найдена');
+        throw new Error("Поставка не найдена");
       }
-      
-      if (newStatus === 'доставлено' && currentDelivery.delivery_status !== 'доставлено') {
+
+      if (newStatus === "доставлено" && currentDelivery.delivery_status !== "доставлено") {
         if (woodId && scope) {
           await updateStorage(woodId, scope, true);
         }
       }
-      
-      if (currentDelivery.delivery_status === 'доставлено' && newStatus !== 'доставлено') {
+
+      if (currentDelivery.delivery_status === "доставлено" && newStatus !== "доставлено") {
         if (woodId && scope) {
           await updateStorage(woodId, scope, false);
         }
       }
-      
+
       const response = await fetch(`http://localhost:8000/api/table/delivery/`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           delivery_id: deliveryId,
-          delivery_status: newStatus
+          delivery_status: newStatus,
         }),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Ошибка обновления статуса');
+        throw new Error(error.error || "Ошибка обновления статуса");
       }
-      
-      setDeliveries(prev => prev.map(delivery => 
-        delivery.delivery_id === deliveryId 
-          ? { ...delivery, delivery_status: newStatus }
-          : delivery
-      ));
-      
+
+      setDeliveries((prev) =>
+        prev.map((delivery) =>
+          delivery.delivery_id === deliveryId
+            ? { ...delivery, delivery_status: newStatus }
+            : delivery
+        )
+      );
     } catch (err) {
-      console.error('Ошибка обновления статуса:', err);
-      alert('Ошибка обновления статуса поставки');
+      console.error("Ошибка обновления статуса:", err);
+      alert("Ошибка обновления статуса поставки");
     } finally {
       setUpdatingStatus(null);
     }
   };
 
   const updateStorage = async (woodId: number, scope: number, isAdd: boolean) => {
-    const storageRes = await fetch('http://localhost:8000/api/table/storage/');
+    const storageRes = await fetch("http://localhost:8000/api/table/storage/");
     const currentStorage = await storageRes.json();
     const storageItem = currentStorage.find((s: StorageItem) => s.wood_id === woodId);
-    
+
     if (storageItem) {
       const currentScope = parseFloat(storageItem.current_scope);
       const newScope = isAdd ? currentScope + scope : currentScope - scope;
-      
-      await fetch('http://localhost:8000/api/table/storage/', {
-        method: 'PUT',
+
+      await fetch("http://localhost:8000/api/table/storage/", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           wood_id: woodId,
           current_scope: newScope.toString(),
-          storage_cell: storageItem.storage_cell
+          storage_cell: storageItem.storage_cell,
         }),
       });
     } else {
       const newStorageItem = {
         wood_id: woodId,
         current_scope: scope.toString(),
-        storage_cell: `Ячейка-${String.fromCharCode(65 + Math.floor((woodId - 1) / 10))}${((woodId - 1) % 10) + 1}`
+        storage_cell: `Ячейка-${String.fromCharCode(65 + Math.floor((woodId - 1) / 10))}${((woodId - 1) % 10) + 1}`,
       };
-      
-      await fetch('http://localhost:8000/api/table/storage/', {
-        method: 'POST',
+
+      await fetch("http://localhost:8000/api/table/storage/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(newStorageItem),
       });
@@ -475,15 +466,19 @@ export default function DeliveryPage() {
 
   const availableProducts = useMemo(() => {
     if (!formData.contractId) return [];
-    
-    const selectedContract = contracts.find(c => c.suppliers_contract_id === parseInt(formData.contractId));
+
+    const selectedContract = contracts.find(
+      (c) => c.suppliers_contract_id === parseInt(formData.contractId)
+    );
     if (!selectedContract) return [];
-    
-    const supplierWoodItems = supplierWood.filter(sw => sw.supplier_id === selectedContract.supplier_id);
-    
-    const availableProductsList = supplierWoodItems
-      .map(sw => {
-        const product = products.find(p => p.wood_id === sw.wood_id);
+
+    const supplierWoodItems = supplierWood.filter(
+      (sw) => sw.supplier_id === selectedContract.supplier_id
+    );
+
+    return supplierWoodItems
+      .map((sw) => {
+        const product = products.find((p) => p.wood_id === sw.wood_id);
         if (!product) return null;
         return {
           wood_id: sw.wood_id,
@@ -491,47 +486,52 @@ export default function DeliveryPage() {
           wood_grade: product.wood_grade,
           wood_length: product.wood_length,
           wood_cross_section: product.wood_cross_section,
-          available_quantity: sw.available_quantity
+          available_quantity: sw.available_quantity,
         };
       })
-      .filter(p => p !== null);
-    
-    return availableProductsList;
+      .filter((p) => p !== null);
   }, [formData.contractId, contracts, supplierWood, products]);
 
   const enrichedContracts = useMemo(() => {
-    return contracts.map(contract => {
-      const supplier = suppliers.find(s => s.supplier_id === contract.supplier_id);
+    return contracts.map((contract) => {
+      const supplier = suppliers.find((s) => s.supplier_id === contract.supplier_id);
       return {
         ...contract,
-        supplier_name: supplier?.supplier_name || 'Неизвестный поставщик',
-        supplier_id: contract.supplier_id
+        supplier_name: supplier?.supplier_name || "Неизвестный поставщик",
+        supplier_id: contract.supplier_id,
       };
     });
   }, [contracts, suppliers]);
 
   const getProductForDelivery = (delivery: DeliveryItem) => {
     if (delivery.wood_id) {
-      const product = products.find(p => p.wood_id === delivery.wood_id);
+      const product = products.find((p) => p.wood_id === delivery.wood_id);
       if (product) return `${product.wood_type} (${product.wood_grade})`;
     }
-    
-    const contract = contracts.find(c => c.suppliers_contract_id === delivery.suppliers_contract_id);
-    if (!contract) return 'Неизвестный материал';
-    
-    const supplierWoodItem = supplierWood.find(sw => sw.supplier_id === contract.supplier_id);
-    if (!supplierWoodItem) return 'Неизвестный материал';
-    
-    const product = products.find(p => p.wood_id === supplierWoodItem.wood_id);
-    return product ? `${product.wood_type} (${product.wood_grade})` : 'Неизвестный материал';
+
+    const contract = contracts.find((c) => c.suppliers_contract_id === delivery.suppliers_contract_id);
+    if (!contract) return "Неизвестный материал";
+
+    const supplierWoodItem = supplierWood.find((sw) => sw.supplier_id === contract.supplier_id);
+    if (!supplierWoodItem) return "Неизвестный материал";
+
+    const product = products.find((p) => p.wood_id === supplierWoodItem.wood_id);
+    return product ? `${product.wood_type} (${product.wood_grade})` : "Неизвестный материал";
   };
 
   const rows = useMemo<DeliveryRow[]>(() => {
     return deliveries.map((item) => {
-      const contract = contracts.find(c => c.suppliers_contract_id === item.suppliers_contract_id);
-      const supplier = suppliers.find(s => s.supplier_id === contract?.supplier_id);
+      const contract = contracts.find((c) => c.suppliers_contract_id === item.suppliers_contract_id);
+      const supplier = suppliers.find((s) => s.supplier_id === contract?.supplier_id);
       const woodId = getWoodIdForDelivery(item);
-      
+
+      const supplierWoodItem =
+        contract && woodId
+          ? supplierWood.find(
+              (sw) => sw.supplier_id === contract.supplier_id && sw.wood_id === woodId
+            )
+          : undefined;
+
       return {
         id: item.delivery_id,
         number: contract?.contract_number || `ДОГ-${item.suppliers_contract_id}`,
@@ -544,35 +544,22 @@ export default function DeliveryPage() {
         createRaw: item.delivery_date,
         scope: item.delivery_scope,
         actId: item.act_id,
-        woodId: woodId,
+        woodId,
         contractId: item.suppliers_contract_id,
+        contractDate: contract?.suppliers_contract_date,
+        offeredPrice: supplierWoodItem?.offered_price,
       };
     });
   }, [deliveries, contracts, suppliers, supplierWood, products]);
 
-  const uniqueSuppliers = useMemo(() => {
-    const suppliersList = rows.map(row => row.supplierName);
-    return [...new Set(suppliersList)].sort();
-  }, [rows]);
-
-  const uniqueProducts = useMemo(() => {
-    const productsList = rows.map(row => row.productName);
-    return [...new Set(productsList)].sort();
-  }, [rows]);
-
-  const uniqueStatuses = useMemo(() => {
-    const statusesList = rows.map(row => row.status);
-    return [...new Set(statusesList)];
-  }, [rows]);
-
-  const uniqueContracts = useMemo(() => {
-    const contractsList = rows.map(row => row.number);
-    return [...new Set(contractsList)].sort();
-  }, [rows]);
+  const uniqueSuppliers = useMemo(() => [...new Set(rows.map((row) => row.supplierName))].sort(), [rows]);
+  const uniqueProducts = useMemo(() => [...new Set(rows.map((row) => row.productName))].sort(), [rows]);
+  const uniqueStatuses = useMemo(() => [...new Set(rows.map((row) => row.status))], [rows]);
+  const uniqueContracts = useMemo(() => [...new Set(rows.map((row) => row.number))].sort(), [rows]);
 
   const filteredAndSortedRows = useMemo(() => {
     let filtered = rows;
-    
+
     const normalizedSearch = search.trim().toLowerCase();
     if (normalizedSearch) {
       filtered = filtered.filter(
@@ -582,210 +569,181 @@ export default function DeliveryPage() {
           row.supplierName.toLowerCase().includes(normalizedSearch)
       );
     }
-    
-    if (filters.contract) {
-      filtered = filtered.filter(row => row.number === filters.contract);
-    }
-    
-    if (filters.supplier) {
-      filtered = filtered.filter(row => row.supplierName === filters.supplier);
-    }
-    
-    if (filters.product) {
-      filtered = filtered.filter(row => row.productName === filters.product);
-    }
-    
-    if (filters.status) {
-      filtered = filtered.filter(row => row.status === filters.status);
-    }
-    
-    if (filters.dateFrom) {
-      filtered = filtered.filter(row => row.createRaw >= filters.dateFrom);
-    }
-    
-    if (filters.dateTo) {
-      filtered = filtered.filter(row => row.createRaw <= filters.dateTo);
-    }
-    
-    if (filters.minScope) {
-      const minScope = Number(filters.minScope);
-      filtered = filtered.filter(row => row.scope >= minScope);
-    }
-    
-    if (filters.maxScope) {
-      const maxScope = Number(filters.maxScope);
-      filtered = filtered.filter(row => row.scope <= maxScope);
-    }
-    
+
+    if (filters.contract) filtered = filtered.filter((row) => row.number === filters.contract);
+    if (filters.supplier) filtered = filtered.filter((row) => row.supplierName === filters.supplier);
+    if (filters.product) filtered = filtered.filter((row) => row.productName === filters.product);
+    if (filters.status) filtered = filtered.filter((row) => row.status === filters.status);
+    if (filters.dateFrom) filtered = filtered.filter((row) => row.createRaw >= filters.dateFrom);
+    if (filters.dateTo) filtered = filtered.filter((row) => row.createRaw <= filters.dateTo);
+    if (filters.minScope) filtered = filtered.filter((row) => row.scope >= Number(filters.minScope));
+    if (filters.maxScope) filtered = filtered.filter((row) => row.scope <= Number(filters.maxScope));
+
     filtered.sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortConfig.key) {
-        case 'number':
+        case "number":
           comparison = a.number.localeCompare(b.number);
           break;
-        case 'supplierName':
-          comparison = a.supplierName.localeCompare(b.supplierName, 'ru');
+        case "supplierName":
+          comparison = a.supplierName.localeCompare(b.supplierName, "ru");
           break;
-        case 'productName':
-          comparison = a.productName.localeCompare(b.productName, 'ru');
+        case "productName":
+          comparison = a.productName.localeCompare(b.productName, "ru");
           break;
-        case 'status':
-          comparison = a.status.localeCompare(b.status, 'ru');
+        case "status":
+          comparison = a.status.localeCompare(b.status, "ru");
           break;
-        case 'create':
+        case "create":
           comparison = a.createRaw.localeCompare(b.createRaw);
           break;
-        case 'scope':
+        case "scope":
           comparison = a.scope - b.scope;
           break;
       }
-      
-      return sortConfig.direction === 'asc' ? comparison : -comparison;
+
+      return sortConfig.direction === "asc" ? comparison : -comparison;
     });
-    
+
     return filtered;
   }, [search, filters, rows, sortConfig]);
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Вы уверены, что хотите удалить эту поставку?')) return;
-    
+    if (!confirm("Вы уверены, что хотите удалить эту поставку?")) return;
+
     try {
-      const deliveryToDelete = deliveries.find(d => d.delivery_id === id);
-      
-      if (deliveryToDelete?.delivery_status === 'доставлено' && deliveryToDelete.wood_id) {
+      const deliveryToDelete = deliveries.find((d) => d.delivery_id === id);
+
+      if (deliveryToDelete?.delivery_status === "доставлено" && deliveryToDelete.wood_id) {
         await updateStorage(deliveryToDelete.wood_id, deliveryToDelete.delivery_scope, false);
       }
-      
+
       const response = await fetch(`http://localhost:8000/api/table/delivery/?id=${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Ошибка удаления');
+        throw new Error(error.error || "Ошибка удаления");
       }
-      
-      alert('Поставка удалена');
+
+      alert("Поставка удалена");
       await fetchAllData();
-      
     } catch (err) {
-      console.error('Ошибка удаления:', err);
-      alert('Ошибка удаления поставки');
+      console.error("Ошибка удаления:", err);
+      alert("Ошибка удаления поставки");
     }
   };
 
   const handleCreate = async () => {
-    console.log("Начинаем создание поставки с данными:", formData);
-    
     if (!formData.contractId) {
       alert("Выберите контракт");
       return;
     }
-    
+
     if (!formData.woodId) {
       alert("Выберите материал");
       return;
     }
-    
+
     if (!formData.deliveryScope || parseFloat(formData.deliveryScope) <= 0) {
       alert("Введите корректный объем поставки");
       return;
     }
-    
+
     if (!formData.deliveryDate) {
       alert("Выберите дату поставки");
       return;
     }
-    
+
     setIsCreating(true);
-    
+
     try {
-      const selectedContract = contracts.find(c => c.suppliers_contract_id === parseInt(formData.contractId));
+      const selectedContract = contracts.find(
+        (c) => c.suppliers_contract_id === parseInt(formData.contractId)
+      );
       if (!selectedContract) {
         throw new Error("Контракт не найден");
       }
-      
+
       const supplierWoodItem = supplierWood.find(
-        sw => sw.supplier_id === selectedContract.supplier_id && 
-        sw.wood_id === parseInt(formData.woodId)
+        (sw) =>
+          sw.supplier_id === selectedContract.supplier_id &&
+          sw.wood_id === parseInt(formData.woodId)
       );
-      
+
       if (!supplierWoodItem) {
         throw new Error("Выбранный материал недоступен у этого поставщика");
       }
-      
+
       const deliveryScopeNum = parseFloat(formData.deliveryScope);
-      
       let actId = formData.actId;
-      
+
       if (!actId) {
         const actData = {
           act_type: formData.deliveryStatus === "нарушение" ? "акт о расхождении" : "акт приемки",
           act_date: formData.deliveryDate,
-          employee_id: 4
+          employee_id: 4,
         };
-        
-        const actResponse = await fetch('http://localhost:8000/api/table/act/', {
-          method: 'POST',
+
+        const actResponse = await fetch("http://localhost:8000/api/table/act/", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(actData),
         });
-        
+
         if (!actResponse.ok) {
-          throw new Error('Ошибка создания акта');
+          throw new Error("Ошибка создания акта");
         }
-        
+
         const actResult = await actResponse.json();
         actId = actResult.id;
       }
-      
+
       const deliveryData = {
         suppliers_contract_id: parseInt(formData.contractId),
         delivery_scope: deliveryScopeNum,
         delivery_date: formData.deliveryDate,
         delivery_status: formData.deliveryStatus,
         act_id: actId,
-        wood_id: parseInt(formData.woodId)
+        wood_id: parseInt(formData.woodId),
       };
-      
-      const response = await fetch('http://localhost:8000/api/table/delivery/', {
-        method: 'POST',
+
+      const response = await fetch("http://localhost:8000/api/table/delivery/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(deliveryData),
       });
-      
+
       if (!response.ok) {
         const error = await response.text();
-        throw new Error('Ошибка создания поставки: ' + error);
+        throw new Error("Ошибка создания поставки: " + error);
       }
-      
-      const result = await response.json();
-      console.log("Поставка создана, ID:", result.id);
-      
-      if (formData.deliveryStatus === 'доставлено') {
+
+      if (formData.deliveryStatus === "доставлено") {
         await updateStorage(parseInt(formData.woodId), deliveryScopeNum, true);
       }
-      
-      await fetch('http://localhost:8000/api/supplier_wood/update/', {
-        method: 'PUT',
+
+      await fetch("http://localhost:8000/api/supplier_wood/update/", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           supplier_id: selectedContract.supplier_id,
           wood_id: parseInt(formData.woodId),
-          available_quantity: supplierWoodItem.available_quantity - deliveryScopeNum
+          available_quantity: supplierWoodItem.available_quantity - deliveryScopeNum,
         }),
       });
-      
-      alert('Поставка успешно создана');
+
+      alert("Поставка успешно создана");
       await fetchAllData();
-      
+
       setFormData({
         contractId: "",
         woodId: "",
@@ -795,12 +753,58 @@ export default function DeliveryPage() {
         actId: "",
       });
       setIsModalOpen(false);
-      
     } catch (err) {
-      console.error('Ошибка:', err);
-      alert('Ошибка создания поставки: ' + (err instanceof Error ? err.message : 'Неизвестная ошибка'));
+      console.error("Ошибка:", err);
+      alert("Ошибка создания поставки: " + (err instanceof Error ? err.message : "Неизвестная ошибка"));
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleDownloadActPdf = async (row: DeliveryRow) => {
+    try {
+      const response = await fetch("/api/delivery-act/download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          city: "Сыктывкар",
+          actDate: row.createRaw,
+          contractDate: row.contractDate,
+          contractNumber: row.number,
+          supplierName: row.supplierName,
+          productName: row.productName,
+          price: row.offeredPrice || 0,
+          scope: row.scope,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = "Ошибка генерации PDF";
+
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {}
+
+        throw new Error(errorMessage);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `delivery-act-${row.number}-${row.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Ошибка скачивания акта PDF:", error);
+      alert(error instanceof Error ? error.message : "Не удалось скачать PDF");
     }
   };
 
@@ -813,17 +817,17 @@ export default function DeliveryPage() {
       dateFrom: "",
       dateTo: "",
       minScope: "",
-      maxScope: ""
+      maxScope: "",
     });
   };
 
   const getStatusClass = (status: string) => {
     switch (status) {
-      case 'доставлено':
+      case "доставлено":
         return styles.statusReady;
-      case 'нарушение':
+      case "нарушение":
         return styles.statusProgress;
-      case 'ожидается':
+      case "ожидается":
       default:
         return styles.statusDoing;
     }
@@ -831,34 +835,36 @@ export default function DeliveryPage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'доставлено':
-        return 'Доставлено';
-      case 'нарушение':
-        return 'Нарушение';
-      case 'ожидается':
-        return 'Ожидается';
+      case "доставлено":
+        return "Доставлено";
+      case "нарушение":
+        return "Нарушение";
+      case "ожидается":
+        return "Ожидается";
       default:
         return status;
     }
   };
 
-  const getSortIcon = (key: SortConfig['key']) => {
-    if (sortConfig.key !== key) return '';
-    return sortConfig.direction === 'asc' ? '↑' : '↓';
+  const getSortIcon = (key: SortConfig["key"]) => {
+    if (sortConfig.key !== key) return "";
+    return sortConfig.direction === "asc" ? "↑" : "↓";
   };
 
   const formatProductCharacteristics = (product: Product) => {
     const characteristics = [];
-    
-    if (product.wood_type) characteristics.push({ label: 'Порода', value: product.wood_type });
-    if (product.wood_grade) characteristics.push({ label: 'Сорт', value: product.wood_grade });
-    if (product.wood_length) characteristics.push({ label: 'Длина', value: `${product.wood_length} м` });
-    if (product.wood_diameter) characteristics.push({ label: 'Диаметр', value: `${product.wood_diameter} мм` });
-    if (product.wood_the_upper_end_diameter) characteristics.push({ label: 'Верхний диаметр', value: `${product.wood_the_upper_end_diameter} мм` });
-    if (product.wood_lower_end_diameter) characteristics.push({ label: 'Нижний диаметр', value: `${product.wood_lower_end_diameter} мм` });
-    if (product.wood_graduation) characteristics.push({ label: 'Градация', value: product.wood_graduation });
-    if (product.wood_cross_section) characteristics.push({ label: 'Сечение', value: product.wood_cross_section });
-    
+
+    if (product.wood_type) characteristics.push({ label: "Порода", value: product.wood_type });
+    if (product.wood_grade) characteristics.push({ label: "Сорт", value: product.wood_grade });
+    if (product.wood_length) characteristics.push({ label: "Длина", value: `${product.wood_length} м` });
+    if (product.wood_diameter) characteristics.push({ label: "Диаметр", value: `${product.wood_diameter} мм` });
+    if (product.wood_the_upper_end_diameter)
+      characteristics.push({ label: "Верхний диаметр", value: `${product.wood_the_upper_end_diameter} мм` });
+    if (product.wood_lower_end_diameter)
+      characteristics.push({ label: "Нижний диаметр", value: `${product.wood_lower_end_diameter} мм` });
+    if (product.wood_graduation) characteristics.push({ label: "Градация", value: product.wood_graduation });
+    if (product.wood_cross_section) characteristics.push({ label: "Сечение", value: product.wood_cross_section });
+
     return characteristics;
   };
 
@@ -879,7 +885,7 @@ export default function DeliveryPage() {
           />
           <span className={styles.searchIcon}>⌕</span>
         </div>
-        
+
         <button
           type="button"
           className={styles.filterButton}
@@ -887,10 +893,14 @@ export default function DeliveryPage() {
         >
           <span className={styles.filterIcon}>🔍</span>
           Фильтры
-          {(filters.supplier || filters.product || filters.status || filters.contract || 
-            filters.dateFrom || filters.dateTo || filters.minScope || filters.maxScope) && (
-            <span className={styles.filterBadge}>●</span>
-          )}
+          {(filters.supplier ||
+            filters.product ||
+            filters.status ||
+            filters.contract ||
+            filters.dateFrom ||
+            filters.dateTo ||
+            filters.minScope ||
+            filters.maxScope) && <span className={styles.filterBadge}>●</span>}
         </button>
       </div>
 
@@ -901,80 +911,86 @@ export default function DeliveryPage() {
               <label>Контракт</label>
               <select
                 value={filters.contract}
-                onChange={(e) => setFilters({...filters, contract: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, contract: e.target.value })}
                 className={styles.filterSelect}
               >
                 <option value="">Все контракты</option>
-                {uniqueContracts.map(contract => (
-                  <option key={contract} value={contract}>{contract}</option>
+                {uniqueContracts.map((contract) => (
+                  <option key={contract} value={contract}>
+                    {contract}
+                  </option>
                 ))}
               </select>
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Поставщик</label>
               <select
                 value={filters.supplier}
-                onChange={(e) => setFilters({...filters, supplier: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, supplier: e.target.value })}
                 className={styles.filterSelect}
               >
                 <option value="">Все поставщики</option>
-                {uniqueSuppliers.map(supplier => (
-                  <option key={supplier} value={supplier}>{supplier}</option>
+                {uniqueSuppliers.map((supplier) => (
+                  <option key={supplier} value={supplier}>
+                    {supplier}
+                  </option>
                 ))}
               </select>
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Материал</label>
               <select
                 value={filters.product}
-                onChange={(e) => setFilters({...filters, product: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, product: e.target.value })}
                 className={styles.filterSelect}
               >
                 <option value="">Все материалы</option>
-                {uniqueProducts.map(product => (
-                  <option key={product} value={product}>{product}</option>
+                {uniqueProducts.map((product) => (
+                  <option key={product} value={product}>
+                    {product}
+                  </option>
                 ))}
               </select>
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Статус</label>
               <select
                 value={filters.status}
-                onChange={(e) => setFilters({...filters, status: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                 className={styles.filterSelect}
               >
                 <option value="">Все статусы</option>
-                {uniqueStatuses.map(status => (
+                {uniqueStatuses.map((status) => (
                   <option key={status} value={status}>
                     {getStatusText(status)}
                   </option>
                 ))}
               </select>
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Дата от</label>
               <input
                 type="date"
                 value={filters.dateFrom}
-                onChange={(e) => setFilters({...filters, dateFrom: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
                 className={styles.filterInput}
               />
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Дата до</label>
               <input
                 type="date"
                 value={filters.dateTo}
-                onChange={(e) => setFilters({...filters, dateTo: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
                 className={styles.filterInput}
               />
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Объем от (м³)</label>
               <input
@@ -982,11 +998,11 @@ export default function DeliveryPage() {
                 step="0.01"
                 placeholder="0"
                 value={filters.minScope}
-                onChange={(e) => setFilters({...filters, minScope: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, minScope: e.target.value })}
                 className={styles.filterInput}
               />
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Объем до (м³)</label>
               <input
@@ -994,16 +1010,12 @@ export default function DeliveryPage() {
                 step="0.01"
                 placeholder="9999"
                 value={filters.maxScope}
-                onChange={(e) => setFilters({...filters, maxScope: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, maxScope: e.target.value })}
                 className={styles.filterInput}
               />
             </div>
-            
-            <button
-              type="button"
-              className={styles.clearFiltersButton}
-              onClick={clearFilters}
-            >
+
+            <button type="button" className={styles.clearFiltersButton} onClick={clearFilters}>
               Сбросить
             </button>
           </div>
@@ -1018,124 +1030,101 @@ export default function DeliveryPage() {
             onClick={() => setIsModalOpen(true)}
             title="Создать поставку"
           >
-            <Image
-              src="/icons/create-document.svg"
-              alt="Создать"
-              width={50}
-              height={50}
-            />
+            <Image src="/icons/create-document.svg" alt="Создать" width={50} height={50} />
           </button>
         </div>
 
         <div className={styles.table}>
           <div className={`${styles.row} ${styles.headerRow}`}>
-            <div 
-              className={`${styles.colNumber} ${styles.sortable}`}
-              onClick={() => handleSort('number')}
-            >
-              Номер контракта {getSortIcon('number')}
+            <div className={`${styles.colNumber} ${styles.sortable}`} onClick={() => handleSort("number")}>
+              Номер контракта {getSortIcon("number")}
             </div>
-            <div 
-              className={`${styles.colSupplier} ${styles.sortable}`}
-              onClick={() => handleSort('supplierName')}
-            >
-              Поставщик {getSortIcon('supplierName')}
+            <div className={`${styles.colSupplier} ${styles.sortable}`} onClick={() => handleSort("supplierName")}>
+              Поставщик {getSortIcon("supplierName")}
             </div>
-            <div 
-              className={`${styles.colProduct} ${styles.sortable}`}
-              onClick={() => handleSort('productName')}
-            >
-              Материал {getSortIcon('productName')}
+            <div className={`${styles.colProduct} ${styles.sortable}`} onClick={() => handleSort("productName")}>
+              Материал {getSortIcon("productName")}
             </div>
-            <div 
-              className={`${styles.colStatus} ${styles.sortable}`}
-              onClick={() => handleSort('status')}
-            >
-              Статус {getSortIcon('status')}
+            <div className={`${styles.colStatus} ${styles.sortable}`} onClick={() => handleSort("status")}>
+              Статус {getSortIcon("status")}
             </div>
-            <div 
-              className={`${styles.colDate} ${styles.sortable}`}
-              onClick={() => handleSort('create')}
-            >
-              Дата поставки {getSortIcon('create')}
+            <div className={`${styles.colDate} ${styles.sortable}`} onClick={() => handleSort("create")}>
+              Дата поставки {getSortIcon("create")}
             </div>
-            <div 
-              className={`${styles.colScope} ${styles.sortable}`}
-              onClick={() => handleSort('scope')}
-            >
-              Объем {getSortIcon('scope')}
+            <div className={`${styles.colScope} ${styles.sortable}`} onClick={() => handleSort("scope")}>
+              Объем {getSortIcon("scope")}
             </div>
             <div className={styles.colActions}>Действия</div>
             <div className={styles.colAct}>Акт</div>
           </div>
 
-          {filteredAndSortedRows.map((row) => {
-            return (
-              <div key={row.id} className={styles.row}>
-                <div className={styles.colNumber}>{row.number}</div>
-                <div className={styles.colSupplier}>{row.supplierName}</div>
-                <div 
-                  className={`${styles.colProduct} ${styles.clickableProduct}`}
-                  onClick={() => handleProductClick(row.woodId)}
-                  title="Нажмите для просмотра характеристик"
-                >
-                  {row.productName}
-                </div>
-                <div className={styles.colStatus}>
-                  <select
-                    value={row.status}
-                    onChange={(e) => handleStatusChange(row.id, e.target.value, row.woodId, row.scope, row.supplierId)}
-                    className={`${styles.statusSelect} ${getStatusClass(row.status)}`}
-                    disabled={updatingStatus === row.id}
-                  >
-                    <option value="ожидается">Ожидается</option>
-                    <option value="доставлено">Доставлено</option>
-                    <option value="нарушение">Нарушение</option>
-                  </select>
-                  {updatingStatus === row.id && (
-                    <span className={styles.statusUpdating}>⏳</span>
-                  )}
-                </div>
-                <div className={styles.colDate}>{row.create}</div>
-                <div className={styles.colScope}>{row.scope} м³</div>
-                <div className={styles.colActions}>
-                  <button
-                    type="button"
-                    className={styles.iconButton}
-                    onClick={() => handleDelete(row.id)}
-                    title="Удалить"
-                  >
-                    <Image
-                      src="/icons/delete-document.svg"
-                      alt="Удалить"
-                      width={50}
-                      height={50}
-                    />
-                  </button>
-                </div>
-                <div className={styles.colAct}>
-                  <button
-                    type="button"
-                    className={styles.actButton}
-                    onClick={() => handleOpenActModal(row)}
-                    title={row.actId ? "Редактировать акт" : "Создать акт"}
-                  >
-                    {row.actId ? (
-                      <>
-                        <span className={styles.actIcon}>📄</span>
-                        Акт №{row.actId}
-                      </>
-                    ) : (
-                      <>
-                        <span className={styles.actIcon}>➕</span>
-                        Создать акт
-                      </>
-                    )}
-                  </button>
-                </div>
+          {filteredAndSortedRows.map((row) => (
+            <div key={row.id} className={styles.row}>
+              <div className={styles.colNumber}>{row.number}</div>
+              <div className={styles.colSupplier}>{row.supplierName}</div>
+              <div
+                className={`${styles.colProduct} ${styles.clickableProduct}`}
+                onClick={() => handleProductClick(row.woodId)}
+                title="Нажмите для просмотра характеристик"
+              >
+                {row.productName}
               </div>
-            );
-          })}
+              <div className={styles.colStatus}>
+                <select
+                  value={row.status}
+                  onChange={(e) => handleStatusChange(row.id, e.target.value, row.woodId, row.scope)}
+                  className={`${styles.statusSelect} ${getStatusClass(row.status)}`}
+                  disabled={updatingStatus === row.id}
+                >
+                  <option value="ожидается">Ожидается</option>
+                  <option value="доставлено">Доставлено</option>
+                  <option value="нарушение">Нарушение</option>
+                </select>
+                {updatingStatus === row.id && <span className={styles.statusUpdating}>⏳</span>}
+              </div>
+              <div className={styles.colDate}>{row.create}</div>
+              <div className={styles.colScope}>{row.scope} м³</div>
+              <div className={styles.colActions}>
+                <button
+                  type="button"
+                  className={styles.iconButton}
+                  onClick={() => handleDownloadActPdf(row)}
+                  title="Скачать PDF"
+                >
+                  <Image src="/icons/download.svg" alt="Скачать" width={50} height={50} />
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.iconButton}
+                  onClick={() => handleDelete(row.id)}
+                  title="Удалить"
+                >
+                  <Image src="/icons/delete-document.svg" alt="Удалить" width={50} height={50} />
+                </button>
+              </div>
+              <div className={styles.colAct}>
+                <button
+                  type="button"
+                  className={styles.actButton}
+                  onClick={() => handleOpenActModal(row)}
+                  title={row.actId ? "Редактировать акт" : "Создать акт"}
+                >
+                  {row.actId ? (
+                    <>
+                      <span className={styles.actIcon}>📄</span>
+                      Акт №{row.actId}
+                    </>
+                  ) : (
+                    <>
+                      <span className={styles.actIcon}>➕</span>
+                      Создать акт
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          ))}
 
           {filteredAndSortedRows.length === 0 && (
             <div className={styles.empty}>Поставки не найдены</div>
@@ -1143,16 +1132,12 @@ export default function DeliveryPage() {
         </div>
       </div>
 
-      {/* Модальное окно создания поставки */}
       {isModalOpen && (
         <div className={styles.overlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalTitle}>
               Создание поставки
-              <button
-                className={styles.closeButton}
-                onClick={() => setIsModalOpen(false)}
-              >
+              <button className={styles.closeButton} onClick={() => setIsModalOpen(false)}>
                 ✕
               </button>
             </div>
@@ -1162,9 +1147,9 @@ export default function DeliveryPage() {
                 value={formData.contractId}
                 onChange={(e) => {
                   setFormData({
-                    ...formData, 
+                    ...formData,
                     contractId: e.target.value,
-                    woodId: ""
+                    woodId: "",
                   });
                 }}
                 className={styles.input}
@@ -1180,23 +1165,23 @@ export default function DeliveryPage() {
 
               <select
                 value={formData.woodId}
-                onChange={(e) => setFormData({...formData, woodId: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, woodId: e.target.value })}
                 className={styles.input}
                 required
                 disabled={!formData.contractId}
               >
                 <option value="">
-                  {!formData.contractId 
-                    ? "Сначала выберите контракт" 
-                    : availableProducts.length === 0 
-                      ? "Нет доступных материалов для этого поставщика" 
-                      : "Выберите материал *"}
+                  {!formData.contractId
+                    ? "Сначала выберите контракт"
+                    : availableProducts.length === 0
+                    ? "Нет доступных материалов для этого поставщика"
+                    : "Выберите материал *"}
                 </option>
                 {availableProducts.map((product) => (
                   <option key={product.wood_id} value={product.wood_id}>
                     {product.wood_type} - {product.wood_grade} сорт
-                    {product.wood_length ? `, длина: ${product.wood_length}м` : ''}
-                    {product.wood_cross_section ? `, сечение: ${product.wood_cross_section}` : ''}
+                    {product.wood_length ? `, длина: ${product.wood_length}м` : ""}
+                    {product.wood_cross_section ? `, сечение: ${product.wood_cross_section}` : ""}
                     {` (доступно: ${product.available_quantity} м³)`}
                   </option>
                 ))}
@@ -1207,7 +1192,7 @@ export default function DeliveryPage() {
                 step="0.01"
                 placeholder="Объем поставки (м³) *"
                 value={formData.deliveryScope}
-                onChange={(e) => setFormData({...formData, deliveryScope: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, deliveryScope: e.target.value })}
                 className={styles.input}
                 required
               />
@@ -1216,14 +1201,14 @@ export default function DeliveryPage() {
                 type="date"
                 placeholder="Дата поставки *"
                 value={formData.deliveryDate}
-                onChange={(e) => setFormData({...formData, deliveryDate: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, deliveryDate: e.target.value })}
                 className={styles.input}
                 required
               />
 
               <select
                 value={formData.deliveryStatus}
-                onChange={(e) => setFormData({...formData, deliveryStatus: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, deliveryStatus: e.target.value })}
                 className={styles.input}
               >
                 <option value="ожидается">Ожидается</option>
@@ -1246,7 +1231,7 @@ export default function DeliveryPage() {
                   onClick={handleCreate}
                   disabled={isCreating}
                 >
-                  {isCreating ? 'Создание...' : 'Создать'}
+                  {isCreating ? "Создание..." : "Создать"}
                 </button>
               </div>
             </div>
@@ -1254,20 +1239,16 @@ export default function DeliveryPage() {
         </div>
       )}
 
-      {/* Модальное окно для работы с актом */}
       {isActModalOpen && selectedDelivery && (
         <div className={styles.overlay} onClick={() => setIsActModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalTitle}>
               {selectedDelivery.actId ? "Редактирование акта" : "Создание акта"}
-              <button
-                className={styles.closeButton}
-                onClick={() => setIsActModalOpen(false)}
-              >
+              <button className={styles.closeButton} onClick={() => setIsActModalOpen(false)}>
                 ✕
               </button>
             </div>
-            
+
             <div className={styles.actInfo}>
               <div className={styles.actInfoRow}>
                 <span className={styles.actInfoLabel}>Поставка №:</span>
@@ -1290,13 +1271,13 @@ export default function DeliveryPage() {
                 <span className={styles.actInfoValue}>{selectedDelivery.scope} м³</span>
               </div>
             </div>
-            
+
             <div className={styles.form}>
               <div className={styles.formGroup}>
                 <label className={styles.label}>Тип акта *</label>
                 <select
                   value={actFormData.act_type}
-                  onChange={(e) => setActFormData({...actFormData, act_type: e.target.value})}
+                  onChange={(e) => setActFormData({ ...actFormData, act_type: e.target.value })}
                   className={styles.input}
                   required
                 >
@@ -1304,12 +1285,12 @@ export default function DeliveryPage() {
                   <option value="акт о расхождении">Акт о расхождении</option>
                 </select>
               </div>
-              
+
               <div className={styles.formGroup}>
                 <label className={styles.label}>Кладовщик *</label>
                 <select
                   value={actFormData.employee_id}
-                  onChange={(e) => setActFormData({...actFormData, employee_id: e.target.value})}
+                  onChange={(e) => setActFormData({ ...actFormData, employee_id: e.target.value })}
                   className={styles.input}
                   required
                 >
@@ -1321,15 +1302,13 @@ export default function DeliveryPage() {
                   ))}
                 </select>
               </div>
-              
+
               <div className={styles.formGroup}>
                 <label className={styles.label}>Дата акта</label>
-                <div className={styles.readonlyDate}>
-                  {new Date().toLocaleDateString('ru-RU')}
-                </div>
+                <div className={styles.readonlyDate}>{new Date().toLocaleDateString("ru-RU")}</div>
                 <small className={styles.hint}>Дата устанавливается автоматически</small>
               </div>
-              
+
               <div className={styles.modalActions}>
                 <button
                   type="button"
@@ -1345,7 +1324,7 @@ export default function DeliveryPage() {
                   onClick={handleSaveAct}
                   disabled={isCreating}
                 >
-                  {isCreating ? 'Сохранение...' : (selectedDelivery.actId ? 'Обновить' : 'Создать')}
+                  {isCreating ? "Сохранение..." : selectedDelivery.actId ? "Обновить" : "Создать"}
                 </button>
               </div>
             </div>
@@ -1353,20 +1332,19 @@ export default function DeliveryPage() {
         </div>
       )}
 
-      {/* Модальное окно карточки товара */}
       {isProductModalOpen && selectedProduct && (
         <div className={styles.overlay} onClick={() => setIsProductModalOpen(false)}>
-          <div className={`${styles.modal} ${styles.productModal}`} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={`${styles.modal} ${styles.productModal}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.modalTitle}>
               Характеристики материала
-              <button
-                className={styles.closeButton}
-                onClick={() => setIsProductModalOpen(false)}
-              >
+              <button className={styles.closeButton} onClick={() => setIsProductModalOpen(false)}>
                 ✕
               </button>
             </div>
-            
+
             <div className={styles.productContent}>
               <div className={styles.productInfo}>
                 {formatProductCharacteristics(selectedProduct).map((char, index) => (
@@ -1376,14 +1354,12 @@ export default function DeliveryPage() {
                   </div>
                 ))}
               </div>
-              
+
               {selectedProduct.wood_id && (
-                <div className={styles.productId}>
-                  ID материала: {selectedProduct.wood_id}
-                </div>
+                <div className={styles.productId}>ID материала: {selectedProduct.wood_id}</div>
               )}
             </div>
-            
+
             <div className={styles.modalActions}>
               <button
                 type="button"
