@@ -1,4 +1,3 @@
-// ActsPage.tsx
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -22,11 +21,6 @@ type Employee = {
   employee_post: string;
 };
 
-type Supplier = {
-  id: number;
-  name: string;
-};
-
 type SuppliersContract = {
   suppliers_contract_id: number;
   supplier_id: number;
@@ -44,6 +38,7 @@ type Delivery = {
   delivery_date: string;
   delivery_status: string;
   act_id: number;
+  wood_id?: number;
 };
 
 type Product = {
@@ -62,14 +57,31 @@ type SupplierWood = {
   supplier_id: number;
   wood_id: number;
   available_quantity: number;
+  offered_price?: number;
+};
+
+type SupplierInfo = {
+  supplier_id: number;
+  supplier_name: string;
+  supplier_address: string;
+  supplier_phone: string;
+  supplier_inn: string;
 };
 
 type DeliveryItem = {
   id: number;
   scope: number;
   date: string;
+  dateRaw: string;
   status: string;
   material: string;
+  contractNumber: string;
+  contractDate: string;
+  supplierId: number;
+  supplierName: string;
+  woodId?: number;
+  price?: number;
+  total?: number;
 };
 
 type Filters = {
@@ -91,6 +103,7 @@ export default function ActsPage() {
   const [suppliersContracts, setSuppliersContracts] = useState<SuppliersContract[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [supplierWood, setSupplierWood] = useState<SupplierWood[]>([]);
+  const [suppliers, setSuppliers] = useState<SupplierInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -116,129 +129,148 @@ export default function ActsPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const formatDate = (dateStr: string) => {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('ru-RU');
-};
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("ru-RU");
+  };
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-  try {
-    setLoading(true);
-
-    // Загрузка актов (обязательна)
-    let actsData = [];
     try {
-      const res = await fetch("http://localhost:8000/api/table/act/");
-      if (res.ok) actsData = await res.json();
-      else console.error("Ошибка загрузки актов:", res.status);
+      setLoading(true);
+
+      let actsData = [];
+      try {
+        const res = await fetch("http://localhost:8000/api/table/act/");
+        if (res.ok) actsData = await res.json();
+      } catch (err) {
+        console.error("Сетевая ошибка при загрузке актов:", err);
+      }
+
+      let employeesData = [];
+      try {
+        const res = await fetch("http://localhost:8000/api/table/employees/");
+        if (res.ok) employeesData = await res.json();
+      } catch (err) {
+        console.error("Сетевая ошибка при загрузке сотрудников:", err);
+      }
+      setEmployees(employeesData);
+
+      let deliveriesData = [];
+      try {
+        const res = await fetch("http://localhost:8000/api/table/delivery/");
+        if (res.ok) deliveriesData = await res.json();
+      } catch (err) {
+        console.error("Сетевая ошибка при загрузке поставок:", err);
+      }
+      setDeliveries(deliveriesData);
+
+      let contractsData = [];
+      try {
+        const res = await fetch("http://localhost:8000/api/table/suppliers_contract/");
+        if (res.ok) contractsData = await res.json();
+      } catch (err) {
+        console.error("Сетевая ошибка при загрузке контрактов:", err);
+      }
+      setSuppliersContracts(contractsData);
+
+      let productsData = [];
+      try {
+        const res = await fetch("http://localhost:8000/api/table/product/");
+        if (res.ok) productsData = await res.json();
+      } catch (err) {
+        console.error("Сетевая ошибка при загрузке продукции:", err);
+      }
+      setProducts(productsData);
+
+      let supplierWoodData = [];
+      try {
+        const res = await fetch("http://localhost:8000/api/table/supplier_wood/");
+        if (res.ok) supplierWoodData = await res.json();
+      } catch (err) {
+        console.error("Сетевая ошибка при загрузке supplier_wood:", err);
+      }
+      setSupplierWood(supplierWoodData);
+
+      let suppliersData = [];
+      try {
+        const res = await fetch("http://localhost:8000/api/table/suppliers_info/");
+        if (res.ok) suppliersData = await res.json();
+      } catch (err) {
+        console.error("Сетевая ошибка при загрузке suppliers_info:", err);
+      }
+      setSuppliers(suppliersData);
+
+      if (actsData.length > 0) {
+        const employeeMap = new Map<number, string>();
+        employeesData.forEach((emp: Employee) => {
+          employeeMap.set(emp.employee_id, emp.employee_name);
+        });
+
+        const mappedActs = actsData.map((act: any) => ({
+          id: act.act_id,
+          type: act.act_type,
+          date: formatDate(act.act_date),
+          dateRaw: act.act_date,
+          employeeName: employeeMap.get(act.employee_id) || "Неизвестный сотрудник",
+          employeeId: act.employee_id,
+        }));
+
+        setActs(mappedActs);
+      } else {
+        setActs([]);
+      }
     } catch (err) {
-      console.error("Сетевая ошибка при загрузке актов:", err);
+      console.error("Общая ошибка загрузки:", err);
+      alert("Ошибка загрузки данных. Подробности в консоли.");
+    } finally {
+      setLoading(false);
     }
-
-    // Загрузка сотрудников
-    let employeesData = [];
-    try {
-      const res = await fetch("http://localhost:8000/api/table/employees/");
-      if (res.ok) employeesData = await res.json();
-      else console.error("Ошибка загрузки сотрудников:", res.status);
-    } catch (err) {
-      console.error("Сетевая ошибка при загрузке сотрудников:", err);
-    }
-    setEmployees(employeesData);
-
-    // Загрузка поставок
-    let deliveriesData = [];
-    try {
-      const res = await fetch("http://localhost:8000/api/table/delivery/");
-      if (res.ok) deliveriesData = await res.json();
-      else console.error("Ошибка загрузки поставок:", res.status);
-    } catch (err) {
-      console.error("Сетевая ошибка при загрузке поставок:", err);
-    }
-    setDeliveries(deliveriesData);
-
-    // Загрузка контрактов поставщиков
-    let contractsData = [];
-    try {
-      const res = await fetch("http://localhost:8000/api/table/suppliers_contract/");
-      if (res.ok) contractsData = await res.json();
-      else console.error("Ошибка загрузки контрактов:", res.status);
-    } catch (err) {
-      console.error("Сетевая ошибка при загрузке контрактов:", err);
-    }
-    setSuppliersContracts(contractsData);
-
-    // Загрузка продукции
-    let productsData = [];
-    try {
-      const res = await fetch("http://localhost:8000/api/table/product/");
-      if (res.ok) productsData = await res.json();
-      else console.error("Ошибка загрузки продукции:", res.status);
-    } catch (err) {
-      console.error("Сетевая ошибка при загрузке продукции:", err);
-    }
-    setProducts(productsData);
-
-    // Загрузка связей поставщик-продукция
-    let supplierWoodData = [];
-    try {
-      const res = await fetch("http://localhost:8000/api/table/supplier_wood/");
-      if (res.ok) supplierWoodData = await res.json();
-      else console.error("Ошибка загрузки supplier_wood:", res.status);
-    } catch (err) {
-      console.error("Сетевая ошибка при загрузке supplier_wood:", err);
-    }
-    setSupplierWood(supplierWoodData);
-
-    // Маппинг актов (только если есть данные)
-    if (actsData.length > 0) {
-      const employeeMap = new Map<number, string>();
-      employeesData.forEach((emp: Employee) => {
-        employeeMap.set(emp.employee_id, emp.employee_name);
-      });
-
-      const mappedActs = actsData.map((act: any) => ({
-        id: act.act_id,
-        type: act.act_type,
-        date: formatDate(act.act_date),
-        dateRaw: act.act_date,
-        employeeName: employeeMap.get(act.employee_id) || "Неизвестный сотрудник",
-        employeeId: act.employee_id,
-      }));
-      setActs(mappedActs);
-    } else {
-      setActs([]);
-    }
-  } catch (err) {
-    console.error("Общая ошибка загрузки:", err);
-    alert("Ошибка загрузки данных. Подробности в консоли.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const getMaterialForDelivery = (delivery: Delivery): string => {
-    // Находим контракт, к которому относится поставка
+    if (delivery.wood_id) {
+      const product = products.find((p) => p.wood_id === delivery.wood_id);
+      if (product) {
+        return `${product.wood_type} (${product.wood_grade})`;
+      }
+    }
+
     const contract = suppliersContracts.find(
       (c) => c.suppliers_contract_id === delivery.suppliers_contract_id
     );
     if (!contract) return "Материал не указан";
 
-    // Ищем продукцию, которую поставляет этот поставщик
     const supplierWoodItem = supplierWood.find(
       (sw) => sw.supplier_id === contract.supplier_id
     );
+
     if (supplierWoodItem) {
       const product = products.find((p) => p.wood_id === supplierWoodItem.wood_id);
       if (product) {
         return `${product.wood_type} (${product.wood_grade})`;
       }
     }
+
     return "Материал не указан";
+  };
+
+  const getWoodIdForDelivery = (delivery: Delivery): number | undefined => {
+    if (delivery.wood_id) return delivery.wood_id;
+
+    const contract = suppliersContracts.find(
+      (c) => c.suppliers_contract_id === delivery.suppliers_contract_id
+    );
+    if (!contract) return undefined;
+
+    const supplierWoodItem = supplierWood.find(
+      (sw) => sw.supplier_id === contract.supplier_id
+    );
+
+    return supplierWoodItem?.wood_id;
   };
 
   const handleActClick = (act: ActItem) => {
@@ -246,21 +278,143 @@ export default function ActsPage() {
     setIsDeliveriesModalOpen(true);
   };
 
-  const actDeliveries = useMemo(() => {
+  const actDeliveries = useMemo<DeliveryItem[]>(() => {
     if (!selectedAct) return [];
 
     const deliveriesList = deliveries.filter((d) => d.act_id === selectedAct.id);
 
     return deliveriesList
-      .map((delivery) => ({
-        id: delivery.delivery_id,
-        scope: delivery.delivery_scope,
-        date: formatDate(delivery.delivery_date),
-        status: delivery.delivery_status,
-        material: getMaterialForDelivery(delivery),
-      }))
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [selectedAct, deliveries, suppliersContracts, products, supplierWood]);
+      .map((delivery) => {
+        const contract = suppliersContracts.find(
+          (c) => c.suppliers_contract_id === delivery.suppliers_contract_id
+        );
+
+        const supplier = suppliers.find((s) => s.supplier_id === contract?.supplier_id);
+        const woodId = getWoodIdForDelivery(delivery);
+
+        const supplierWoodItem =
+          contract && woodId
+            ? supplierWood.find(
+                (sw) => sw.supplier_id === contract.supplier_id && sw.wood_id === woodId
+              )
+            : undefined;
+
+        const price = Number(supplierWoodItem?.offered_price || 0);
+        const total = price * Number(delivery.delivery_scope || 0);
+
+        return {
+          id: delivery.delivery_id,
+          scope: delivery.delivery_scope,
+          date: formatDate(delivery.delivery_date),
+          dateRaw: delivery.delivery_date,
+          status: delivery.delivery_status,
+          material: getMaterialForDelivery(delivery),
+          contractNumber: contract?.contract_number || "",
+          contractDate: contract?.suppliers_contract_date || "",
+          supplierId: contract?.supplier_id || 0,
+          supplierName: supplier?.supplier_name || "Неизвестный поставщик",
+          woodId,
+          price,
+          total,
+        };
+      })
+      .sort((a, b) => new Date(b.dateRaw).getTime() - new Date(a.dateRaw).getTime());
+  }, [selectedAct, deliveries, suppliersContracts, products, supplierWood, suppliers]);
+
+  const handleDownloadActPdf = async (act: ActItem) => {
+    try {
+      const deliveriesForAct = deliveries.filter((d) => d.act_id === act.id);
+
+      if (deliveriesForAct.length === 0) {
+        alert("У этого акта нет поставок для формирования PDF");
+        return;
+      }
+
+      const items = deliveriesForAct.map((delivery, index) => {
+        const contract = suppliersContracts.find(
+          (c) => c.suppliers_contract_id === delivery.suppliers_contract_id
+        );
+
+        const supplier = suppliers.find((s) => s.supplier_id === contract?.supplier_id);
+        const woodId = getWoodIdForDelivery(delivery);
+
+        const supplierWoodItem =
+          contract && woodId
+            ? supplierWood.find(
+                (sw) => sw.supplier_id === contract.supplier_id && sw.wood_id === woodId
+              )
+            : undefined;
+
+        const productName = getMaterialForDelivery(delivery);
+        const price = Number(supplierWoodItem?.offered_price || 0);
+        const scope = Number(delivery.delivery_scope || 0);
+        const total = price * scope;
+
+        return {
+          index: index + 1,
+          productName,
+          price,
+          scope,
+          total,
+          contractNumber: contract?.contract_number || "",
+          contractDate: contract?.suppliers_contract_date || "",
+          supplierName: supplier?.supplier_name || "Неизвестный поставщик",
+        };
+      });
+
+      const firstItem = items[0];
+      const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
+      const vat = grandTotal * 0.2;
+      const totalWithVat = grandTotal + vat;
+
+      const response = await fetch("/api/acts/download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          actId: act.id,
+          actType: act.type,
+          actDate: act.dateRaw,
+          employeeName: act.employeeName,
+          city: "Сыктывкар",
+          supplierName: firstItem?.supplierName || "Поставщик",
+          contractNumber: firstItem?.contractNumber || "",
+          contractDate: firstItem?.contractDate || "",
+          items,
+          grandTotal,
+          vat,
+          totalWithVat,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = "Ошибка генерации PDF";
+
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {}
+
+        throw new Error(errorMessage);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `act-${act.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Ошибка скачивания PDF:", error);
+      alert(error instanceof Error ? error.message : "Не удалось скачать PDF");
+    }
+  };
 
   const handleSort = (key: SortConfig["key"]) => {
     setSortConfig((prev) => ({
@@ -296,7 +450,6 @@ export default function ActsPage() {
   const filteredAndSortedActs = useMemo(() => {
     let filtered = [...acts];
 
-    // Поиск
     const normalizedSearch = search.trim().toLowerCase();
     if (normalizedSearch) {
       filtered = filtered.filter(
@@ -307,27 +460,22 @@ export default function ActsPage() {
       );
     }
 
-    // Фильтр по типу
     if (filters.type) {
       filtered = filtered.filter((act) => act.type === filters.type);
     }
 
-    // Фильтр по сотруднику
     if (filters.employee) {
       filtered = filtered.filter((act) => act.employeeName === filters.employee);
     }
 
-    // Фильтр по дате (от)
     if (filters.dateFrom) {
       filtered = filtered.filter((act) => act.dateRaw >= filters.dateFrom);
     }
 
-    // Фильтр по дате (до)
     if (filters.dateTo) {
       filtered = filtered.filter((act) => act.dateRaw <= filters.dateTo);
     }
 
-    // Сортировка
     filtered.sort((a, b) => {
       let comparison = 0;
 
@@ -482,7 +630,6 @@ export default function ActsPage() {
         </button>
       </div>
 
-      {/* Панель фильтров */}
       {isFilterOpen && (
         <div className={styles.filterPanel}>
           <div className={styles.filterRow}>
@@ -613,6 +760,20 @@ export default function ActsPage() {
                 <button
                   type="button"
                   className={styles.iconButton}
+                  onClick={() => handleDownloadActPdf(act)}
+                  title="Скачать PDF"
+                >
+                  <Image
+                    src="/icons/download.svg"
+                    alt="Скачать"
+                    width={50}
+                    height={50}
+                  />
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.iconButton}
                   onClick={() => handleDeleteAct(act.id)}
                   title="Удалить"
                   disabled={deletingId === act.id}
@@ -634,7 +795,6 @@ export default function ActsPage() {
         </div>
       </div>
 
-      {/* Модальное окно создания акта */}
       {isModalOpen && (
         <div className={styles.overlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -695,7 +855,6 @@ export default function ActsPage() {
         </div>
       )}
 
-      {/* Модальное окно с поставками по акту */}
       {isDeliveriesModalOpen && selectedAct && (
         <div className={styles.overlay} onClick={() => setIsDeliveriesModalOpen(false)}>
           <div
