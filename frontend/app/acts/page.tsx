@@ -1,3 +1,5 @@
+// ActsPage.tsx - полная версия с поддержкой новых полей и редактированием
+
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -11,6 +13,11 @@ type ActItem = {
   dateRaw: string;
   employeeName: string;
   employeeId: number;
+  discrepancyType?: string;
+  defectQuantity?: number;
+  shortageQuantity?: number;
+  actuallyAccepted?: number;
+  defectDescription?: string;
 };
 
 type Employee = {
@@ -29,6 +36,9 @@ type SuppliersContract = {
   suppliers_contract_cost: number | null;
   suppliers_contract_scope: number | null;
   suppliers_contract_date: string;
+  contract_bank?: string;
+  contract_bik?: string;
+  contract_correspondent_account?: string;
 };
 
 type Delivery = {
@@ -66,6 +76,8 @@ type SupplierInfo = {
   supplier_address: string;
   supplier_phone: string;
   supplier_inn: string;
+  supplier_ogrnip?: string;
+  supplier_bank_account?: string;
 };
 
 type DeliveryItem = {
@@ -79,6 +91,7 @@ type DeliveryItem = {
   contractDate: string;
   supplierId: number;
   supplierName: string;
+  supplierAddress: string;
   woodId?: number;
   price?: number;
   total?: number;
@@ -107,6 +120,7 @@ export default function ActsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAct, setSelectedAct] = useState<ActItem | null>(null);
   const [isDeliveriesModalOpen, setIsDeliveriesModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -125,7 +139,19 @@ export default function ActsPage() {
     date: "",
     employeeId: "",
   });
+  const [editFormData, setEditFormData] = useState({
+    act_id: "",
+    act_type: "акт приемки",
+    act_date: "",
+    employee_id: "",
+    discrepancy_type: "",
+    defect_quantity: "0",
+    shortage_quantity: "0",
+    actually_accepted: "",
+    defect_description: "",
+  });
   const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const formatDate = (dateStr: string) => {
@@ -146,6 +172,7 @@ export default function ActsPage() {
       try {
         const res = await fetch("http://localhost:8000/api/table/act/");
         if (res.ok) actsData = await res.json();
+        else console.error("Ошибка загрузки актов:", res.status);
       } catch (err) {
         console.error("Сетевая ошибка при загрузке актов:", err);
       }
@@ -154,6 +181,7 @@ export default function ActsPage() {
       try {
         const res = await fetch("http://localhost:8000/api/table/employees/");
         if (res.ok) employeesData = await res.json();
+        else console.error("Ошибка загрузки сотрудников:", res.status);
       } catch (err) {
         console.error("Сетевая ошибка при загрузке сотрудников:", err);
       }
@@ -163,6 +191,7 @@ export default function ActsPage() {
       try {
         const res = await fetch("http://localhost:8000/api/table/delivery/");
         if (res.ok) deliveriesData = await res.json();
+        else console.error("Ошибка загрузки поставок:", res.status);
       } catch (err) {
         console.error("Сетевая ошибка при загрузке поставок:", err);
       }
@@ -172,6 +201,7 @@ export default function ActsPage() {
       try {
         const res = await fetch("http://localhost:8000/api/table/suppliers_contract/");
         if (res.ok) contractsData = await res.json();
+        else console.error("Ошибка загрузки контрактов:", res.status);
       } catch (err) {
         console.error("Сетевая ошибка при загрузке контрактов:", err);
       }
@@ -181,6 +211,7 @@ export default function ActsPage() {
       try {
         const res = await fetch("http://localhost:8000/api/table/product/");
         if (res.ok) productsData = await res.json();
+        else console.error("Ошибка загрузки продукции:", res.status);
       } catch (err) {
         console.error("Сетевая ошибка при загрузке продукции:", err);
       }
@@ -190,6 +221,7 @@ export default function ActsPage() {
       try {
         const res = await fetch("http://localhost:8000/api/table/supplier_wood/");
         if (res.ok) supplierWoodData = await res.json();
+        else console.error("Ошибка загрузки supplier_wood:", res.status);
       } catch (err) {
         console.error("Сетевая ошибка при загрузке supplier_wood:", err);
       }
@@ -199,6 +231,7 @@ export default function ActsPage() {
       try {
         const res = await fetch("http://localhost:8000/api/table/suppliers_info/");
         if (res.ok) suppliersData = await res.json();
+        else console.error("Ошибка загрузки suppliers_info:", res.status);
       } catch (err) {
         console.error("Сетевая ошибка при загрузке suppliers_info:", err);
       }
@@ -217,6 +250,11 @@ export default function ActsPage() {
           dateRaw: act.act_date,
           employeeName: employeeMap.get(act.employee_id) || "Неизвестный сотрудник",
           employeeId: act.employee_id,
+          discrepancyType: act.discrepancy_type,
+          defectQuantity: act.defect_quantity !== null ? parseFloat(act.defect_quantity) : 0,
+          shortageQuantity: act.shortage_quantity !== null ? parseFloat(act.shortage_quantity) : 0,
+          actuallyAccepted: act.actually_accepted !== null ? parseFloat(act.actually_accepted) : undefined,
+          defectDescription: act.defect_description,
         }));
 
         setActs(mappedActs);
@@ -228,6 +266,82 @@ export default function ActsPage() {
       alert("Ошибка загрузки данных. Подробности в консоли.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenEditModal = (act: ActItem) => {
+    setSelectedAct(act);
+    setEditFormData({
+      act_id: act.id.toString(),
+      act_type: act.type,
+      act_date: act.dateRaw,
+      employee_id: act.employeeId.toString(),
+      discrepancy_type: act.discrepancyType || "",
+      defect_quantity: (act.defectQuantity || 0).toString(),
+      shortage_quantity: (act.shortageQuantity || 0).toString(),
+      actually_accepted: act.actuallyAccepted !== undefined ? act.actuallyAccepted.toString() : "",
+      defect_description: act.defectDescription || "",
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateAct = async () => {
+    if (!editFormData.act_date) {
+      alert("Введите дату акта");
+      return;
+    }
+
+    if (!editFormData.employee_id) {
+      alert("Выберите сотрудника");
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      const payload: any = {
+        act_id: parseInt(editFormData.act_id),
+        act_type: editFormData.act_type,
+        act_date: editFormData.act_date,
+        employee_id: parseInt(editFormData.employee_id),
+      };
+
+      if (editFormData.act_type === "акт о расхождении") {
+        if (editFormData.discrepancy_type) {
+          payload.discrepancy_type = editFormData.discrepancy_type;
+        }
+        payload.defect_quantity = parseFloat(editFormData.defect_quantity) || 0;
+        payload.shortage_quantity = parseFloat(editFormData.shortage_quantity) || 0;
+        if (editFormData.actually_accepted) {
+          payload.actually_accepted = parseFloat(editFormData.actually_accepted);
+        }
+        if (editFormData.defect_description) {
+          payload.defect_description = editFormData.defect_description;
+        }
+      }
+
+      const response = await fetch("http://localhost:8000/api/table/act/", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Ошибка обновления акта");
+      }
+
+      alert("Акт успешно обновлён");
+      await fetchData();
+      setIsEditModalOpen(false);
+      setSelectedAct(null);
+    } catch (err) {
+      console.error("Ошибка:", err);
+      alert(err instanceof Error ? err.message : "Ошибка обновления акта");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -313,6 +427,7 @@ export default function ActsPage() {
           contractDate: contract?.suppliers_contract_date || "",
           supplierId: contract?.supplier_id || 0,
           supplierName: supplier?.supplier_name || "Неизвестный поставщик",
+          supplierAddress: supplier?.supplier_address || "",
           woodId,
           price,
           total,
@@ -359,6 +474,9 @@ export default function ActsPage() {
           contractNumber: contract?.contract_number || "",
           contractDate: contract?.suppliers_contract_date || "",
           supplierName: supplier?.supplier_name || "Неизвестный поставщик",
+          supplierAddress: supplier?.supplier_address || "",
+          woodId,
+          deliveryDate: delivery.delivery_date,
         };
       });
 
@@ -379,36 +497,43 @@ export default function ActsPage() {
           employeeName: act.employeeName,
           city: "Сыктывкар",
           supplierName: firstItem?.supplierName || "Поставщик",
+          supplierAddress: firstItem?.supplierAddress || "",
           contractNumber: firstItem?.contractNumber || "",
           contractDate: firstItem?.contractDate || "",
           items,
           grandTotal,
           vat,
           totalWithVat,
+          discrepancyType: act.discrepancyType,
+          defectQuantity: act.defectQuantity,
+          shortageQuantity: act.shortageQuantity,
+          actuallyAccepted: act.actuallyAccepted,
+          defectDescription: act.defectDescription,
+          deliveryDate: firstItem?.deliveryDate || "",
+          productName: firstItem?.productName || "Товар",
+          unit: "м³",
+          price: firstItem?.price || 0,
+          documentedQuantity: firstItem?.scope || 0,
         }),
       });
 
       if (!response.ok) {
         let errorMessage = "Ошибка генерации PDF";
-
         try {
           const errorData = await response.json();
           errorMessage = errorData.error || errorMessage;
         } catch {}
-
         throw new Error(errorMessage);
       }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-
       const a = document.createElement("a");
       a.href = url;
       a.download = `act-${act.id}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
-
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Ошибка скачивания PDF:", error);
@@ -520,7 +645,7 @@ export default function ActsPage() {
         employee_id: parseInt(formData.employeeId, 10),
       };
 
-      const response = await fetch("http://localhost:8000/api/act/create/", {
+      const response = await fetch("http://localhost:8000/api/table/act/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -760,6 +885,15 @@ export default function ActsPage() {
                 <button
                   type="button"
                   className={styles.iconButton}
+                  onClick={() => handleOpenEditModal(act)}
+                  title="Редактировать"
+                >
+                  ✏️
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.iconButton}
                   onClick={() => handleDownloadActPdf(act)}
                   title="Скачать PDF"
                 >
@@ -795,6 +929,7 @@ export default function ActsPage() {
         </div>
       </div>
 
+      {/* Модальное окно создания акта */}
       {isModalOpen && (
         <div className={styles.overlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -855,6 +990,148 @@ export default function ActsPage() {
         </div>
       )}
 
+      {/* Модальное окно редактирования акта */}
+      {isEditModalOpen && selectedAct && (
+        <div className={styles.overlay} onClick={() => setIsEditModalOpen(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalTitle}>
+              Редактирование акта №{selectedAct.id}
+              <button className={styles.closeButton} onClick={() => setIsEditModalOpen(false)}>
+                ✕
+              </button>
+            </div>
+            <div className={styles.form}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Тип акта</label>
+                <select
+                  value={editFormData.act_type}
+                  onChange={(e) => setEditFormData({ ...editFormData, act_type: e.target.value })}
+                  className={styles.input}
+                >
+                  <option value="акт приемки">Акт приемки</option>
+                  <option value="акт о расхождении">Акт о расхождении</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Дата акта</label>
+                <input
+                  type="date"
+                  value={editFormData.act_date}
+                  onChange={(e) => setEditFormData({ ...editFormData, act_date: e.target.value })}
+                  className={styles.input}
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Сотрудник</label>
+                <select
+                  value={editFormData.employee_id}
+                  onChange={(e) => setEditFormData({ ...editFormData, employee_id: e.target.value })}
+                  className={styles.input}
+                  required
+                >
+                  <option value="">Выберите сотрудника</option>
+                  {employees.map((emp) => (
+                    <option key={emp.employee_id} value={emp.employee_id}>
+                      {emp.employee_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {editFormData.act_type === "акт о расхождении" && (
+                <>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Тип расхождения</label>
+                    <select
+                      value={editFormData.discrepancy_type}
+                      onChange={(e) => setEditFormData({ ...editFormData, discrepancy_type: e.target.value })}
+                      className={styles.input}
+                    >
+                      <option value="">Выберите тип расхождения</option>
+                      <option value="недостаток">Недостаток</option>
+                      <option value="брак">Брак</option>
+                      <option value="недостаток и брак">Недостаток и брак</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Количество брака (м³)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editFormData.defect_quantity}
+                        onChange={(e) => setEditFormData({ ...editFormData, defect_quantity: e.target.value })}
+                        className={styles.input}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Количество недостачи (м³)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editFormData.shortage_quantity}
+                        onChange={(e) => setEditFormData({ ...editFormData, shortage_quantity: e.target.value })}
+                        className={styles.input}
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Фактически принято (м³)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="Автоматический расчёт"
+                      value={editFormData.actually_accepted}
+                      onChange={(e) => setEditFormData({ ...editFormData, actually_accepted: e.target.value })}
+                      className={styles.input}
+                    />
+                    <small className={styles.hint}>
+                      При пустом поле будет автоматически рассчитано: объём поставки - брак - недостача
+                    </small>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Описание брака</label>
+                    <textarea
+                      placeholder="Опишите выявленный брак"
+                      value={editFormData.defect_description}
+                      onChange={(e) => setEditFormData({ ...editFormData, defect_description: e.target.value })}
+                      className={styles.textarea}
+                      rows={3}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => setIsEditModalOpen(false)}
+                  disabled={isUpdating}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="button"
+                  className={styles.submitButton}
+                  onClick={handleUpdateAct}
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? "Сохранение..." : "Сохранить"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно поставок по акту */}
       {isDeliveriesModalOpen && selectedAct && (
         <div className={styles.overlay} onClick={() => setIsDeliveriesModalOpen(false)}>
           <div
@@ -886,6 +1163,45 @@ export default function ActsPage() {
                 <span className={styles.actInfoLabel}>Дата акта:</span>
                 <span className={styles.actInfoValue}>{selectedAct.date}</span>
               </div>
+              {selectedAct.type === "акт о расхождении" && (
+                <>
+                  <div className={styles.actInfoRow}>
+                    <span className={styles.actInfoLabel}>Тип расхождения:</span>
+                    <span className={styles.actInfoValue}>
+                      {selectedAct.discrepancyType === "недостаток" && "Недостаток"}
+                      {selectedAct.discrepancyType === "брак" && "Брак"}
+                      {selectedAct.discrepancyType === "недостаток и брак" && "Недостаток и брак"}
+                      {!selectedAct.discrepancyType && "-"}
+                    </span>
+                  </div>
+                  <div className={styles.actInfoRow}>
+                    <span className={styles.actInfoLabel}>Брак:</span>
+                    <span className={styles.actInfoValue}>
+                      {selectedAct.defectQuantity?.toFixed(2) ?? "0.00"} м³
+                    </span>
+                  </div>
+                  <div className={styles.actInfoRow}>
+                    <span className={styles.actInfoLabel}>Недостача:</span>
+                    <span className={styles.actInfoValue}>
+                      {selectedAct.shortageQuantity?.toFixed(2) ?? "0.00"} м³
+                    </span>
+                  </div>
+                  <div className={styles.actInfoRow}>
+                    <span className={styles.actInfoLabel}>Фактически принято:</span>
+                    <span className={styles.actInfoValue}>
+                      {selectedAct.actuallyAccepted !== undefined && selectedAct.actuallyAccepted !== null
+                        ? `${selectedAct.actuallyAccepted.toFixed(2)} м³`
+                        : "-"}
+                    </span>
+                  </div>
+                  <div className={styles.actInfoRow}>
+                    <span className={styles.actInfoLabel}>Описание дефекта:</span>
+                    <span className={styles.actInfoValue}>
+                      {selectedAct.defectDescription || "-"}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className={styles.deliveriesSection}>

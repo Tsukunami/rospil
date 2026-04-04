@@ -1,5 +1,6 @@
 .page {
   width: 100%;
+  color: #1f1f1f;
 }
 
 .topBar {
@@ -94,13 +95,16 @@
   min-width: 170px;
 }
 
-.filterGroup label {
+.filterGroup label,
+.label {
   font-size: 13px;
   color: #444444;
 }
 
 .filterSelect,
-.filterInput {
+.filterInput,
+.input,
+.textarea {
   min-height: 40px;
   padding: 0 12px;
   border: 1px solid #9a9a9a;
@@ -109,10 +113,19 @@
   font-size: 14px;
   color: #1f1f1f;
   box-sizing: border-box;
+  width: 100%;
+}
+
+.textarea {
+  min-height: 90px;
+  resize: vertical;
+  padding: 10px 12px;
 }
 
 .filterSelect:focus,
-.filterInput:focus {
+.filterInput:focus,
+.input:focus,
+.textarea:focus {
   outline: none;
   border-color: #1f1f1f;
 }
@@ -134,7 +147,7 @@
 
 .tableWrapper {
   width: 100%;
-  max-width: 1260px;
+  max-width: 1400px;
   background: #f3eedf;
   border: 1px solid #8d8d8d;
   border-radius: 10px;
@@ -154,9 +167,9 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1.2fr 1.5fr 1.6fr 1.3fr 1.2fr 1fr 0.9fr 1.2fr;
+  grid-template-columns: 1.1fr 1.5fr 1.6fr 1.3fr 1.1fr 0.9fr 1fr 1.3fr;
   align-items: center;
-  min-height: 62px;
+  min-height: 54px;
   padding: 0 12px;
   border-top: 1px solid #b5b5b5;
   box-sizing: border-box;
@@ -165,7 +178,7 @@
 
 .headerRow {
   border-top: none;
-  min-height: 48px;
+  min-height: 46px;
 }
 
 .headerRow .colNumber,
@@ -202,20 +215,20 @@
   opacity: 0.7;
 }
 
+.colSupplier,
+.colProduct {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .clickableProduct {
   cursor: pointer;
   text-decoration: underline;
 }
 
 .clickableProduct:hover {
-  opacity: 0.7;
-}
-
-.colSupplier,
-.colProduct {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  opacity: 0.75;
 }
 
 .colScope {
@@ -226,11 +239,12 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  gap: 6px;
 }
 
 .iconButton {
-  width: 54px;
-  height: 54px;
+  width: 44px;
+  height: 44px;
   border: none;
   background: transparent;
   display: inline-flex;
@@ -248,7 +262,7 @@
 
 .statusSelect {
   width: 100%;
-  min-height: 38px;
+  min-height: 36px;
   padding: 0 10px;
   border: 1px solid #9a9a9a;
   border-radius: 8px;
@@ -281,7 +295,7 @@
 }
 
 .actButton {
-  min-height: 36px;
+  min-height: 34px;
   padding: 6px 10px;
   border: 1px solid #8d8d8d;
   border-radius: 8px;
@@ -300,7 +314,7 @@
 }
 
 .actIcon {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1;
 }
 
@@ -321,7 +335,8 @@
 }
 
 .modal {
-  width: 520px;
+  width: 560px;
+  max-width: calc(100vw - 40px);
   background: #f3eedf;
   border: 2px solid #1f1f1f;
   border-radius: 12px;
@@ -371,35 +386,14 @@
   gap: 6px;
 }
 
-.label {
-  font-size: 13px;
-  color: #444444;
-}
-
-.input {
-  width: 100%;
-  min-height: 42px;
-  padding: 10px 12px;
-  border: 1px solid #9a9a9a;
-  border-radius: 8px;
-  background: #ffffff;
-  font-size: 14px;
-  box-sizing: border-box;
-  color: #1f1f1f;
-}
-
-.input:focus {
-  outline: none;
-  border-color: #1f1f1f;
-}
-
-.hint {
-  font-size: 12px;
-  color: #666666;
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .readonlyDate {
-  min-height: 42px;
+  min-height: 40px;
   display: flex;
   align-items: center;
   padding: 0 12px;
@@ -408,6 +402,53 @@
   background: #faf6ec;
   color: #1f1f1f;
   font-size: 14px;
+}
+
+.hint {
+  font-size: 12px;
+  color: #666666;
+}
+
+.actInfo,
+.productContent {
+  background: #faf6ec;
+  border: 1px solid #c8c1b3;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.actInfoRow,
+.productChar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 14px;
+}
+
+.actInfoLabel,
+.charLabel {
+  color: #555555;
+}
+
+.actInfoValue,
+.charValue {
+  color: #1f1f1f;
+  font-weight: 500;
+  text-align: right;
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.productId {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #666666;
 }
 
 .modalActions {
@@ -447,42 +488,6 @@
 .submitButton:hover,
 .closeModalButton:hover {
   opacity: 0.92;
-}
-
-.actInfo,
-.productContent {
-  background: #faf6ec;
-  border: 1px solid #c8c1b3;
-  border-radius: 8px;
-  padding: 14px;
-  margin-bottom: 16px;
-}
-
-.actInfoRow,
-.productChar {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 4px 0;
-  font-size: 14px;
-}
-
-.actInfoLabel,
-.charLabel {
-  color: #555555;
-}
-
-.actInfoValue,
-.charValue {
-  color: #1f1f1f;
-  font-weight: 500;
-  text-align: right;
-}
-
-.productId {
-  margin-top: 10px;
-  font-size: 13px;
-  color: #666666;
 }
 
 .cancelButton:disabled,

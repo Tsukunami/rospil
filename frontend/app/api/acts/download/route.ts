@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
 import { getActHtml } from "@/lib/templates/actTemplate";
-import { getTerminationAgreementHtml } from "@/lib/templates/terminationAgreementTemplate";
+import { getDiscrepancyActHtml } from "@/lib/templates/discrepancyActTemplate";
 
 function formatDate(dateStr: string) {
   if (!dateStr) return "";
@@ -26,23 +26,64 @@ export async function POST(req: Request) {
       employeeName,
       city,
       supplierName,
+      supplierAddress,
       contractNumber,
       contractDate,
       items,
       grandTotal,
       vat,
       totalWithVat,
+
+      discrepancyType,
+      defectQuantity,
+      shortageQuantity,
+      actuallyAccepted,
+      defectDescription,
+      deliveryDate,
+      productName,
+      unit,
+      price,
+      documentedQuantity,
     } = body;
 
     let html = "";
 
     if (actType === "акт о расхождении") {
-      html = getTerminationAgreementHtml({
-        city: city || "Сыктывкар",
-        agreementDate: formatDate(actDate),
+      const numericPrice = Number(price || 0);
+      const numericDocumentedQuantity = Number(documentedQuantity || 0);
+      const numericActualQuantity = Number(actuallyAccepted || 0);
+      const numericShortageQuantity = Number(shortageQuantity || 0);
+      const numericDefectQuantity = Number(defectQuantity || 0);
+
+      const documentedSum = numericPrice * numericDocumentedQuantity;
+      const actualSum = numericPrice * numericActualQuantity;
+      const shortageSum = numericPrice * numericShortageQuantity;
+      const defectSum = numericPrice * numericDefectQuantity;
+
+      html = getDiscrepancyActHtml({
+        actDate: formatDate(actDate),
+        organizationName: "ООО «Роспил»",
+        organizationAddress: "г. Сыктывкар",
+        place: city || "Сыктывкар",
+        employeeName: employeeName || "",
+        supplierName: supplierName || "Поставщик",
+        supplierAddress: supplierAddress || "",
         contractNumber: contractNumber || "",
         contractDate: formatDate(contractDate),
-        supplierName: supplierName || "Поставщик",
+        deliveryDate: formatDate(deliveryDate),
+        productName: productName || "Товар",
+        unit: unit || "м³",
+        price: numericPrice,
+        documentedQuantity: numericDocumentedQuantity,
+        actualQuantity: numericActualQuantity,
+        shortageQuantity: numericShortageQuantity,
+        defectQuantity: numericDefectQuantity,
+        discrepancyType: discrepancyType || "",
+        defectDescription: defectDescription || "",
+        documentedSum,
+        actualSum,
+        shortageSum,
+        defectSum,
       });
     } else {
       html = getActHtml({

@@ -1,3 +1,5 @@
+// DeliveryPage.tsx - полная версия с поддержкой новых полей в актах
+
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -22,6 +24,9 @@ type SupplierContract = {
   suppliers_contract_cost: number;
   suppliers_contract_scope: number;
   suppliers_contract_date: string;
+  contract_bank?: string;
+  contract_bik?: string;
+  contract_correspondent_account?: string;
 };
 
 type Supplier = {
@@ -30,6 +35,8 @@ type Supplier = {
   supplier_address: string;
   supplier_phone: string;
   supplier_inn: string;
+  supplier_ogrnip?: string;
+  supplier_bank_account?: string;
 };
 
 type Product = {
@@ -63,6 +70,11 @@ type Act = {
   act_date: string;
   employee_id: number;
   employee_name?: string;
+  discrepancy_type?: string;
+  defect_quantity?: number;
+  shortage_quantity?: number;
+  actually_accepted?: number;
+  defect_description?: string;
 };
 
 type Employee = {
@@ -155,6 +167,11 @@ export default function DeliveryPage() {
   const [actFormData, setActFormData] = useState({
     act_type: "акт приемки",
     employee_id: "",
+    discrepancy_type: "",
+    defect_quantity: "0",
+    shortage_quantity: "0",
+    actually_accepted: "",
+    defect_description: "",
   });
 
   const [formData, setFormData] = useState({
@@ -233,17 +250,32 @@ export default function DeliveryPage() {
         setActFormData({
           act_type: existingAct.act_type,
           employee_id: existingAct.employee_id.toString(),
+          discrepancy_type: existingAct.discrepancy_type || "",
+          defect_quantity: (existingAct.defect_quantity || 0).toString(),
+          shortage_quantity: (existingAct.shortage_quantity || 0).toString(),
+          actually_accepted: existingAct.actually_accepted !== undefined ? existingAct.actually_accepted.toString() : "",
+          defect_description: existingAct.defect_description || "",
         });
       } else {
         setActFormData({
           act_type: "акт приемки",
           employee_id: "",
+          discrepancy_type: "",
+          defect_quantity: "0",
+          shortage_quantity: "0",
+          actually_accepted: "",
+          defect_description: "",
         });
       }
     } else {
       setActFormData({
         act_type: "акт приемки",
         employee_id: "",
+        discrepancy_type: "",
+        defect_quantity: "0",
+        shortage_quantity: "0",
+        actually_accepted: "",
+        defect_description: "",
       });
     }
 
@@ -268,11 +300,25 @@ export default function DeliveryPage() {
       const today = new Date();
       const formattedDate = today.toISOString().split("T")[0];
 
-      const actData = {
+      const actData: any = {
         act_type: actFormData.act_type,
         act_date: formattedDate,
         employee_id: parseInt(actFormData.employee_id),
       };
+
+      if (actFormData.act_type === "акт о расхождении") {
+        if (actFormData.discrepancy_type) {
+          actData.discrepancy_type = actFormData.discrepancy_type;
+        }
+        actData.defect_quantity = parseFloat(actFormData.defect_quantity) || 0;
+        actData.shortage_quantity = parseFloat(actFormData.shortage_quantity) || 0;
+        if (actFormData.actually_accepted) {
+          actData.actually_accepted = parseFloat(actFormData.actually_accepted);
+        }
+        if (actFormData.defect_description) {
+          actData.defect_description = actFormData.defect_description;
+        }
+      }
 
       let actId: number;
 
@@ -763,6 +809,8 @@ export default function DeliveryPage() {
 
   const handleDownloadActPdf = async (row: DeliveryRow) => {
     try {
+      const act = acts.find((a) => a.act_id === row.actId);
+      
       const response = await fetch("/api/delivery-act/download", {
         method: "POST",
         headers: {
@@ -777,6 +825,12 @@ export default function DeliveryPage() {
           productName: row.productName,
           price: row.offeredPrice || 0,
           scope: row.scope,
+          actType: act?.act_type,
+          discrepancyType: act?.discrepancy_type,
+          defectQuantity: act?.defect_quantity,
+          shortageQuantity: act?.shortage_quantity,
+          actuallyAccepted: act?.actually_accepted,
+          defectDescription: act?.defect_description,
         }),
       });
 
@@ -1302,6 +1356,73 @@ export default function DeliveryPage() {
                   ))}
                 </select>
               </div>
+
+              {actFormData.act_type === "акт о расхождении" && (
+                <>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Тип расхождения</label>
+                    <select
+                      value={actFormData.discrepancy_type}
+                      onChange={(e) => setActFormData({ ...actFormData, discrepancy_type: e.target.value })}
+                      className={styles.input}
+                    >
+                      <option value="">Выберите тип расхождения</option>
+                      <option value="недостаток">Недостаток</option>
+                      <option value="брак">Брак</option>
+                      <option value="недостаток и брак">Недостаток и брак</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Количество брака (м³)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={actFormData.defect_quantity}
+                        onChange={(e) => setActFormData({ ...actFormData, defect_quantity: e.target.value })}
+                        className={styles.input}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Количество недостачи (м³)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={actFormData.shortage_quantity}
+                        onChange={(e) => setActFormData({ ...actFormData, shortage_quantity: e.target.value })}
+                        className={styles.input}
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Фактически принято (м³)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="Автоматический расчёт"
+                      value={actFormData.actually_accepted}
+                      onChange={(e) => setActFormData({ ...actFormData, actually_accepted: e.target.value })}
+                      className={styles.input}
+                    />
+                    <small className={styles.hint}>
+                      При пустом поле будет автоматически рассчитано: объём поставки - брак - недостача
+                    </small>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Описание брака</label>
+                    <textarea
+                      placeholder="Опишите выявленный брак"
+                      value={actFormData.defect_description}
+                      onChange={(e) => setActFormData({ ...actFormData, defect_description: e.target.value })}
+                      className={styles.textarea}
+                      rows={3}
+                    />
+                  </div>
+                </>
+              )}
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>Дата акта</label>
