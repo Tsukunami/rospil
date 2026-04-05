@@ -571,3 +571,29 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+.cardTitleClickable {
+  padding: 10px 12px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1f1f1f;
+  cursor: pointer;
+  text-decoration: underline;
+  border-bottom: 1px solid #8d8d8d;
+}
+
+.cardTitleClickable:hover {
+  opacity: 0.75;
+}
+
+.supplierModal {
+  width: 950px;
+  max-width: calc(100vw - 40px);
+}
+
+.modalActionsBetween {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}

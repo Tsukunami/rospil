@@ -57,12 +57,13 @@ export default function SuppliersPage() {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const [selectedSupplier, setSelectedSupplier] = useState<SupplierWithProducts | null>(null);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [isProductInfoModalOpen, setIsProductInfoModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [expandedSuppliers, setExpandedSuppliers] = useState<Set<number>>(new Set());
+
+  const [selectedSupplier, setSelectedSupplier] = useState<SupplierWithProducts | null>(null);
+  const [isSupplierDetailsOpen, setIsSupplierDetailsOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -264,7 +265,7 @@ export default function SuppliersPage() {
 
       if (selectedSupplier?.supplier_id === id) {
         setSelectedSupplier(null);
-        setIsProductModalOpen(false);
+        setIsSupplierDetailsOpen(false);
       }
     } catch (err) {
       console.error("Ошибка удаления:", err);
@@ -291,14 +292,19 @@ export default function SuppliersPage() {
     }
   };
 
-  const openProductModal = (supplier: SupplierWithProducts) => {
+  const openSupplierDetails = (supplier: SupplierWithProducts) => {
+    setSelectedSupplier(supplier);
+    setIsSupplierDetailsOpen(true);
+  };
+
+  const openAddProductModal = (supplier: SupplierWithProducts) => {
     setSelectedSupplier(supplier);
     setProductFormData({
       wood_id: "",
       available_quantity: "",
       offered_price: "",
     });
-    setIsProductModalOpen(true);
+    setIsAddingProduct(true);
   };
 
   const handleAddProduct = async () => {
@@ -316,8 +322,6 @@ export default function SuppliersPage() {
       alert("Введите корректную цену");
       return;
     }
-
-    setIsAddingProduct(true);
 
     try {
       const productData = {
@@ -343,8 +347,14 @@ export default function SuppliersPage() {
       alert("Материал успешно добавлен");
       await fetchAllData();
 
+      const updatedSupplier = enrichedSuppliers.find(
+        (s) => s.supplier_id === selectedSupplier.supplier_id
+      );
+      if (updatedSupplier) {
+        setSelectedSupplier(updatedSupplier);
+      }
+
       setIsAddingProduct(false);
-      setIsProductModalOpen(false);
       setProductFormData({
         wood_id: "",
         available_quantity: "",
@@ -353,7 +363,6 @@ export default function SuppliersPage() {
     } catch (err) {
       console.error("Ошибка:", err);
       alert(err instanceof Error ? err.message : "Ошибка добавления материала");
-      setIsAddingProduct(false);
     }
   };
 
@@ -436,7 +445,13 @@ export default function SuppliersPage() {
 
           return (
             <div key={supplier.supplier_id} className={styles.card}>
-              <div className={styles.cardTitle}>{supplier.supplier_name}</div>
+              <div
+                className={styles.cardTitleClickable}
+                onClick={() => openSupplierDetails(supplier)}
+                title="Нажмите для просмотра полной информации"
+              >
+                {supplier.supplier_name}
+              </div>
 
               <div className={styles.cardBody}>
                 <div className={styles.infoLine}>
@@ -450,8 +465,8 @@ export default function SuppliersPage() {
                 </div>
 
                 <div className={styles.infoLine}>
-                  <span className={styles.label}>Адрес:</span>
-                  <span className={styles.value}>{formatAddress(supplier.supplier_address)}</span>
+                  <span className={styles.label}>Материалов:</span>
+                  <span className={styles.value}>{supplier.products.length}</span>
                 </div>
 
                 <div className={styles.expandSection}>
@@ -461,23 +476,12 @@ export default function SuppliersPage() {
                     onClick={() => toggleExpand(supplier.supplier_id)}
                   >
                     <span className={styles.expandIcon}>{isExpanded ? "▼" : "▶"}</span>
-                    {isExpanded ? "Скрыть подробности" : "Показать подробнее"}
+                    {isExpanded ? "Скрыть материалы" : "Показать материалы"}
                   </button>
                 </div>
 
                 {isExpanded && (
                   <>
-                    <div className={styles.extraInfoBlock}>
-                      <div className={styles.infoLine}>
-                        <span className={styles.label}>ОГРНИП:</span>
-                        <span className={styles.value}>{supplier.supplier_ogrnip || "—"}</span>
-                      </div>
-                      <div className={styles.infoLine}>
-                        <span className={styles.label}>Р/с:</span>
-                        <span className={styles.value}>{supplier.supplier_bank_account || "—"}</span>
-                      </div>
-                    </div>
-
                     <div className={styles.productsHeader}>
                       <div className={styles.productsTitle}>
                         Материалы поставщика ({supplier.products.length})
@@ -485,7 +489,7 @@ export default function SuppliersPage() {
                       <button
                         type="button"
                         className={styles.addProductButton}
-                        onClick={() => openProductModal(supplier)}
+                        onClick={() => openAddProductModal(supplier)}
                       >
                         Добавить материал
                       </button>
@@ -557,29 +561,10 @@ export default function SuppliersPage() {
                         ))}
                       </div>
                     ) : (
-                      <div className={styles.noProducts}>
-                        Нет поставляемых материалов
-                      </div>
+                      <div className={styles.noProducts}>Нет поставляемых материалов</div>
                     )}
                   </>
                 )}
-
-                <div className={styles.cardActions}>
-                  <button
-                    type="button"
-                    className={styles.deleteButton}
-                    onClick={() => handleDelete(supplier.supplier_id)}
-                    title="Удалить поставщика"
-                  >
-                    <Image
-                      src="/icons/delete-document.svg"
-                      alt="Удалить"
-                      width={20}
-                      height={20}
-                    />
-                    Удалить поставщика
-                  </button>
-                </div>
               </div>
             </div>
           );
@@ -684,15 +669,18 @@ export default function SuppliersPage() {
         </div>
       )}
 
-      {isProductModalOpen && selectedSupplier && (
-        <div className={styles.overlay} onClick={() => setIsProductModalOpen(false)}>
+      {isSupplierDetailsOpen && selectedSupplier && (
+        <div className={styles.overlay} onClick={() => setIsSupplierDetailsOpen(false)}>
           <div
             className={`${styles.modal} ${styles.deliveriesModal}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className={styles.modalTitle}>
-              Материалы поставщика: {selectedSupplier.supplier_name}
-              <button className={styles.closeButton} onClick={() => setIsProductModalOpen(false)}>
+              {selectedSupplier.supplier_name}
+              <button
+                className={styles.closeButton}
+                onClick={() => setIsSupplierDetailsOpen(false)}
+              >
                 ✕
               </button>
             </div>
@@ -700,27 +688,50 @@ export default function SuppliersPage() {
             <div className={styles.contractInfo}>
               <div className={styles.contractInfoRow}>
                 <span className={styles.contractInfoLabel}>ИНН:</span>
-                <span className={styles.contractInfoValue}>{selectedSupplier.supplier_inn || "—"}</span>
+                <span className={styles.contractInfoValue}>
+                  {selectedSupplier.supplier_inn || "—"}
+                </span>
               </div>
               <div className={styles.contractInfoRow}>
                 <span className={styles.contractInfoLabel}>ОГРНИП:</span>
-                <span className={styles.contractInfoValue}>{selectedSupplier.supplier_ogrnip || "—"}</span>
+                <span className={styles.contractInfoValue}>
+                  {selectedSupplier.supplier_ogrnip || "—"}
+                </span>
               </div>
               <div className={styles.contractInfoRow}>
-                <span className={styles.contractInfoLabel}>Р/с:</span>
-                <span className={styles.contractInfoValue}>{selectedSupplier.supplier_bank_account || "—"}</span>
+                <span className={styles.contractInfoLabel}>Расчётный счёт:</span>
+                <span className={styles.contractInfoValue}>
+                  {selectedSupplier.supplier_bank_account || "—"}
+                </span>
               </div>
               <div className={styles.contractInfoRow}>
                 <span className={styles.contractInfoLabel}>Телефон:</span>
-                <span className={styles.contractInfoValue}>{formatPhone(selectedSupplier.supplier_phone)}</span>
+                <span className={styles.contractInfoValue}>
+                  {formatPhone(selectedSupplier.supplier_phone)}
+                </span>
               </div>
               <div className={styles.contractInfoRow}>
                 <span className={styles.contractInfoLabel}>Адрес:</span>
-                <span className={styles.contractInfoValue}>{formatAddress(selectedSupplier.supplier_address)}</span>
+                <span className={styles.contractInfoValue}>
+                  {formatAddress(selectedSupplier.supplier_address)}
+                </span>
               </div>
             </div>
 
             <div className={styles.deliveriesSection}>
+              <div className={styles.productsHeader}>
+                <div className={styles.productsTitle}>
+                  Материалы поставщика ({selectedSupplier.products.length})
+                </div>
+                <button
+                  type="button"
+                  className={styles.addProductButton}
+                  onClick={() => openAddProductModal(selectedSupplier)}
+                >
+                  Добавить материал
+                </button>
+              </div>
+
               <div className={styles.deliveriesHeader}>
                 <div className={styles.deliveryColMaterial}>Материал</div>
                 <div className={styles.deliveryColScope}>Доступно (м³)</div>
@@ -771,23 +782,28 @@ export default function SuppliersPage() {
               ) : (
                 <div className={styles.noDeliveries}>Нет поставляемых материалов</div>
               )}
-
-              <div className={styles.addProductSection}>
-                <button
-                  type="button"
-                  className={styles.addProductButton}
-                  onClick={() => setIsAddingProduct(true)}
-                >
-                  Добавить материал
-                </button>
-              </div>
             </div>
 
-            <div className={styles.modalActions}>
+            <div className={styles.modalActionsBetween}>
+              <button
+                type="button"
+                className={styles.deleteButton}
+                onClick={() => handleDelete(selectedSupplier.supplier_id)}
+                title="Удалить поставщика"
+              >
+                <Image
+                  src="/icons/delete-document.svg"
+                  alt="Удалить"
+                  width={20}
+                  height={20}
+                />
+                Удалить поставщика
+              </button>
+
               <button
                 type="button"
                 className={styles.closeModalButton}
-                onClick={() => setIsProductModalOpen(false)}
+                onClick={() => setIsSupplierDetailsOpen(false)}
               >
                 Закрыть
               </button>
@@ -884,7 +900,10 @@ export default function SuppliersPage() {
           >
             <div className={styles.modalTitle}>
               Характеристики материала
-              <button className={styles.closeButton} onClick={() => setIsProductInfoModalOpen(false)}>
+              <button
+                className={styles.closeButton}
+                onClick={() => setIsProductInfoModalOpen(false)}
+              >
                 ✕
               </button>
             </div>

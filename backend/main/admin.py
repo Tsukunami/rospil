@@ -124,10 +124,10 @@ class SuppliersInfoAdmin(admin.ModelAdmin):
     ordering = ('supplier_name',)
     list_per_page = 20
     inlines = [SupplierWoodInline]
-    
     fieldsets = (
+
         ('Основная информация', {
-            'fields': ('supplier_name', 'supplier_inn', 'supplier_phone', 'supplier_address')
+            'fields': ('supplier_name', 'supplier_inn', 'supplier_phone', 'supplier_address', 'supplier_ogrnip', 'supplier_bank_account')
         }),
     )
 
@@ -203,7 +203,8 @@ class SuppliersContractAdmin(admin.ModelAdmin):
             'fields': ('contract_number', 'supplier', 'suppliers_contract_date')
         }),
         ('Финансовая информация', {
-            'fields': ('suppliers_contract_cost', 'suppliers_contract_scope', 'suppliers_contract_status')
+            'fields': ('suppliers_contract_cost', 'suppliers_contract_scope', 'suppliers_contract_status',  'contract_bank', 'contract_bik',
+              'contract_correspondent_account')
         }),
     )
 
@@ -241,7 +242,8 @@ class ActAdmin(admin.ModelAdmin):
     list_filter = ('act_type', 'act_date')
     date_hierarchy = 'act_date'
     list_per_page = 20
-    
+    fields = ('act_type', 'act_date', 'employee', 'discrepancy_type', 'defect_quantity', 
+              'shortage_quantity', 'actually_accepted', 'defect_description')
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('employee')
 
