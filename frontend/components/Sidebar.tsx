@@ -15,43 +15,48 @@ const menuItems: MenuItem[] = [
   {
     label: "Поставщики",
     href: "/suppliers",
-    accessList: ["1", "4", "5"],
+    accessList: ["1", "4"],
   },
   {
     label: "Заключение договоров",
     href: "/contracts",
-    accessList: ["1", "3", "4", "5"],
+    accessList: ["1", "4"],
   },
   {
     label: "Поставка и приемка сырья",
     href: "/deliver",
-    accessList: ["2", "4", "5"],
+    accessList: ["2", "4"],
   },
   {
     label: "Акты",
     href: "/acts",
-    accessList: ["2", "4", "5"],
+    accessList: ["2", "4"],
   },
   {
     label: "Расход материалов",
     href: "/materials-expense",
-    accessList: ["2", "4", "5"],
+    accessList: ["1","2", "4"],
   },
   {
     label: "Расчеты с поставщиками",
     href: "/payments",
-    accessList: ["3", "4", "5"],
+    accessList: ["3", "4"],
   },
   {
     label: "Склад",
     href: "/storage",
-    accessList: ["1", "2", "4", "5"],
+    accessList: ["1","2", "4"],
   },
   {
     label: "Статистика",
     href: "/statistics",
-    accessList: ["1", "3", "4", "5"],
+    accessList: ["4"],
   },
+  {
+    label: "Админ панель",
+    href: "http://localhost:8000/admin/login/?next=/admin/",
+    accessList: ["5"],
+  }
 ];
 
 export default function Sidebar() {
