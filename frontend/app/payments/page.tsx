@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./PaymentsPage.module.css";
+import { useAuth } from "@/components/AuthContext";
 
 type PaymentItem = {
   suppliers_contract_id: number;
@@ -44,53 +45,62 @@ type Filters = {
 };
 
 type SortConfig = {
-  key: 'number' | 'supplierName' | 'status' | 'create' | 'cost' | 'scope';
-  direction: 'asc' | 'desc';
+  key: "number" | "supplierName" | "status" | "create" | "cost" | "scope";
+  direction: "asc" | "desc";
 };
 
 function formatDate(dateStr: string) {
-  if (!dateStr) return '';
+  if (!dateStr) return "";
   try {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('ru-RU');
+    return date.toLocaleDateString("ru-RU");
   } catch {
     return dateStr;
   }
 }
 
 function formatCurrency(amount: number) {
-  if (!amount) return '—';
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'RUB',
+  if (!amount) return "—";
+  return new Intl.NumberFormat("ru-RU", {
+    style: "currency",
+    currency: "RUB",
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 
 export default function PaymentsPage() {
+  const { user } = useAuth();
+
   const [payments, setPayments] = useState<PaymentItem[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  
-  // Состояния для сортировки и фильтрации
+
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: 'create',
-    direction: 'desc'
+    key: "create",
+    direction: "desc",
   });
+
   const [filters, setFilters] = useState<Filters>({
     supplier: "",
     status: "",
     dateFrom: "",
     dateTo: "",
     minCost: "",
-    maxCost: ""
+    maxCost: "",
   });
+
+  const isReadOnly = useMemo(() => {
+    if (!user) return false;
+
+    const access = (user as any).access;
+    const role = String((user as any).role || "").toLowerCase();
+
+    return access === "3" || access === 3 || role === "бухгалтер";
+  }, [user]);
 
   useEffect(() => {
     fetchAllData();
@@ -99,24 +109,23 @@ export default function PaymentsPage() {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      
+
       const [contractsRes, suppliersRes] = await Promise.all([
-        fetch('http://localhost:8000/api/table/suppliers_contract/'),
-        fetch('http://localhost:8000/api/table/suppliers_info/')
+        fetch("http://localhost:8000/api/table/suppliers_contract/"),
+        fetch("http://localhost:8000/api/table/suppliers_info/"),
       ]);
-      
-      if (!contractsRes.ok) throw new Error('Ошибка загрузки контрактов');
-      if (!suppliersRes.ok) throw new Error('Ошибка загрузки поставщиков');
-      
+
+      if (!contractsRes.ok) throw new Error("Ошибка загрузки контрактов");
+      if (!suppliersRes.ok) throw new Error("Ошибка загрузки поставщиков");
+
       const contractsData = await contractsRes.json();
       const suppliersData = await suppliersRes.json();
-      
+
       setPayments(contractsData);
       setSuppliers(suppliersData);
-      
     } catch (err) {
-      console.error('Ошибка загрузки:', err);
-      alert('Ошибка загрузки данных');
+      console.error("Ошибка загрузки:", err);
+      alert("Ошибка загрузки данных");
     } finally {
       setLoading(false);
     }
@@ -124,8 +133,8 @@ export default function PaymentsPage() {
 
   const rows = useMemo<PaymentRow[]>(() => {
     return payments.map((item) => {
-      const supplier = suppliers.find(s => s.supplier_id === item.supplier_id);
-      
+      const supplier = suppliers.find((s) => s.supplier_id === item.supplier_id);
+
       return {
         id: item.suppliers_contract_id,
         number: item.contract_number,
@@ -135,27 +144,24 @@ export default function PaymentsPage() {
         create: formatDate(item.suppliers_contract_date),
         createRaw: item.suppliers_contract_date,
         cost: item.suppliers_contract_cost || 0,
-        scope: item.suppliers_contract_scope || 0
+        scope: item.suppliers_contract_scope || 0,
       };
     });
   }, [payments, suppliers]);
 
-  // Получаем уникальные значения для фильтров
   const uniqueSuppliers = useMemo(() => {
-    const suppliersList = rows.map(row => row.supplierName);
+    const suppliersList = rows.map((row) => row.supplierName);
     return [...new Set(suppliersList)].sort();
   }, [rows]);
 
   const uniqueStatuses = useMemo(() => {
-    const statusesList = rows.map(row => row.status);
+    const statusesList = rows.map((row) => row.status);
     return [...new Set(statusesList)];
   }, [rows]);
 
-  // Применяем фильтры и сортировку
   const filteredAndSortedRows = useMemo(() => {
-    let filtered = rows;
-    
-    // Поиск по номеру контракта или поставщику
+    let filtered = [...rows];
+
     const normalizedSearch = search.trim().toLowerCase();
     if (normalizedSearch) {
       filtered = filtered.filter(
@@ -164,79 +170,70 @@ export default function PaymentsPage() {
           row.supplierName.toLowerCase().includes(normalizedSearch)
       );
     }
-    
-    // Фильтр по поставщику
+
     if (filters.supplier) {
-      filtered = filtered.filter(row => row.supplierName === filters.supplier);
+      filtered = filtered.filter((row) => row.supplierName === filters.supplier);
     }
-    
-    // Фильтр по статусу
+
     if (filters.status) {
-      filtered = filtered.filter(row => row.status === filters.status);
+      filtered = filtered.filter((row) => row.status === filters.status);
     }
-    
-    // Фильтр по дате (от)
+
     if (filters.dateFrom) {
-      filtered = filtered.filter(row => row.createRaw >= filters.dateFrom);
+      filtered = filtered.filter((row) => row.createRaw >= filters.dateFrom);
     }
-    
-    // Фильтр по дате (до)
+
     if (filters.dateTo) {
-      filtered = filtered.filter(row => row.createRaw <= filters.dateTo);
+      filtered = filtered.filter((row) => row.createRaw <= filters.dateTo);
     }
-    
-    // Фильтр по минимальной стоимости
+
     if (filters.minCost) {
       const minCost = Number(filters.minCost);
-      filtered = filtered.filter(row => row.cost >= minCost);
+      filtered = filtered.filter((row) => row.cost >= minCost);
     }
-    
-    // Фильтр по максимальной стоимости
+
     if (filters.maxCost) {
       const maxCost = Number(filters.maxCost);
-      filtered = filtered.filter(row => row.cost <= maxCost);
+      filtered = filtered.filter((row) => row.cost <= maxCost);
     }
-    
-    // Сортировка
+
     filtered.sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortConfig.key) {
-        case 'number':
+        case "number":
           comparison = a.number.localeCompare(b.number);
           break;
-        case 'supplierName':
-          comparison = a.supplierName.localeCompare(b.supplierName, 'ru');
+        case "supplierName":
+          comparison = a.supplierName.localeCompare(b.supplierName, "ru");
           break;
-        case 'status':
-          comparison = a.status.localeCompare(b.status, 'ru');
+        case "status":
+          comparison = a.status.localeCompare(b.status, "ru");
           break;
-        case 'create':
+        case "create":
           comparison = a.createRaw.localeCompare(b.createRaw);
           break;
-        case 'cost':
+        case "cost":
           comparison = a.cost - b.cost;
           break;
-        case 'scope':
+        case "scope":
           comparison = a.scope - b.scope;
           break;
       }
-      
-      return sortConfig.direction === 'asc' ? comparison : -comparison;
+
+      return sortConfig.direction === "asc" ? comparison : -comparison;
     });
-    
+
     return filtered;
   }, [search, filters, rows, sortConfig]);
 
-  // Функция для сортировки
-  const handleSort = (key: SortConfig['key']) => {
-    setSortConfig(prev => ({
+  const handleSort = (key: SortConfig["key"]) => {
+    setSortConfig((prev) => ({
       key,
-      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
   };
 
-  // Функция для сброса фильтров
   const clearFilters = () => {
     setFilters({
       supplier: "",
@@ -244,20 +241,21 @@ export default function PaymentsPage() {
       dateFrom: "",
       dateTo: "",
       minCost: "",
-      maxCost: ""
+      maxCost: "",
     });
   };
 
-  // Функция для обновления статуса через выпадающий список
   const handleStatusChange = async (contractId: number, newStatus: string) => {
+    if (isReadOnly) return;
+
     setUpdatingStatus(contractId);
-    
+
     try {
-      const contractToUpdate = payments.find(p => p.suppliers_contract_id === contractId);
+      const contractToUpdate = payments.find((p) => p.suppliers_contract_id === contractId);
       if (!contractToUpdate) {
         throw new Error("Контракт не найден");
       }
-      
+
       const updateData = {
         suppliers_contract_id: contractToUpdate.suppliers_contract_id,
         supplier_id: contractToUpdate.supplier_id,
@@ -265,70 +263,72 @@ export default function PaymentsPage() {
         suppliers_contract_status: newStatus,
         suppliers_contract_cost: contractToUpdate.suppliers_contract_cost,
         suppliers_contract_scope: contractToUpdate.suppliers_contract_scope,
-        suppliers_contract_date: contractToUpdate.suppliers_contract_date
+        suppliers_contract_date: contractToUpdate.suppliers_contract_date,
       };
-      
-      const response = await fetch('http://localhost:8000/api/table/suppliers_contract/', {
-        method: 'PUT',
+
+      const response = await fetch("http://localhost:8000/api/table/suppliers_contract/", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(updateData),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Ошибка обновления статуса');
+        throw new Error(error.error || "Ошибка обновления статуса");
       }
-      
-      // Обновляем локальное состояние
-      setPayments(prev => prev.map(p => 
-        p.suppliers_contract_id === contractId 
-          ? { ...p, suppliers_contract_status: newStatus }
-          : p
-      ));
-      
+
+      setPayments((prev) =>
+        prev.map((p) =>
+          p.suppliers_contract_id === contractId
+            ? { ...p, suppliers_contract_status: newStatus }
+            : p
+        )
+      );
     } catch (err) {
-      console.error('Ошибка обновления статуса:', err);
-      alert('Ошибка обновления статуса оплаты');
+      console.error("Ошибка обновления статуса:", err);
+      alert("Ошибка обновления статуса оплаты");
     } finally {
       setUpdatingStatus(null);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Вы уверены, что хотите удалить этот контракт? Это действие необратимо.')) return;
-    
+    if (isReadOnly) return;
+
+    if (!confirm("Вы уверены, что хотите удалить этот контракт? Это действие необратимо.")) {
+      return;
+    }
+
     try {
-      const response = await fetch(`http://localhost:8000/api/table/suppliers_contract/?id=${id}`, {
-        method: 'DELETE',
-      });
-      
+      const response = await fetch(
+        `http://localhost:8000/api/table/suppliers_contract/?id=${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Ошибка удаления');
+        throw new Error(error.error || "Ошибка удаления");
       }
-      
-      setPayments(prev => prev.filter(item => item.suppliers_contract_id !== id));
-      alert('Контракт удален');
-      
-    } catch (err) {
-      console.error('Ошибка удаления:', err);
-      alert('Ошибка удаления контракта');
-    }
-  };
 
-  const handleOpenPdf = (number: string) => {
-    window.open(`/docs/${number}.pdf`, "_blank");
+      setPayments((prev) => prev.filter((item) => item.suppliers_contract_id !== id));
+      alert("Контракт удален");
+    } catch (err) {
+      console.error("Ошибка удаления:", err);
+      alert("Ошибка удаления контракта");
+    }
   };
 
   const getStatusClass = (status: string) => {
     switch (status) {
-      case 'оплачено':
+      case "оплачено":
         return styles.statusReady;
-      case 'просрочено':
+      case "просрочено":
         return styles.statusProgress;
-      case 'срок оплаты не наступил':
+      case "срок оплаты не наступил":
       default:
         return styles.statusDoing;
     }
@@ -336,20 +336,20 @@ export default function PaymentsPage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'оплачено':
-        return 'Оплачено';
-      case 'просрочено':
-        return 'Просрочено';
-      case 'срок оплаты не наступил':
-        return 'Срок оплаты не наступил';
+      case "оплачено":
+        return "Оплачено";
+      case "просрочено":
+        return "Просрочено";
+      case "срок оплаты не наступил":
+        return "Срок оплаты не наступил";
       default:
         return status;
     }
   };
 
-  const getSortIcon = (key: SortConfig['key']) => {
-    if (sortConfig.key !== key) return '';
-    return sortConfig.direction === 'asc' ? '↑' : '↓';
+  const getSortIcon = (key: SortConfig["key"]) => {
+    if (sortConfig.key !== key) return "";
+    return sortConfig.direction === "asc" ? "↑" : "↓";
   };
 
   if (loading) {
@@ -369,7 +369,7 @@ export default function PaymentsPage() {
           />
           <span className={styles.searchIcon}>⌕</span>
         </div>
-        
+
         <button
           type="button"
           className={styles.filterButton}
@@ -377,13 +377,15 @@ export default function PaymentsPage() {
         >
           <span className={styles.filterIcon}>🔍</span>
           Фильтры
-          {(filters.supplier || filters.status || filters.dateFrom || filters.dateTo || filters.minCost || filters.maxCost) && (
-            <span className={styles.filterBadge}>●</span>
-          )}
+          {(filters.supplier ||
+            filters.status ||
+            filters.dateFrom ||
+            filters.dateTo ||
+            filters.minCost ||
+            filters.maxCost) && <span className={styles.filterBadge}>●</span>}
         </button>
       </div>
 
-      {/* Панель фильтров */}
       {isFilterOpen && (
         <div className={styles.filterPanel}>
           <div className={styles.filterRow}>
@@ -391,52 +393,54 @@ export default function PaymentsPage() {
               <label>Поставщик</label>
               <select
                 value={filters.supplier}
-                onChange={(e) => setFilters({...filters, supplier: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, supplier: e.target.value })}
                 className={styles.filterSelect}
               >
                 <option value="">Все поставщики</option>
-                {uniqueSuppliers.map(supplier => (
-                  <option key={supplier} value={supplier}>{supplier}</option>
+                {uniqueSuppliers.map((supplier) => (
+                  <option key={supplier} value={supplier}>
+                    {supplier}
+                  </option>
                 ))}
               </select>
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Статус</label>
               <select
                 value={filters.status}
-                onChange={(e) => setFilters({...filters, status: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                 className={styles.filterSelect}
               >
                 <option value="">Все статусы</option>
-                {uniqueStatuses.map(status => (
+                {uniqueStatuses.map((status) => (
                   <option key={status} value={status}>
                     {getStatusText(status)}
                   </option>
                 ))}
               </select>
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Дата от</label>
               <input
                 type="date"
                 value={filters.dateFrom}
-                onChange={(e) => setFilters({...filters, dateFrom: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
                 className={styles.filterInput}
               />
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Дата до</label>
               <input
                 type="date"
                 value={filters.dateTo}
-                onChange={(e) => setFilters({...filters, dateTo: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
                 className={styles.filterInput}
               />
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Стоимость от (₽)</label>
               <input
@@ -444,11 +448,11 @@ export default function PaymentsPage() {
                 step="1000"
                 placeholder="0"
                 value={filters.minCost}
-                onChange={(e) => setFilters({...filters, minCost: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, minCost: e.target.value })}
                 className={styles.filterInput}
               />
             </div>
-            
+
             <div className={styles.filterGroup}>
               <label>Стоимость до (₽)</label>
               <input
@@ -456,11 +460,11 @@ export default function PaymentsPage() {
                 step="1000"
                 placeholder="9999999"
                 value={filters.maxCost}
-                onChange={(e) => setFilters({...filters, maxCost: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, maxCost: e.target.value })}
                 className={styles.filterInput}
               />
             </div>
-            
+
             <button
               type="button"
               className={styles.clearFiltersButton}
@@ -473,101 +477,100 @@ export default function PaymentsPage() {
       )}
 
       <div className={styles.tableWrapper}>
-        <div className={styles.tableActions}>
-          <button
-            type="button"
-            className={styles.iconButton}
-            onClick={() => setIsModalOpen(true)}
-            title="Обновить статус оплаты"
-          >
-            <Image
-              src="/icons/create-document.svg"
-              alt="Обновить статус"
-              width={50}
-              height={50}
-            />
-          </button>
-        </div>
-
         <div className={styles.table}>
-          <div className={`${styles.row} ${styles.headerRow}`}>
-            <div 
+          <div className={`${styles.row} ${styles.headerRow} ${isReadOnly ? styles.readonlyRow : ""}`}>
+            <div
               className={`${styles.colNumber} ${styles.sortable}`}
-              onClick={() => handleSort('number')}
+              onClick={() => handleSort("number")}
             >
-              Номер контракта {getSortIcon('number')}
+              Номер контракта {getSortIcon("number")}
             </div>
-            <div 
+            <div
               className={`${styles.colSupplier} ${styles.sortable}`}
-              onClick={() => handleSort('supplierName')}
+              onClick={() => handleSort("supplierName")}
             >
-              Поставщик {getSortIcon('supplierName')}
+              Поставщик {getSortIcon("supplierName")}
             </div>
-            <div 
+            <div
               className={`${styles.colStatus} ${styles.sortable}`}
-              onClick={() => handleSort('status')}
+              onClick={() => handleSort("status")}
             >
-              Статус оплаты {getSortIcon('status')}
+              Статус оплаты {getSortIcon("status")}
             </div>
-            <div 
+            <div
               className={`${styles.colDate} ${styles.sortable}`}
-              onClick={() => handleSort('create')}
+              onClick={() => handleSort("create")}
             >
-              Дата контракта {getSortIcon('create')}
+              Дата контракта {getSortIcon("create")}
             </div>
-            <div 
+            <div
               className={`${styles.colCost} ${styles.sortable}`}
-              onClick={() => handleSort('cost')}
+              onClick={() => handleSort("cost")}
             >
-              Стоимость {getSortIcon('cost')}
+              Стоимость {getSortIcon("cost")}
             </div>
-            <div 
+            <div
               className={`${styles.colScope} ${styles.sortable}`}
-              onClick={() => handleSort('scope')}
+              onClick={() => handleSort("scope")}
             >
-              Объем {getSortIcon('scope')}
+              Объем {getSortIcon("scope")}
             </div>
-            <div className={styles.colActions}>Действия</div>
+            {!isReadOnly && <div className={styles.colActions}>Действия</div>}
           </div>
 
           {filteredAndSortedRows.map((row) => (
-            <div key={row.id} className={styles.row}>
+            <div
+              key={row.id}
+              className={`${styles.row} ${isReadOnly ? styles.readonlyRow : ""}`}
+            >
               <div className={styles.colNumber}>№{row.number}</div>
               <div className={styles.colSupplier}>{row.supplierName}</div>
+
               <div className={styles.colStatus}>
-                <select
-                  value={row.status}
-                  onChange={(e) => handleStatusChange(row.id, e.target.value)}
-                  className={`${styles.statusSelect} ${getStatusClass(row.status)}`}
-                  disabled={updatingStatus === row.id}
-                >
-                  <option value="срок оплаты не наступил">Срок оплаты не наступил</option>
-                  <option value="оплачено">Оплачено</option>
-                  <option value="просрочено">Просрочено</option>
-                </select>
-                {updatingStatus === row.id && (
-                  <span className={styles.statusUpdating}>⏳</span>
+                {isReadOnly ? (
+                  <span className={`${styles.statusBadge} ${getStatusClass(row.status)}`}>
+                    {getStatusText(row.status)}
+                  </span>
+                ) : (
+                  <>
+                    <select
+                      value={row.status}
+                      onChange={(e) => handleStatusChange(row.id, e.target.value)}
+                      className={`${styles.statusSelect} ${getStatusClass(row.status)}`}
+                      disabled={updatingStatus === row.id}
+                    >
+                      <option value="срок оплаты не наступил">Срок оплаты не наступил</option>
+                      <option value="оплачено">Оплачено</option>
+                      <option value="просрочено">Просрочено</option>
+                    </select>
+                    {updatingStatus === row.id && (
+                      <span className={styles.statusUpdating}>⏳</span>
+                    )}
+                  </>
                 )}
               </div>
+
               <div className={styles.colDate}>{row.create}</div>
               <div className={styles.colCost}>{formatCurrency(row.cost)}</div>
               <div className={styles.colScope}>{row.scope} м³</div>
-              <div className={styles.colActions}>
 
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  onClick={() => handleDelete(row.id)}
-                  title="Удалить контракт"
-                >
-                  <Image
-                    src="/icons/delete-document.svg"
-                    alt="Удалить"
-                    width={50}
-                    height={50}
-                  />
-                </button>
-              </div>
+              {!isReadOnly && (
+                <div className={styles.colActions}>
+                  <button
+                    type="button"
+                    className={styles.iconButton}
+                    onClick={() => handleDelete(row.id)}
+                    title="Удалить контракт"
+                  >
+                    <Image
+                      src="/icons/delete-document.svg"
+                      alt="Удалить"
+                      width={50}
+                      height={50}
+                    />
+                  </button>
+                </div>
+              )}
             </div>
           ))}
 

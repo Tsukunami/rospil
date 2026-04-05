@@ -275,3 +275,18 @@
   font-size: 14px;
   color: #666666;
 }
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.rowReadonly {
+  grid-template-columns: 1.2fr 1.5fr 1.5fr 1.2fr 1.2fr 1fr;
+}
