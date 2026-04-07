@@ -144,7 +144,45 @@
 .tableActions {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   padding: 10px 12px 0;
+}
+
+.selectedInfo {
+  margin: 10px 12px 0;
+  padding: 10px 12px;
+  border: 1px solid #c9bea7;
+  border-radius: 8px;
+  background: #faf6ec;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: #1f1f1f;
+}
+
+.selectedInfoText {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.clearSelectionButton {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid #8f8f8f;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.clearSelectionButton:hover {
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .table {
@@ -158,7 +196,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: minmax(220px, 2fr) minmax(180px, 1.4fr) minmax(130px, 1.2fr) 110px;
+  grid-template-columns: 52px minmax(220px, 2fr) minmax(180px, 1.4fr) minmax(130px, 1.2fr) 110px;
   align-items: center;
   min-height: 58px;
   padding: 0 12px;
@@ -171,6 +209,7 @@
   min-height: 48px;
 }
 
+.headerRow .colCheckbox,
 .headerRow .colProduct,
 .headerRow .colScope,
 .headerRow .colDate,
@@ -180,12 +219,26 @@
   font-weight: 500;
 }
 
+.colCheckbox,
 .colProduct,
 .colScope,
 .colDate,
 .colActions {
   font-size: 14px;
   color: #1f1f1f;
+}
+
+.colCheckbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.colCheckbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #1f1f1f;
 }
 
 .sortable {
@@ -254,7 +307,7 @@
 }
 
 .characteristicsBox {
-  padding: 0 12px 14px;
+  padding: 0 12px 14px 64px;
   color: #444444;
   font-size: 13px;
 }
@@ -423,6 +476,11 @@
   }
 
   .table {
-    min-width: 860px;
+    min-width: 920px;
+  }
+
+  .selectedInfo {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

@@ -13,21 +13,21 @@ type MenuItem = {
 
 const menuItems: MenuItem[] = [
   {
-    label: "Поставщики",
+    label: "Выбор поставщиков",
     href: "/suppliers",
-    accessList: ["1", "4"],
+    accessList: ["1", "4", "5"],
   },
   {
     label: "Заключение договоров",
     href: "/contracts",
-    accessList: ["1", "4"],
+    accessList: ["1", "3", "4", "5"],
   },
   {
     label: "Поставка и приемка сырья",
     href: "/deliver",
-    accessList: ["2", "4"],
+    accessList: ["2", "4", "5"],
   },
-  {
+    {
     label: "Акты",
     href: "/acts",
     accessList: ["2", "4"],
@@ -35,25 +35,25 @@ const menuItems: MenuItem[] = [
   {
     label: "Расход материалов",
     href: "/materials-expense",
-    accessList: ["1","2", "4"],
+    accessList: ["2", "4", "5"],
   },
   {
     label: "Расчеты с поставщиками",
     href: "/payments",
-    accessList: ["3", "4"],
+    accessList: ["3", "4", "5"],
   },
   {
     label: "Склад",
     href: "/storage",
-    accessList: ["1","2", "4"],
+    accessList: ["1", "2", "4", "5"],
   },
   {
     label: "Статистика",
     href: "/statistics",
-    accessList: ["4"],
+    accessList: ["1", "3", "4", "5"],
   },
   {
-    label: "Админ панель",
+    label: "Админ панель  ",
     href: "http://localhost:8000/admin/login/?next=/admin/",
     accessList: ["5"],
   }

@@ -13,6 +13,11 @@ function formatDate(dateStr: string) {
   }
 }
 
+function getSafeFilename(actId: string | number | undefined) {
+  const safeId = String(actId ?? "document").replace(/[^a-zA-Z0-9_-]/g, "_");
+  return `act-${safeId}.pdf`;
+}
+
 export async function POST(req: Request) {
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
 
@@ -33,7 +38,6 @@ export async function POST(req: Request) {
       grandTotal,
       vat,
       totalWithVat,
-
       discrepancyType,
       defectQuantity,
       shortageQuantity,
@@ -104,12 +108,13 @@ export async function POST(req: Request) {
 
     browser = await puppeteer.launch({
       headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
 
     await page.setContent(html, {
-      waitUntil: "networkidle0",
+      waitUntil: "domcontentloaded",
     });
 
     const pdf = await page.pdf({
@@ -123,11 +128,14 @@ export async function POST(req: Request) {
       },
     });
 
-    return new NextResponse(Buffer.from(pdf), {
+    const filename = getSafeFilename(actId);
+
+    return new NextResponse(Uint8Array.from(pdf), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="act-${actId}.pdf"`,
+        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Cache-Control": "no-store",
       },
     });
   } catch (error) {

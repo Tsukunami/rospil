@@ -1,5 +1,3 @@
-// DeliveryPage.tsx - полная версия с поддержкой новых полей в актах
-
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -22,7 +20,7 @@ type SupplierContract = {
   supplier_id: number;
   suppliers_contract_status: string;
   suppliers_contract_cost: number;
-  suppliers_contract_scope: number;
+  suppliers_contract_scope: number | null;
   suppliers_contract_date: string;
   contract_bank?: string;
   contract_bik?: string;
@@ -70,11 +68,11 @@ type Act = {
   act_date: string;
   employee_id: number;
   employee_name?: string;
-  discrepancy_type?: string;
+  discrepancy_type?: string | null;
   defect_quantity?: number;
   shortage_quantity?: number;
-  actually_accepted?: number;
-  defect_description?: string;
+  actually_accepted?: number | null;
+  defect_description?: string | null;
 };
 
 type Employee = {
@@ -82,7 +80,7 @@ type Employee = {
   employee_name: string;
   employee_pasport_number: string;
   employee_phone: string;
-  employee_post: string;
+  employee_post: string | null;
 };
 
 type DeliveryRow = {
@@ -121,11 +119,27 @@ type SortConfig = {
 
 function formatDate(dateStr: string) {
   if (!dateStr) return "";
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return dateStr;
+  return date.toLocaleDateString("ru-RU");
+}
+
+async function getErrorMessage(response: Response, fallback = "Ошибка запроса") {
   try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("ru-RU");
+    const data = await response.json();
+    return (
+      data?.error ||
+      data?.message ||
+      data?.detail ||
+      (typeof data === "string" ? data : JSON.stringify(data))
+    );
   } catch {
-    return dateStr;
+    try {
+      const text = await response.text();
+      return text || fallback;
+    } catch {
+      return fallback;
+    }
   }
 }
 
@@ -253,7 +267,10 @@ export default function DeliveryPage() {
           discrepancy_type: existingAct.discrepancy_type || "",
           defect_quantity: (existingAct.defect_quantity || 0).toString(),
           shortage_quantity: (existingAct.shortage_quantity || 0).toString(),
-          actually_accepted: existingAct.actually_accepted !== undefined ? existingAct.actually_accepted.toString() : "",
+          actually_accepted:
+            existingAct.actually_accepted !== undefined && existingAct.actually_accepted !== null
+              ? existingAct.actually_accepted.toString()
+              : "",
           defect_description: existingAct.defect_description || "",
         });
       } else {
@@ -283,7 +300,10 @@ export default function DeliveryPage() {
   };
 
   const storekeepers = useMemo(() => {
-    return employees.filter((emp) => emp.employee_post === "Кладовщик");
+    return employees.filter((emp) => {
+      const post = (emp.employee_post || "").trim().toLowerCase();
+      return post === "кладовщик";
+    });
   }, [employees]);
 
   const handleSaveAct = async () => {
@@ -300,30 +320,41 @@ export default function DeliveryPage() {
       const today = new Date();
       const formattedDate = today.toISOString().split("T")[0];
 
-      const actData: any = {
+      const actData: Record<string, unknown> = {
         act_type: actFormData.act_type,
         act_date: formattedDate,
-        employee_id: parseInt(actFormData.employee_id),
+        employee_id: parseInt(actFormData.employee_id, 10),
       };
 
       if (actFormData.act_type === "акт о расхождении") {
+        const defectQty = parseFloat(actFormData.defect_quantity) || 0;
+        const shortageQty = parseFloat(actFormData.shortage_quantity) || 0;
+
         if (actFormData.discrepancy_type) {
           actData.discrepancy_type = actFormData.discrepancy_type;
         }
-        actData.defect_quantity = parseFloat(actFormData.defect_quantity) || 0;
-        actData.shortage_quantity = parseFloat(actFormData.shortage_quantity) || 0;
-        if (actFormData.actually_accepted) {
-          actData.actually_accepted = parseFloat(actFormData.actually_accepted);
-        }
+
+        actData.defect_quantity = defectQty;
+        actData.shortage_quantity = shortageQty;
+        actData.actually_accepted = actFormData.actually_accepted
+          ? parseFloat(actFormData.actually_accepted)
+          : Math.max(0, selectedDelivery.scope - defectQty - shortageQty);
+
         if (actFormData.defect_description) {
           actData.defect_description = actFormData.defect_description;
         }
+      } else {
+        actData.defect_quantity = 0;
+        actData.shortage_quantity = 0;
+        actData.actually_accepted = selectedDelivery.scope;
+        actData.discrepancy_type = null;
+        actData.defect_description = null;
       }
 
       let actId: number;
 
       if (selectedDelivery.actId) {
-        const updateResponse = await fetch(`http://localhost:8000/api/table/act/`, {
+        const updateResponse = await fetch("http://localhost:8000/api/table/act/", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -335,7 +366,8 @@ export default function DeliveryPage() {
         });
 
         if (!updateResponse.ok) {
-          throw new Error("Ошибка обновления акта");
+          const errorMessage = await getErrorMessage(updateResponse, "Ошибка обновления акта");
+          throw new Error(errorMessage);
         }
 
         actId = selectedDelivery.actId;
@@ -349,13 +381,18 @@ export default function DeliveryPage() {
         });
 
         if (!createResponse.ok) {
-          throw new Error("Ошибка создания акта");
+          const errorMessage = await getErrorMessage(createResponse, "Ошибка создания акта");
+          throw new Error(errorMessage);
         }
 
         const result = await createResponse.json();
-        actId = result.id;
+        actId = result.act_id ?? result.id;
 
-        const updateDeliveryResponse = await fetch(`http://localhost:8000/api/table/delivery/`, {
+        if (!actId) {
+          throw new Error("Сервер не вернул ID созданного акта");
+        }
+
+        const updateDeliveryResponse = await fetch("http://localhost:8000/api/table/delivery/", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -367,7 +404,11 @@ export default function DeliveryPage() {
         });
 
         if (!updateDeliveryResponse.ok) {
-          throw new Error("Ошибка обновления поставки");
+          const errorMessage = await getErrorMessage(
+            updateDeliveryResponse,
+            "Ошибка обновления поставки"
+          );
+          throw new Error(errorMessage);
         }
       }
 
@@ -442,7 +483,7 @@ export default function DeliveryPage() {
         }
       }
 
-      const response = await fetch(`http://localhost:8000/api/table/delivery/`, {
+      const response = await fetch("http://localhost:8000/api/table/delivery/", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -454,8 +495,8 @@ export default function DeliveryPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Ошибка обновления статуса");
+        const errorMessage = await getErrorMessage(response, "Ошибка обновления статуса");
+        throw new Error(errorMessage);
       }
 
       setDeliveries((prev) =>
@@ -467,7 +508,7 @@ export default function DeliveryPage() {
       );
     } catch (err) {
       console.error("Ошибка обновления статуса:", err);
-      alert("Ошибка обновления статуса поставки");
+      alert("Ошибка обновления статуса поставки: " + (err instanceof Error ? err.message : ""));
     } finally {
       setUpdatingStatus(null);
     }
@@ -482,17 +523,22 @@ export default function DeliveryPage() {
       const currentScope = parseFloat(storageItem.current_scope);
       const newScope = isAdd ? currentScope + scope : currentScope - scope;
 
-      await fetch("http://localhost:8000/api/table/storage/", {
+      const response = await fetch("http://localhost:8000/api/table/storage/", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           wood_id: woodId,
-          current_scope: newScope.toString(),
+          current_scope: Math.max(0, newScope).toString(),
           storage_cell: storageItem.storage_cell,
         }),
       });
+
+      if (!response.ok) {
+        const errorMessage = await getErrorMessage(response, "Ошибка обновления склада");
+        throw new Error(errorMessage);
+      }
     } else {
       const newStorageItem = {
         wood_id: woodId,
@@ -500,13 +546,18 @@ export default function DeliveryPage() {
         storage_cell: `Ячейка-${String.fromCharCode(65 + Math.floor((woodId - 1) / 10))}${((woodId - 1) % 10) + 1}`,
       };
 
-      await fetch("http://localhost:8000/api/table/storage/", {
+      const response = await fetch("http://localhost:8000/api/table/storage/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newStorageItem),
       });
+
+      if (!response.ok) {
+        const errorMessage = await getErrorMessage(response, "Ошибка создания записи склада");
+        throw new Error(errorMessage);
+      }
     }
   };
 
@@ -514,7 +565,7 @@ export default function DeliveryPage() {
     if (!formData.contractId) return [];
 
     const selectedContract = contracts.find(
-      (c) => c.suppliers_contract_id === parseInt(formData.contractId)
+      (c) => c.suppliers_contract_id === parseInt(formData.contractId, 10)
     );
     if (!selectedContract) return [];
 
@@ -535,7 +586,7 @@ export default function DeliveryPage() {
           available_quantity: sw.available_quantity,
         };
       })
-      .filter((p) => p !== null);
+      .filter((p): p is NonNullable<typeof p> => p !== null);
   }, [formData.contractId, contracts, supplierWood, products]);
 
   const enrichedContracts = useMemo(() => {
@@ -584,7 +635,7 @@ export default function DeliveryPage() {
         supplierName: supplier?.supplier_name || "Неизвестный поставщик",
         supplierId: contract?.supplier_id || 0,
         productName: getProductForDelivery(item),
-        productId: item.wood_id,
+        productId: woodId,
         status: item.delivery_status,
         create: formatDate(item.delivery_date),
         createRaw: item.delivery_date,
@@ -604,7 +655,7 @@ export default function DeliveryPage() {
   const uniqueContracts = useMemo(() => [...new Set(rows.map((row) => row.number))].sort(), [rows]);
 
   const filteredAndSortedRows = useMemo(() => {
-    let filtered = rows;
+    let filtered = [...rows];
 
     const normalizedSearch = search.trim().toLowerCase();
     if (normalizedSearch) {
@@ -670,15 +721,15 @@ export default function DeliveryPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Ошибка удаления");
+        const errorMessage = await getErrorMessage(response, "Ошибка удаления");
+        throw new Error(errorMessage);
       }
 
       alert("Поставка удалена");
       await fetchAllData();
     } catch (err) {
       console.error("Ошибка удаления:", err);
-      alert("Ошибка удаления поставки");
+      alert("Ошибка удаления поставки: " + (err instanceof Error ? err.message : ""));
     }
   };
 
@@ -707,7 +758,7 @@ export default function DeliveryPage() {
 
     try {
       const selectedContract = contracts.find(
-        (c) => c.suppliers_contract_id === parseInt(formData.contractId)
+        (c) => c.suppliers_contract_id === parseInt(formData.contractId, 10)
       );
       if (!selectedContract) {
         throw new Error("Контракт не найден");
@@ -716,7 +767,7 @@ export default function DeliveryPage() {
       const supplierWoodItem = supplierWood.find(
         (sw) =>
           sw.supplier_id === selectedContract.supplier_id &&
-          sw.wood_id === parseInt(formData.woodId)
+          sw.wood_id === parseInt(formData.woodId, 10)
       );
 
       if (!supplierWoodItem) {
@@ -724,13 +775,36 @@ export default function DeliveryPage() {
       }
 
       const deliveryScopeNum = parseFloat(formData.deliveryScope);
-      let actId = formData.actId;
+
+      if (deliveryScopeNum > Number(supplierWoodItem.available_quantity)) {
+        throw new Error(
+          `Недостаточно доступного объема у поставщика. Доступно: ${supplierWoodItem.available_quantity} м³`
+        );
+      }
+
+      let actId: number | string = formData.actId;
 
       if (!actId) {
+        const defaultEmployeeId =
+          storekeepers[0]?.employee_id ||
+          employees.find((e) => e.employee_id === 4)?.employee_id ||
+          employees[0]?.employee_id;
+
+        if (!defaultEmployeeId) {
+          throw new Error("Не найден сотрудник для создания акта");
+        }
+
+        const isDiscrepancy = formData.deliveryStatus === "нарушение";
+
         const actData = {
-          act_type: formData.deliveryStatus === "нарушение" ? "акт о расхождении" : "акт приемки",
+          act_type: isDiscrepancy ? "акт о расхождении" : "акт приемки",
           act_date: formData.deliveryDate,
-          employee_id: 4,
+          employee_id: defaultEmployeeId,
+          discrepancy_type: isDiscrepancy ? "недостаток и брак" : null,
+          defect_quantity: 0,
+          shortage_quantity: 0,
+          actually_accepted: deliveryScopeNum,
+          defect_description: null,
         };
 
         const actResponse = await fetch("http://localhost:8000/api/table/act/", {
@@ -742,20 +816,26 @@ export default function DeliveryPage() {
         });
 
         if (!actResponse.ok) {
-          throw new Error("Ошибка создания акта");
+          const errorMessage = await getErrorMessage(actResponse, "Ошибка создания акта");
+          console.error("Ошибка ответа /api/table/act/:", errorMessage);
+          throw new Error(errorMessage);
         }
 
         const actResult = await actResponse.json();
-        actId = actResult.id;
+        actId = actResult.act_id ?? actResult.id;
+
+        if (!actId) {
+          throw new Error("Сервер не вернул ID созданного акта");
+        }
       }
 
       const deliveryData = {
-        suppliers_contract_id: parseInt(formData.contractId),
+        suppliers_contract_id: parseInt(formData.contractId, 10),
         delivery_scope: deliveryScopeNum,
         delivery_date: formData.deliveryDate,
         delivery_status: formData.deliveryStatus,
-        act_id: actId,
-        wood_id: parseInt(formData.woodId),
+        act_id: Number(actId),
+        wood_id: parseInt(formData.woodId, 10),
       };
 
       const response = await fetch("http://localhost:8000/api/table/delivery/", {
@@ -767,25 +847,33 @@ export default function DeliveryPage() {
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error("Ошибка создания поставки: " + error);
+        const errorMessage = await getErrorMessage(response, "Ошибка создания поставки");
+        throw new Error(errorMessage);
       }
 
       if (formData.deliveryStatus === "доставлено") {
-        await updateStorage(parseInt(formData.woodId), deliveryScopeNum, true);
+        await updateStorage(parseInt(formData.woodId, 10), deliveryScopeNum, true);
       }
 
-      await fetch("http://localhost:8000/api/supplier_wood/update/", {
+      const supplierWoodResponse = await fetch("http://localhost:8000/api/supplier_wood/update/", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           supplier_id: selectedContract.supplier_id,
-          wood_id: parseInt(formData.woodId),
-          available_quantity: supplierWoodItem.available_quantity - deliveryScopeNum,
+          wood_id: parseInt(formData.woodId, 10),
+          available_quantity: Number(supplierWoodItem.available_quantity) - deliveryScopeNum,
         }),
       });
+
+      if (!supplierWoodResponse.ok) {
+        const errorMessage = await getErrorMessage(
+          supplierWoodResponse,
+          "Ошибка обновления доступного объема у поставщика"
+        );
+        throw new Error(errorMessage);
+      }
 
       alert("Поставка успешно создана");
       await fetchAllData();
@@ -810,7 +898,7 @@ export default function DeliveryPage() {
   const handleDownloadActPdf = async (row: DeliveryRow) => {
     try {
       const act = acts.find((a) => a.act_id === row.actId);
-      
+
       const response = await fetch("/api/delivery-act/download", {
         method: "POST",
         headers: {
@@ -1138,15 +1226,18 @@ export default function DeliveryPage() {
               </div>
               <div className={styles.colDate}>{row.create}</div>
               <div className={styles.colScope}>{row.scope} м³</div>
+
               <div className={styles.colActions}>
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  onClick={() => handleDownloadActPdf(row)}
-                  title="Скачать PDF"
-                >
-                  <Image src="/icons/download.svg" alt="Скачать" width={50} height={50} />
-                </button>
+                {row.status === "доставлено" && (
+                  <button
+                    type="button"
+                    className={styles.iconButton}
+                    onClick={() => handleDownloadActPdf(row)}
+                    title="Скачать PDF"
+                  >
+                    <Image src="/icons/download.svg" alt="Скачать" width={50} height={50} />
+                  </button>
+                )}
 
                 <button
                   type="button"
@@ -1157,6 +1248,7 @@ export default function DeliveryPage() {
                   <Image src="/icons/delete-document.svg" alt="Удалить" width={50} height={50} />
                 </button>
               </div>
+
               <div className={styles.colAct}>
                 <button
                   type="button"

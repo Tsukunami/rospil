@@ -5,7 +5,8 @@ import Image from "next/image";
 import styles from "./MaterialsExpensePage.module.css";
 
 type ExpenseItem = {
-  id: number;
+  id?: number;
+  expenditure_id?: number;
   wood_id: number;
   expenditure_scope?: number;
   expenditure_data: string;
@@ -38,6 +39,7 @@ type SupplierWood = {
 };
 
 type ExpenseRow = {
+  key: string;
   id: number;
   woodId: number;
   productName: string;
@@ -81,6 +83,7 @@ function formatDateForDisplay(dateStr: string) {
   if (!dateStr) return "";
   try {
     const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return dateStr;
     return date.toLocaleDateString("ru-RU");
   } catch {
     return dateStr;
@@ -100,6 +103,8 @@ export default function MaterialsExpensePage() {
   const [expenseScope, setExpenseScope] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [isBulkDownloading, setIsBulkDownloading] = useState(false);
+  const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: "expenseDate",
@@ -208,26 +213,25 @@ export default function MaterialsExpensePage() {
   };
 
   const rows = useMemo<ExpenseRow[]>(() => {
-    return expenses.map((item) => {
+    return expenses.map((item, index) => {
       const product = products.find((p) => p.wood_id === item.wood_id);
       const scope = item.expenditure_scope || 0;
+      const normalizedId = item.id ?? item.expenditure_id ?? index + 1;
 
       const characteristics: string[] = [];
       if (product?.wood_grade) characteristics.push(`Сорт: ${product.wood_grade}`);
       if (product?.wood_length) characteristics.push(`Длина: ${product.wood_length} м`);
-      if (product?.wood_cross_section)
-        characteristics.push(`Сечение: ${product.wood_cross_section}`);
-      if (product?.wood_diameter)
-        characteristics.push(`Диаметр: ${product.wood_diameter} мм`);
-      if (product?.wood_graduation)
-        characteristics.push(`Градация: ${product.wood_graduation}`);
+      if (product?.wood_cross_section) characteristics.push(`Сечение: ${product.wood_cross_section}`);
+      if (product?.wood_diameter) characteristics.push(`Диаметр: ${product.wood_diameter} мм`);
+      if (product?.wood_graduation) characteristics.push(`Градация: ${product.wood_graduation}`);
       if (product?.wood_the_upper_end_diameter)
         characteristics.push(`Верхний диаметр: ${product.wood_the_upper_end_diameter} мм`);
       if (product?.wood_lower_end_diameter)
         characteristics.push(`Нижний диаметр: ${product.wood_lower_end_diameter} мм`);
 
       return {
-        id: item.id,
+        key: `${normalizedId}-${item.wood_id}-${item.expenditure_data}-${index}`,
+        id: normalizedId,
         woodId: item.wood_id,
         productName: product?.wood_type || "Неизвестный материал",
         expenseScope: scope,
@@ -296,6 +300,36 @@ export default function MaterialsExpensePage() {
 
     return filtered;
   }, [search, filters, rows, sortConfig]);
+
+  const selectedRows = useMemo(() => {
+    return filteredAndSortedRows.filter((row) => selectedRowIds.includes(row.id));
+  }, [filteredAndSortedRows, selectedRowIds]);
+
+  const isAllVisibleSelected =
+    filteredAndSortedRows.length > 0 &&
+    filteredAndSortedRows.every((row) => selectedRowIds.includes(row.id));
+
+  const toggleRowSelection = (rowId: number) => {
+    setSelectedRowIds((prev) =>
+      prev.includes(rowId) ? prev.filter((id) => id !== rowId) : [...prev, rowId]
+    );
+  };
+
+  const toggleSelectAllVisible = () => {
+    if (isAllVisibleSelected) {
+      setSelectedRowIds((prev) =>
+        prev.filter((id) => !filteredAndSortedRows.some((row) => row.id === id))
+      );
+    } else {
+      setSelectedRowIds((prev) => [
+        ...new Set([...prev, ...filteredAndSortedRows.map((row) => row.id)]),
+      ]);
+    }
+  };
+
+  const clearSelectedRows = () => {
+    setSelectedRowIds([]);
+  };
 
   const handleAddExpense = async () => {
     if (!selectedWoodId) {
@@ -384,18 +418,10 @@ export default function MaterialsExpensePage() {
   const formatProductCharacteristics = (product: Product) => {
     const characteristics = [];
 
-    if (product.wood_type) {
-      characteristics.push({ label: "Порода", value: product.wood_type });
-    }
-    if (product.wood_grade) {
-      characteristics.push({ label: "Сорт", value: product.wood_grade });
-    }
-    if (product.wood_length) {
-      characteristics.push({ label: "Длина", value: `${product.wood_length} м` });
-    }
-    if (product.wood_diameter) {
-      characteristics.push({ label: "Диаметр", value: `${product.wood_diameter} мм` });
-    }
+    if (product.wood_type) characteristics.push({ label: "Порода", value: product.wood_type });
+    if (product.wood_grade) characteristics.push({ label: "Сорт", value: product.wood_grade });
+    if (product.wood_length) characteristics.push({ label: "Длина", value: `${product.wood_length} м` });
+    if (product.wood_diameter) characteristics.push({ label: "Диаметр", value: `${product.wood_diameter} мм` });
     if (product.wood_the_upper_end_diameter) {
       characteristics.push({
         label: "Верхний диаметр",
@@ -408,14 +434,21 @@ export default function MaterialsExpensePage() {
         value: `${product.wood_lower_end_diameter} мм`,
       });
     }
-    if (product.wood_graduation) {
-      characteristics.push({ label: "Градация", value: product.wood_graduation });
-    }
-    if (product.wood_cross_section) {
-      characteristics.push({ label: "Сечение", value: product.wood_cross_section });
-    }
+    if (product.wood_graduation) characteristics.push({ label: "Градация", value: product.wood_graduation });
+    if (product.wood_cross_section) characteristics.push({ label: "Сечение", value: product.wood_cross_section });
 
     return characteristics;
+  };
+
+  const downloadBlobAsFile = (blob: Blob, filename: string) => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
   };
 
   const handleDownloadExpenseInvoice = async (row: ExpenseRow) => {
@@ -436,13 +469,15 @@ export default function MaterialsExpensePage() {
           consigneeAddress: "г. Сыктывкар",
           basis: "Передача материалов в производство",
           vatPercent: 18,
-          item: {
-            id: row.id,
-            productName: row.productName,
-            unit: "м³",
-            price: row.price,
-            quantity: row.expenseScope,
-          },
+          items: [
+            {
+              id: row.id,
+              productName: row.productName,
+              unit: "м³",
+              price: row.price,
+              quantity: row.expenseScope,
+            },
+          ],
         }),
       });
 
@@ -458,21 +493,70 @@ export default function MaterialsExpensePage() {
       }
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `expense-invoice-${row.id}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(url);
+      downloadBlobAsFile(blob, `expense-invoice-${row.id}.pdf`);
     } catch (error) {
       console.error("Ошибка скачивания расходной накладной:", error);
       alert(error instanceof Error ? error.message : "Не удалось скачать PDF");
     } finally {
       setDownloadingId(null);
+    }
+  };
+
+  const handleDownloadSelectedExpenseInvoice = async () => {
+    if (selectedRows.length === 0) {
+      alert("Выберите хотя бы одну строку расхода");
+      return;
+    }
+
+    try {
+      setIsBulkDownloading(true);
+
+      const sortedSelected = [...selectedRows].sort((a, b) =>
+        a.expenseDateRaw.localeCompare(b.expenseDateRaw)
+      );
+
+      const response = await fetch("/api/materials-expense/download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          invoiceNumber: `GROUP-${Date.now()}`,
+          invoiceDate: sortedSelected[0]?.expenseDateRaw || new Date().toISOString().split("T")[0],
+          shipper: "ООО «Роспил»",
+          shipperAddress: "г. Сыктывкар",
+          consignee: "Производство",
+          consigneeAddress: "г. Сыктывкар",
+          basis: "Передача материалов в производство",
+          vatPercent: 18,
+          items: sortedSelected.map((row) => ({
+            id: row.id,
+            productName: row.productName,
+            unit: "м³",
+            price: row.price,
+            quantity: row.expenseScope,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = "Ошибка генерации PDF";
+
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {}
+
+        throw new Error(errorMessage);
+      }
+
+      const blob = await response.blob();
+      downloadBlobAsFile(blob, `expense-invoice-selected-${selectedRows.length}.pdf`);
+    } catch (error) {
+      console.error("Ошибка скачивания общей расходной накладной:", error);
+      alert(error instanceof Error ? error.message : "Не удалось скачать PDF");
+    } finally {
+      setIsBulkDownloading(false);
     }
   };
 
@@ -593,10 +677,42 @@ export default function MaterialsExpensePage() {
           >
             <Image src="/icons/create-document.svg" alt="Добавить" width={55} height={55} />
           </button>
+
+          <button
+            type="button"
+            className={styles.iconButton}
+            onClick={handleDownloadSelectedExpenseInvoice}
+            title="Скачать накладную по выбранным строкам"
+            disabled={selectedRows.length === 0 || isBulkDownloading}
+          >
+            <Image src="/icons/download.svg" alt="Скачать выбранные" width={55} height={55} />
+          </button>
         </div>
+
+        {selectedRows.length > 0 && (
+          <div className={styles.selectedInfo}>
+            Выбрано строк: <b>{selectedRows.length}</b>
+            <button
+              type="button"
+              className={styles.clearSelectionButton}
+              onClick={clearSelectedRows}
+            >
+              Снять выделение
+            </button>
+          </div>
+        )}
 
         <div className={styles.table}>
           <div className={`${styles.row} ${styles.headerRow}`}>
+            <div className={styles.colCheckbox}>
+              <input
+                type="checkbox"
+                checked={isAllVisibleSelected}
+                onChange={toggleSelectAllVisible}
+                title="Выбрать все видимые строки"
+              />
+            </div>
+
             <div
               className={`${styles.colProduct} ${styles.sortable}`}
               onClick={() => handleSort("productName")}
@@ -619,8 +735,16 @@ export default function MaterialsExpensePage() {
           </div>
 
           {filteredAndSortedRows.map((row) => (
-            <div key={row.id} className={styles.rowGroup}>
+            <div key={row.key} className={styles.rowGroup}>
               <div className={styles.row}>
+                <div className={styles.colCheckbox}>
+                  <input
+                    type="checkbox"
+                    checked={selectedRowIds.includes(row.id)}
+                    onChange={() => toggleRowSelection(row.id)}
+                  />
+                </div>
+
                 <div className={styles.colProduct}>
                   <button
                     type="button"
@@ -666,7 +790,7 @@ export default function MaterialsExpensePage() {
                   <div className={styles.characteristicsTitle}>Характеристики:</div>
                   {row.characteristics.length > 0 ? (
                     row.characteristics.map((item, index) => (
-                      <div key={index} className={styles.characteristicLine}>
+                      <div key={`${row.key}-char-${index}`} className={styles.characteristicLine}>
                         {item}
                       </div>
                     ))
@@ -698,8 +822,7 @@ export default function MaterialsExpensePage() {
                 <option value="">Выберите материал со склада</option>
                 {availableProducts.map((product) => (
                   <option key={product.wood_id} value={product.wood_id}>
-                    {product.wood_type} {product.wood_grade && `(${product.wood_grade})`} —
-                    доступно{" "}
+                    {product.wood_type} {product.wood_grade && `(${product.wood_grade})`} — доступно{" "}
                     {product.currentScope.toLocaleString("ru-RU", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
@@ -760,7 +883,7 @@ export default function MaterialsExpensePage() {
             <div className={styles.productContent}>
               <div className={styles.productInfo}>
                 {formatProductCharacteristics(selectedProduct).map((char, index) => (
-                  <div key={index} className={styles.productChar}>
+                  <div key={`${selectedProduct.wood_id}-char-${index}`} className={styles.productChar}>
                     <span className={styles.charLabel}>{char.label}:</span>
                     <span className={styles.charValue}>{char.value}</span>
                   </div>

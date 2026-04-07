@@ -54,32 +54,16 @@ export function getExpenseInvoiceHtml(data: ExpenseInvoiceTemplateData) {
     totalNamesCount,
   } = data;
 
-  const minRows = 7;
-  const rowsToRender = [...items];
-
-  while (rowsToRender.length < minRows) {
-    rowsToRender.push({
-      index: rowsToRender.length + 1,
-      productName: "",
-      unit: "",
-      price: 0,
-      quantity: 0,
-      sum: 0,
-    });
-  }
-
-  const tableRows = rowsToRender
+  const tableRows = items
     .map((item, idx) => {
-      const isEmpty = !item.productName;
-
       return `
         <tr>
           <td class="center">${idx + 1}</td>
-          <td>${isEmpty ? "" : escapeHtml(item.productName)}</td>
-          <td class="center">${isEmpty ? "" : escapeHtml(item.unit)}</td>
-          <td class="right">${isEmpty ? "" : formatMoney(item.price)}</td>
-          <td class="right">${isEmpty ? "" : formatMoney(item.quantity)}</td>
-          <td class="right">${isEmpty ? "" : formatMoney(item.sum)}</td>
+          <td>${escapeHtml(item.productName)}</td>
+          <td class="center">${escapeHtml(item.unit)}</td>
+          <td class="right">${formatMoney(item.price)}</td>
+          <td class="right">${formatMoney(item.quantity)}</td>
+          <td class="right">${formatMoney(item.sum)}</td>
         </tr>
       `;
     })

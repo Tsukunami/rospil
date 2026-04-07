@@ -46,7 +46,6 @@ def update_storage_quantity(wood_id, scope, is_add):
     """
     try:
         with connection.cursor() as cursor:
-            # Получаем текущее количество на складе
             cursor.execute("""
                 SELECT current_scope FROM storage WHERE wood_id = %s
             """, [wood_id])
@@ -61,11 +60,9 @@ def update_storage_quantity(wood_id, scope, is_add):
                 else:
                     new_scope = current_scope - scope
                 
-                # Не допускаем отрицательного значения
                 if new_scope < 0:
                     new_scope = 0
                 
-                # Обновляем склад
                 cursor.execute("""
                     UPDATE storage 
                     SET current_scope = %s 
@@ -74,9 +71,7 @@ def update_storage_quantity(wood_id, scope, is_add):
                 
                 return True
             else:
-                # Если записи на складе нет и мы добавляем материал
                 if is_add and scope > 0:
-                    # Генерируем название ячейки
                     letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                     row = letters[(wood_id - 1) // 10 % len(letters)]
                     col = ((wood_id - 1) % 10) + 1
@@ -115,7 +110,6 @@ def universal_api(request, table_name):
     PUT: обновление записи
     DELETE: удаление записи
     """
-    # Проверяем существование таблицы
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT EXISTS (
@@ -127,7 +121,6 @@ def universal_api(request, table_name):
         if not cursor.fetchone()[0]:
             return JsonResponse({'error': f'Table {table_name} not found'}, status=404)
     
-    # GET - получение данных
     if request.method == 'GET':
         primary_key = get_primary_key(table_name)
         id_param = request.GET.get('id')
@@ -143,73 +136,45 @@ def universal_api(request, table_name):
                 cursor.execute(f'SELECT * FROM "{table_name}" ORDER BY {primary_key}')
                 return JsonResponse(dictfetchall(cursor), safe=False)
     
-    # POST - создание записи
     elif request.method == 'POST':
         try:
             data = json.loads(request.body)
-            
-            # Специальная обработка для таблицы expenditure
             if table_name == 'expenditure':
                 return handle_expenditure_create(data)
-            
-            # Специальная обработка для таблицы delivery
             if table_name == 'delivery':
                 return handle_delivery_create(data)
-            
-            # Обычная обработка для других таблиц
             return handle_general_create(table_name, data)
-            
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except Exception as e:
             return JsonResponse({'error': f'Error creating record: {str(e)}'}, status=500)
     
-    # PUT - обновление записи
     elif request.method == 'PUT':
         try:
             data = json.loads(request.body)
-            
-            # Специальная обработка для таблицы delivery
             if table_name == 'delivery':
                 return handle_delivery_update(data)
-            
-            # Обычная обработка для других таблиц
             return handle_general_update(table_name, data)
-            
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except Exception as e:
             return JsonResponse({'error': f'Error updating record: {str(e)}'}, status=500)
     
-    # DELETE - удаление записи
     elif request.method == 'DELETE':
         try:
             primary_key = get_primary_key(table_name)
             record_id = request.GET.get('id')
-            
             if not record_id:
                 return JsonResponse({'error': f'Parameter id is required'}, status=400)
-            
-            # Специальная обработка для таблицы delivery
             if table_name == 'delivery':
                 return handle_delivery_delete(record_id)
-            
-            # Специальная обработка для таблицы expenditure
             if table_name == 'expenditure':
                 return handle_expenditure_delete(record_id)
-            
-            # Обычное удаление для других таблиц
             with connection.cursor() as cursor:
                 cursor.execute(f'DELETE FROM "{table_name}" WHERE {primary_key} = %s', [record_id])
-                
                 if cursor.rowcount == 0:
                     return JsonResponse({'error': 'Record not found'}, status=404)
-                
-            return JsonResponse({
-                'success': True,
-                'message': 'Record deleted successfully'
-            })
-            
+            return JsonResponse({'success': True, 'message': 'Record deleted successfully'})
         except Exception as e:
             return JsonResponse({'error': f'Error deleting record: {str(e)}'}, status=500)
 
@@ -222,11 +187,9 @@ def handle_expenditure_create(data):
     
     if not wood_id:
         return JsonResponse({'error': 'Missing required field: wood_id'}, status=400)
-    
     if not expenditure_scope:
         return JsonResponse({'error': 'Missing required field: expenditure_scope'}, status=400)
     
-    # Проверяем наличие на складе
     current_storage = get_storage_quantity(wood_id)
     scope = float(expenditure_scope)
     
@@ -236,16 +199,12 @@ def handle_expenditure_create(data):
         }, status=400)
     
     with connection.cursor() as cursor:
-        # Создаем расход
         cursor.execute("""
             INSERT INTO expenditure (wood_id, expenditure_scope, expenditure_data)
             VALUES (%s, %s, %s)
             RETURNING expenditure_id
         """, [wood_id, scope, expenditure_data])
-        
         expenditure_id = cursor.fetchone()[0]
-        
-        # Списываем со склада
         update_storage_quantity(wood_id, scope, is_add=False)
         
     return JsonResponse({
@@ -258,32 +217,20 @@ def handle_expenditure_create(data):
 def handle_expenditure_delete(expenditure_id):
     """Удаление расхода с возвратом материала на склад"""
     with connection.cursor() as cursor:
-        # Получаем информацию о расходе
         cursor.execute("""
             SELECT wood_id, expenditure_scope FROM expenditure 
             WHERE expenditure_id = %s
         """, [expenditure_id])
-        
         record = cursor.fetchone()
         if not record:
             return JsonResponse({'error': 'Record not found'}, status=404)
-        
         wood_id = record[0]
         scope = float(record[1]) if record[1] else 0
-        
-        # Возвращаем материал на склад
         if scope > 0:
             update_storage_quantity(wood_id, scope, is_add=True)
+        cursor.execute("DELETE FROM expenditure WHERE expenditure_id = %s", [expenditure_id])
         
-        # Удаляем расход
-        cursor.execute("""
-            DELETE FROM expenditure WHERE expenditure_id = %s
-        """, [expenditure_id])
-        
-    return JsonResponse({
-        'success': True,
-        'message': 'Expenditure deleted successfully'
-    })
+    return JsonResponse({'success': True, 'message': 'Expenditure deleted successfully'})
 
 
 def handle_delivery_create(data):
@@ -297,15 +244,12 @@ def handle_delivery_create(data):
     
     if not suppliers_contract_id:
         return JsonResponse({'error': 'Missing required field: suppliers_contract_id'}, status=400)
-    
     if not delivery_scope:
         return JsonResponse({'error': 'Missing required field: delivery_scope'}, status=400)
-    
     if not delivery_date:
         return JsonResponse({'error': 'Missing required field: delivery_date'}, status=400)
     
     with connection.cursor() as cursor:
-        # Создаем поставку
         cursor.execute("""
             INSERT INTO delivery (
                 suppliers_contract_id, delivery_scope, delivery_date, 
@@ -313,10 +257,7 @@ def handle_delivery_create(data):
             ) VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING delivery_id
         """, [suppliers_contract_id, delivery_scope, delivery_date, delivery_status, act_id, wood_id])
-        
         delivery_id = cursor.fetchone()[0]
-        
-        # Если статус "доставлено", добавляем на склад
         if delivery_status == 'доставлено' and wood_id:
             update_storage_quantity(wood_id, float(delivery_scope), is_add=True)
         
@@ -331,79 +272,55 @@ def handle_delivery_update(data):
     """Обновление поставки с автоматической корректировкой склада"""
     delivery_id = data.get('delivery_id')
     new_status = data.get('delivery_status')
-    
     if not delivery_id:
         return JsonResponse({'error': 'Missing required field: delivery_id'}, status=400)
     
     with connection.cursor() as cursor:
-        # Получаем текущую поставку
         cursor.execute("""
             SELECT delivery_id, delivery_status, delivery_scope, wood_id 
             FROM delivery WHERE delivery_id = %s
         """, [delivery_id])
-        
         old_delivery = cursor.fetchone()
         if not old_delivery:
             return JsonResponse({'error': 'Delivery not found'}, status=404)
-        
         old_status = old_delivery[1]
         scope = float(old_delivery[2])
         wood_id = old_delivery[3]
         
-        # Если статус изменился
         if old_status != new_status:
-            # Если статус стал "доставлено"
             if new_status == 'доставлено' and old_status != 'доставлено':
                 if wood_id:
                     update_storage_quantity(wood_id, scope, is_add=True)
-            
-            # Если статус перестал быть "доставлено"
             elif old_status == 'доставлено' and new_status != 'доставлено':
                 if wood_id:
                     update_storage_quantity(wood_id, scope, is_add=False)
         
-        # Обновляем статус
         cursor.execute("""
             UPDATE delivery SET delivery_status = %s 
             WHERE delivery_id = %s
         """, [new_status, delivery_id])
         
-    return JsonResponse({
-        'success': True,
-        'message': 'Delivery updated successfully'
-    })
+    return JsonResponse({'success': True, 'message': 'Delivery updated successfully'})
 
 
 def handle_delivery_delete(delivery_id):
     """Удаление поставки с возможным удалением со склада"""
     with connection.cursor() as cursor:
-        # Получаем информацию о поставке
         cursor.execute("""
             SELECT delivery_status, delivery_scope, wood_id 
             FROM delivery WHERE delivery_id = %s
         """, [delivery_id])
-        
         record = cursor.fetchone()
         if not record:
             return JsonResponse({'error': 'Record not found'}, status=404)
-        
         delivery_status = record[0]
         scope = float(record[1]) if record[1] else 0
         wood_id = record[2]
-        
-        # Если поставка была доставлена, убираем со склада
         if delivery_status == 'доставлено' and wood_id and scope > 0:
             update_storage_quantity(wood_id, scope, is_add=False)
+        cursor.execute("DELETE FROM delivery WHERE delivery_id = %s", [delivery_id])
         
-        # Удаляем поставку
-        cursor.execute("""
-            DELETE FROM delivery WHERE delivery_id = %s
-        """, [delivery_id])
-        
-    return JsonResponse({
-        'success': True,
-        'message': 'Delivery deleted successfully'
-    })
+    return JsonResponse({'success': True, 'message': 'Delivery deleted successfully'})
 
 
 def handle_general_create(table_name, data):
@@ -411,15 +328,12 @@ def handle_general_create(table_name, data):
     columns, required_fields = get_table_schema(table_name)
     primary_key = get_primary_key(table_name)
     
-    # Проверяем обязательные поля
     for field in required_fields:
         if field not in data and field != primary_key:
             return JsonResponse({'error': f'Missing required field: {field}'}, status=400)
     
-    # Формируем SQL запрос
     insert_columns = []
     values = []
-    
     for col in columns:
         if col in data:
             insert_columns.append(col)
@@ -452,13 +366,10 @@ def handle_general_create(table_name, data):
 def handle_general_update(table_name, data):
     """Общее обновление записи для таблиц без специальной логики"""
     primary_key = get_primary_key(table_name)
-    
     if primary_key not in data:
         return JsonResponse({'error': f'Primary key {primary_key} is required for update'}, status=400)
     
     record_id = data[primary_key]
-    
-    # Формируем SET часть запроса
     set_clauses = []
     values = []
     for key, value in data.items():
@@ -468,7 +379,6 @@ def handle_general_update(table_name, data):
     
     if not set_clauses:
         return JsonResponse({'error': 'No fields to update'}, status=400)
-    
     values.append(record_id)
     
     with connection.cursor() as cursor:
@@ -476,14 +386,10 @@ def handle_general_update(table_name, data):
             f'UPDATE "{table_name}" SET {", ".join(set_clauses)} WHERE {primary_key} = %s',
             values
         )
-        
         if cursor.rowcount == 0:
             return JsonResponse({'error': 'Record not found'}, status=404)
         
-    return JsonResponse({
-        'success': True,
-        'message': 'Record updated successfully'
-    })
+    return JsonResponse({'success': True, 'message': 'Record updated successfully'})
 
 
 def get_table_schema(table_name):
@@ -504,7 +410,9 @@ def get_table_schema(table_name):
         required_fields = []
         for row in cursor.fetchall():
             columns.append(row[0])
-            if row[1] == 'NO' and row[0] not in ['expenditure_id', 'delivery_id', 'act_id', 'suppliers_contract_id', 'supplier_id', 'wood_id', 'employee_id', 'role_id', 'user_id']:
+            # Исключаем автоинкрементные первичные ключи из обязательных полей
+            if row[1] == 'NO' and row[0] not in ['expenditure_id', 'delivery_id', 'act_id', 'suppliers_contract_id', 
+                                                  'supplier_id', 'wood_id', 'employee_id', 'role_id', 'user_id']:
                 required_fields.append(row[0])
         
         return columns, required_fields
@@ -523,12 +431,9 @@ def get_primary_key(table_name):
                 AND tc.table_name = %s
             LIMIT 1;
         """, [table_name])
-        
         result = cursor.fetchone()
         if result:
             return result[0]
-        
-        # Стандартные имена для первичных ключей
         pk_map = {
             'suppliers_info': 'supplier_id',
             'product': 'wood_id',
@@ -549,7 +454,10 @@ def get_primary_key(table_name):
 @csrf_exempt
 @require_http_methods(["POST"])
 def create_contract(request):
-    """Специализированный API для создания контракта с данными о поставщике"""
+    """
+    Специализированный API для создания контракта с данными о поставщике.
+    Поддерживает новые поля: contract_bank, contract_bik, contract_correspondent_account.
+    """
     try:
         data = json.loads(request.body)
         
@@ -563,7 +471,6 @@ def create_contract(request):
                 SELECT supplier_id FROM suppliers_info 
                 WHERE supplier_name = %s
             """, [data['supplier_name']])
-            
             supplier = cursor.fetchone()
             
             if supplier:
@@ -581,6 +488,7 @@ def create_contract(request):
                 ])
                 supplier_id = cursor.fetchone()[0]
             
+            # Вставка контракта с поддержкой новых полей
             cursor.execute("""
                 INSERT INTO suppliers_contract (
                     supplier_id, 
@@ -588,8 +496,11 @@ def create_contract(request):
                     suppliers_contract_status,
                     suppliers_contract_cost,
                     suppliers_contract_scope,
-                    suppliers_contract_date
-                ) VALUES (%s, %s, %s, %s, %s, %s)
+                    suppliers_contract_date,
+                    contract_bank,
+                    contract_bik,
+                    contract_correspondent_account
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING suppliers_contract_id
             """, [
                 supplier_id,
@@ -597,7 +508,10 @@ def create_contract(request):
                 data.get('status', 'срок оплаты не наступил'),
                 data.get('cost'),
                 data.get('scope'),
-                data['contract_date']
+                data['contract_date'],
+                data.get('contract_bank'),
+                data.get('contract_bik'),
+                data.get('contract_correspondent_account')
             ])
             
             contract_id = cursor.fetchone()[0]
@@ -626,7 +540,6 @@ def get_suppliers(request):
             ORDER BY supplier_name
         """)
         suppliers = [{'id': row[0], 'name': row[1]} for row in cursor.fetchall()]
-    
     return JsonResponse(suppliers, safe=False)
 
 
@@ -636,7 +549,6 @@ def update_supplier_wood(request):
     """Специализированное обновление доступного количества материала у поставщика"""
     try:
         data = json.loads(request.body)
-        
         supplier_id = data.get('supplier_id')
         wood_id = data.get('wood_id')
         available_quantity = data.get('available_quantity')
@@ -651,7 +563,6 @@ def update_supplier_wood(request):
                 WHERE supplier_id = %s AND wood_id = %s
                 RETURNING supplier_id
             """, [available_quantity, supplier_id, wood_id])
-            
             if cursor.fetchone() is None:
                 return JsonResponse({'error': 'Record not found'}, status=404)
             
@@ -670,7 +581,6 @@ def delete_supplier_wood(request):
     try:
         supplier_id = request.GET.get('supplier_id')
         wood_id = request.GET.get('wood_id')
-        
         if not supplier_id or not wood_id:
             return JsonResponse({'error': 'supplier_id and wood_id are required'}, status=400)
         
@@ -680,14 +590,10 @@ def delete_supplier_wood(request):
                 WHERE supplier_id = %s AND wood_id = %s
                 RETURNING supplier_id
             """, [supplier_id, wood_id])
-            
             if cursor.rowcount == 0:
                 return JsonResponse({'error': 'Record not found'}, status=404)
             
-        return JsonResponse({
-            'success': True,
-            'message': 'Supplier wood relation deleted successfully'
-        })
+        return JsonResponse({'success': True, 'message': 'Supplier wood relation deleted successfully'})
         
     except Exception as e:
         return JsonResponse({'error': f'Error deleting relation: {str(e)}'}, status=500)

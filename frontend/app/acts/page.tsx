@@ -1,10 +1,9 @@
-// ActsPage.tsx - полная версия с поддержкой новых полей и редактированием
-
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./ActsPage.module.css";
+import { useAuth } from "@/components/AuthContext";
 
 type ActItem = {
   id: number;
@@ -110,6 +109,9 @@ type SortConfig = {
 };
 
 export default function ActsPage() {
+  const { user } = useAuth();
+  const isDirector = String((user as any)?.access ?? "") === "4";
+
   const [acts, setActs] = useState<ActItem[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
@@ -137,7 +139,6 @@ export default function ActsPage() {
   const [formData, setFormData] = useState({
     type: "акт приемки",
     date: "",
-    employeeId: "",
   });
   const [editFormData, setEditFormData] = useState({
     act_id: "",
@@ -163,6 +164,11 @@ export default function ActsPage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const currentEmployee = useMemo(() => {
+    if (!user?.name) return null;
+    return employees.find((emp) => emp.employee_name === user.name) || null;
+  }, [user, employees]);
 
   const fetchData = async () => {
     try {
@@ -253,7 +259,8 @@ export default function ActsPage() {
           discrepancyType: act.discrepancy_type,
           defectQuantity: act.defect_quantity !== null ? parseFloat(act.defect_quantity) : 0,
           shortageQuantity: act.shortage_quantity !== null ? parseFloat(act.shortage_quantity) : 0,
-          actuallyAccepted: act.actually_accepted !== null ? parseFloat(act.actually_accepted) : undefined,
+          actuallyAccepted:
+            act.actually_accepted !== null ? parseFloat(act.actually_accepted) : undefined,
           defectDescription: act.defect_description,
         }));
 
@@ -269,7 +276,15 @@ export default function ActsPage() {
     }
   };
 
+  const visibleActs = useMemo(() => {
+    if (isDirector) return acts;
+    if (!user?.name) return acts;
+    return acts.filter((act) => act.employeeName === user.name);
+  }, [acts, user, isDirector]);
+
   const handleOpenEditModal = (act: ActItem) => {
+    if (!isDirector) return;
+
     setSelectedAct(act);
     setEditFormData({
       act_id: act.id.toString(),
@@ -279,20 +294,23 @@ export default function ActsPage() {
       discrepancy_type: act.discrepancyType || "",
       defect_quantity: (act.defectQuantity || 0).toString(),
       shortage_quantity: (act.shortageQuantity || 0).toString(),
-      actually_accepted: act.actuallyAccepted !== undefined ? act.actuallyAccepted.toString() : "",
+      actually_accepted:
+        act.actuallyAccepted !== undefined ? act.actuallyAccepted.toString() : "",
       defect_description: act.defectDescription || "",
     });
     setIsEditModalOpen(true);
   };
 
   const handleUpdateAct = async () => {
+    if (!isDirector) return;
+
     if (!editFormData.act_date) {
       alert("Введите дату акта");
       return;
     }
 
     if (!editFormData.employee_id) {
-      alert("Выберите сотрудника");
+      alert("Не определён сотрудник");
       return;
     }
 
@@ -358,9 +376,7 @@ export default function ActsPage() {
     );
     if (!contract) return "Материал не указан";
 
-    const supplierWoodItem = supplierWood.find(
-      (sw) => sw.supplier_id === contract.supplier_id
-    );
+    const supplierWoodItem = supplierWood.find((sw) => sw.supplier_id === contract.supplier_id);
 
     if (supplierWoodItem) {
       const product = products.find((p) => p.wood_id === supplierWoodItem.wood_id);
@@ -380,9 +396,7 @@ export default function ActsPage() {
     );
     if (!contract) return undefined;
 
-    const supplierWoodItem = supplierWood.find(
-      (sw) => sw.supplier_id === contract.supplier_id
-    );
+    const supplierWoodItem = supplierWood.find((sw) => sw.supplier_id === contract.supplier_id);
 
     return supplierWoodItem?.wood_id;
   };
@@ -395,7 +409,9 @@ export default function ActsPage() {
   const actDeliveries = useMemo<DeliveryItem[]>(() => {
     if (!selectedAct) return [];
 
-    const deliveriesList = deliveries.filter((d) => d.act_id === selectedAct.id);
+    const deliveriesList = deliveries.filter(
+      (d) => Number(d.act_id) === Number(selectedAct.id)
+    );
 
     return deliveriesList
       .map((delivery) => {
@@ -438,7 +454,9 @@ export default function ActsPage() {
 
   const handleDownloadActPdf = async (act: ActItem) => {
     try {
-      const deliveriesForAct = deliveries.filter((d) => d.act_id === act.id);
+      const deliveriesForAct = deliveries.filter(
+        (d) => Number(d.act_id) === Number(act.id)
+      );
 
       if (deliveriesForAct.length === 0) {
         alert("У этого акта нет поставок для формирования PDF");
@@ -563,17 +581,17 @@ export default function ActsPage() {
   };
 
   const uniqueTypes = useMemo(() => {
-    const types = acts.map((act) => act.type);
+    const types = visibleActs.map((act) => act.type);
     return [...new Set(types)];
-  }, [acts]);
+  }, [visibleActs]);
 
   const uniqueEmployees = useMemo(() => {
-    const employeesList = acts.map((act) => act.employeeName);
+    const employeesList = visibleActs.map((act) => act.employeeName);
     return [...new Set(employeesList)].sort();
-  }, [acts]);
+  }, [visibleActs]);
 
   const filteredAndSortedActs = useMemo(() => {
-    let filtered = [...acts];
+    let filtered = [...visibleActs];
 
     const normalizedSearch = search.trim().toLowerCase();
     if (normalizedSearch) {
@@ -623,7 +641,7 @@ export default function ActsPage() {
     });
 
     return filtered;
-  }, [acts, search, filters, sortConfig]);
+  }, [visibleActs, search, filters, sortConfig]);
 
   const handleCreateAct = async () => {
     if (!formData.date) {
@@ -631,8 +649,8 @@ export default function ActsPage() {
       return;
     }
 
-    if (!formData.employeeId) {
-      alert("Выберите сотрудника");
+    if (!currentEmployee) {
+      alert("Не удалось определить текущего сотрудника по имени пользователя");
       return;
     }
 
@@ -642,7 +660,7 @@ export default function ActsPage() {
       const payload = {
         act_type: formData.type,
         act_date: formData.date,
-        employee_id: parseInt(formData.employeeId, 10),
+        employee_id: currentEmployee.employee_id,
       };
 
       const response = await fetch("http://localhost:8000/api/table/act/", {
@@ -664,7 +682,6 @@ export default function ActsPage() {
       setFormData({
         type: "акт приемки",
         date: "",
-        employeeId: "",
       });
       setIsModalOpen(false);
     } catch (err) {
@@ -676,6 +693,8 @@ export default function ActsPage() {
   };
 
   const handleDeleteAct = async (id: number) => {
+    if (!isDirector) return;
+
     if (!confirm("Вы уверены, что хотите удалить этот акт?")) return;
 
     setDeletingId(id);
@@ -823,19 +842,7 @@ export default function ActsPage() {
 
       <div className={styles.tableWrapper}>
         <div className={styles.tableActions}>
-          <button
-            type="button"
-            className={styles.iconButton}
-            onClick={() => setIsModalOpen(true)}
-            title="Создать акт"
-          >
-            <Image
-              src="/icons/create-document.svg"
-              alt="Создать"
-              width={50}
-              height={50}
-            />
-          </button>
+
         </div>
 
         <div className={styles.table}>
@@ -882,14 +889,16 @@ export default function ActsPage() {
               <div className={styles.colEmployee}>{act.employeeName}</div>
               <div className={styles.colDate}>{act.date}</div>
               <div className={styles.colActions}>
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  onClick={() => handleOpenEditModal(act)}
-                  title="Редактировать"
-                >
-                  ✏️
-                </button>
+                {isDirector && (
+                  <button
+                    type="button"
+                    className={styles.iconButton}
+                    onClick={() => handleOpenEditModal(act)}
+                    title="Редактировать"
+                  >
+                    ✏️
+                  </button>
+                )}
 
                 <button
                   type="button"
@@ -905,20 +914,22 @@ export default function ActsPage() {
                   />
                 </button>
 
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  onClick={() => handleDeleteAct(act.id)}
-                  title="Удалить"
-                  disabled={deletingId === act.id}
-                >
-                  <Image
-                    src="/icons/delete-document.svg"
-                    alt="Удалить"
-                    width={50}
-                    height={50}
-                  />
-                </button>
+                {isDirector && (
+                  <button
+                    type="button"
+                    className={styles.iconButton}
+                    onClick={() => handleDeleteAct(act.id)}
+                    title="Удалить"
+                    disabled={deletingId === act.id}
+                  >
+                    <Image
+                      src="/icons/delete-document.svg"
+                      alt="Удалить"
+                      width={50}
+                      height={50}
+                    />
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -929,7 +940,6 @@ export default function ActsPage() {
         </div>
       </div>
 
-      {/* Модальное окно создания акта */}
       {isModalOpen && (
         <div className={styles.overlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -953,19 +963,19 @@ export default function ActsPage() {
                 required
               />
 
-              <select
-                value={formData.employeeId}
-                onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
+              <input
+                type="text"
+                value={currentEmployee?.employee_name || user?.name || ""}
                 className={styles.input}
-                required
-              >
-                <option value="">Выберите сотрудника</option>
-                {employees.map((emp) => (
-                  <option key={emp.employee_id} value={emp.employee_id}>
-                    {emp.employee_name}
-                  </option>
-                ))}
-              </select>
+                disabled
+                placeholder="Текущий сотрудник"
+              />
+
+              {!currentEmployee && (
+                <div className={styles.hint}>
+                  Не удалось определить сотрудника. Убедитесь, что имя пользователя совпадает с employee_name в таблице employees.
+                </div>
+              )}
 
               <div className={styles.modalActions}>
                 <button
@@ -980,7 +990,7 @@ export default function ActsPage() {
                   type="button"
                   className={styles.submitButton}
                   onClick={handleCreateAct}
-                  disabled={isCreating}
+                  disabled={isCreating || !currentEmployee}
                 >
                   {isCreating ? "Создание..." : "Создать"}
                 </button>
@@ -990,8 +1000,7 @@ export default function ActsPage() {
         </div>
       )}
 
-      {/* Модальное окно редактирования акта */}
-      {isEditModalOpen && selectedAct && (
+      {isEditModalOpen && selectedAct && isDirector && (
         <div className={styles.overlay} onClick={() => setIsEditModalOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalTitle}>
@@ -1026,19 +1035,12 @@ export default function ActsPage() {
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>Сотрудник</label>
-                <select
-                  value={editFormData.employee_id}
-                  onChange={(e) => setEditFormData({ ...editFormData, employee_id: e.target.value })}
+                <input
+                  type="text"
+                  value={selectedAct.employeeName}
                   className={styles.input}
-                  required
-                >
-                  <option value="">Выберите сотрудника</option>
-                  {employees.map((emp) => (
-                    <option key={emp.employee_id} value={emp.employee_id}>
-                      {emp.employee_name}
-                    </option>
-                  ))}
-                </select>
+                  disabled
+                />
               </div>
 
               {editFormData.act_type === "акт о расхождении" && (
@@ -1047,7 +1049,9 @@ export default function ActsPage() {
                     <label className={styles.label}>Тип расхождения</label>
                     <select
                       value={editFormData.discrepancy_type}
-                      onChange={(e) => setEditFormData({ ...editFormData, discrepancy_type: e.target.value })}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, discrepancy_type: e.target.value })
+                      }
                       className={styles.input}
                     >
                       <option value="">Выберите тип расхождения</option>
@@ -1064,7 +1068,9 @@ export default function ActsPage() {
                         type="number"
                         step="0.01"
                         value={editFormData.defect_quantity}
-                        onChange={(e) => setEditFormData({ ...editFormData, defect_quantity: e.target.value })}
+                        onChange={(e) =>
+                          setEditFormData({ ...editFormData, defect_quantity: e.target.value })
+                        }
                         className={styles.input}
                       />
                     </div>
@@ -1074,7 +1080,9 @@ export default function ActsPage() {
                         type="number"
                         step="0.01"
                         value={editFormData.shortage_quantity}
-                        onChange={(e) => setEditFormData({ ...editFormData, shortage_quantity: e.target.value })}
+                        onChange={(e) =>
+                          setEditFormData({ ...editFormData, shortage_quantity: e.target.value })
+                        }
                         className={styles.input}
                       />
                     </div>
@@ -1087,7 +1095,9 @@ export default function ActsPage() {
                       step="0.01"
                       placeholder="Автоматический расчёт"
                       value={editFormData.actually_accepted}
-                      onChange={(e) => setEditFormData({ ...editFormData, actually_accepted: e.target.value })}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, actually_accepted: e.target.value })
+                      }
                       className={styles.input}
                     />
                     <small className={styles.hint}>
@@ -1100,7 +1110,9 @@ export default function ActsPage() {
                     <textarea
                       placeholder="Опишите выявленный брак"
                       value={editFormData.defect_description}
-                      onChange={(e) => setEditFormData({ ...editFormData, defect_description: e.target.value })}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, defect_description: e.target.value })
+                      }
                       className={styles.textarea}
                       rows={3}
                     />
@@ -1131,7 +1143,6 @@ export default function ActsPage() {
         </div>
       )}
 
-      {/* Модальное окно поставок по акту */}
       {isDeliveriesModalOpen && selectedAct && (
         <div className={styles.overlay} onClick={() => setIsDeliveriesModalOpen(false)}>
           <div

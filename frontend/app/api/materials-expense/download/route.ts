@@ -6,11 +6,20 @@ function formatDate(dateStr: string) {
   if (!dateStr) return "";
   try {
     const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return dateStr;
     return date.toLocaleDateString("ru-RU");
   } catch {
     return dateStr;
   }
 }
+
+type RequestItem = {
+  id?: number | string;
+  productName?: string;
+  unit?: string;
+  price?: number;
+  quantity?: number;
+};
 
 export async function POST(req: Request) {
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
@@ -28,45 +37,57 @@ export async function POST(req: Request) {
       consigneeAddress,
       basis,
       item,
+      items,
       vatPercent,
     } = body;
 
-    if (!item) {
+    let sourceItems: RequestItem[] = [];
+
+    if (Array.isArray(items) && items.length > 0) {
+      sourceItems = items;
+    } else if (item) {
+      sourceItems = [item];
+    }
+
+    if (sourceItems.length === 0) {
       return NextResponse.json(
         { error: "Не переданы данные позиции накладной" },
         { status: 400 }
       );
     }
 
-    const price = Number(item.price || 0);
-    const quantity = Number(item.quantity || 0);
-    const sum = price * quantity;
+    const normalizedItems = sourceItems.map((entry, index) => {
+      const price = Number(entry.price || 0);
+      const quantity = Number(entry.quantity || 0);
+      const sum = price * quantity;
 
+      return {
+        index: index + 1,
+        productName: entry.productName || "Материал",
+        unit: entry.unit || "м³",
+        price,
+        quantity,
+        sum,
+      };
+    });
+
+    const total = normalizedItems.reduce((acc, entry) => acc + entry.sum, 0);
     const actualVatPercent = Number(vatPercent ?? 18);
-    const vatAmount = sum * actualVatPercent / (100 + actualVatPercent);
+    const vatAmount = total * actualVatPercent / (100 + actualVatPercent);
 
     const html = getExpenseInvoiceHtml({
-      invoiceNumber: invoiceNumber || item.id || "",
+      invoiceNumber: invoiceNumber || sourceItems[0]?.id || "document",
       invoiceDate: formatDate(invoiceDate),
       shipper: shipper || "ООО «Роспил»",
       shipperAddress: shipperAddress || "г. Сыктывкар",
       consignee: consignee || "Производство",
       consigneeAddress: consigneeAddress || "г. Сыктывкар",
       basis: basis || "Передача материалов в производство",
-      items: [
-        {
-          index: 1,
-          productName: item.productName || "Материал",
-          unit: item.unit || "м³",
-          price,
-          quantity,
-          sum,
-        },
-      ],
+      items: normalizedItems,
       vatPercent: actualVatPercent,
-      total: sum,
+      total,
       vatAmount,
-      totalNamesCount: 1,
+      totalNamesCount: normalizedItems.length,
     });
 
     browser = await puppeteer.launch({
@@ -95,7 +116,7 @@ export async function POST(req: Request) {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="expense-invoice-${invoiceNumber || item.id || "document"}.pdf"`,
+        "Content-Disposition": `attachment; filename="expense-invoice-${invoiceNumber || sourceItems[0]?.id || "document"}.pdf"`,
       },
     });
   } catch (error) {

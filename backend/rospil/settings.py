@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'rospil.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'rospil',           # Название вашей базы данных
+        'NAME': 'rospil2',           # Название вашей базы данных
         'USER': 'postgres',          # Имя пользователя
         'PASSWORD': '9352',  # Пароль
         'HOST': 'localhost',        # Адрес сервера (или IP)
